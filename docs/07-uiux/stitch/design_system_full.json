@@ -1,0 +1,144 @@
+{
+  "designSystem": {
+    "displayName": "Efficient Growth",
+    "styleGuidelines": "## Brand & Style\nThis design system is built upon a foundation of **Corporate Modernism** with a heavy influence from **Apple’s design language**. The brand personality is professional, efficient, and growth-oriented, designed to evoke a sense of reliability and modern sophistication for Human Resource Management.\n\nThe aesthetic prioritizes data clarity and ease of use through a minimalist lens. Key characteristics include high-contrast typography, generous whitespace, and a \"soft-tech\" feel achieved through substantial corner radii and subtle, natural-looking shadows. The use of a vibrant emerald green as the primary signature color signifies growth, vitality, and positive action within the workplace.\n\n## Layout & Spacing\nThe layout follows a **8px base grid system** to ensure mathematical harmony across all components.\n\n- **Grid Model**: A 12-column fluid grid is used for the main content area.\n- **Margins & Gutters**: Standard page margins are 40px on desktop, scaling down to 16px on mobile. Gutters between cards and dashboard widgets are fixed at 24px.\n- **Sidebar**: The dashboard features a fixed-width left sidebar (280px) that collapses into a drawer on mobile devices.\n- **Responsiveness**: Elements should stack vertically on mobile (below 768px), with horizontal padding reduced to 16px.\n\n## Elevation & Depth\nThe system uses **Ambient Shadows** and **Tonal Layers** to create depth without visual clutter.\n\n- **Z-0 (Background)**: The main application background uses the Light Gray (`#f2f2f7`).\n- **Z-1 (Cards/Surfaces)**: Primary content containers are pure white with a subtle 1px border (`rgba(0,0,0,0.08)`) and a soft, diffused shadow (`0 4px 6px -1px rgba(0,0,0,0.1)`).\n- **Z-2 (Popovers/Modals)**: High-elevation elements use a more pronounced shadow with a larger blur radius to indicate they are floating above the interface.\n- **Sidebar**: Defined by a subtle vertical border on the right rather than a shadow, keeping the primary focus on the content area.\n\n## Components\n\n### Buttons\n- **Primary**: 12px corner radius, Emerald Green gradient (Top: `#10b981` to Bottom: `#059669`), with white text.\n- **Secondary**: Light gray background (`#f2f2f7`) with `#1d1d1f` text.\n- **State**: Hover states should involve a subtle darkening of the background; focus states must show a 2px Emerald Green ring with an offset.\n\n### Input Fields\n- **Styling**: 12px corner radius, background color `#f2f2f7`, no border in default state.\n- **Focus**: Transitions to a white background with a 2px Emerald Green border.\n- **Labels**: Placed above the input in `label-md` (Medium weight).\n\n### Cards\n- **Construction**: White background, 16px corner radius, and `shadow-md`. \n- **Header**: Often includes a bottom border of 1px `rgba(0,0,0,0.05)` to separate title from content.\n\n### Chips & Badges\n- **Success/Active**: Light green tint background with dark green text.\n- **Status Indicators**: Fully rounded (pill) with a 12px height for small indicators.\n\n### Sidebar\n- **Background**: White (`#ffffff`).\n- **Navigation Items**: 8px border radius for the hover/active state highlight. Active items use the primary green for the icon or a small left-side indicator.",
+    "theme": {
+      "bodyFont": "INTER",
+      "bodyFontFamily": "Inter",
+      "colorMode": "LIGHT",
+      "colorVariant": "FIDELITY",
+      "customColor": "#059669",
+      "designMd": "---\nname: Efficient Growth\ncolors:\n  surface: '#f5fbf5'\n  surface-dim: '#d5dcd6'\n  surface-bright: '#f5fbf5'\n  surface-container-lowest: '#ffffff'\n  surface-container-low: '#eff5ef'\n  surface-container: '#e9efe9'\n  surface-container-high: '#e4eae4'\n  surface-container-highest: '#dee4de'\n  on-surface: '#171d19'\n  on-surface-variant: '#3d4a42'\n  inverse-surface: '#2c322e'\n  inverse-on-surface: '#ecf2ec'\n  outline: '#6d7a72'\n  outline-variant: '#bccac0'\n  surface-tint: '#006c4a'\n  primary: '#006948'\n  on-primary: '#ffffff'\n  primary-container: '#00855d'\n  on-primary-container: '#f5fff7'\n  inverse-primary: '#68dba9'\n  secondary: '#5d5e63'\n  on-secondary: '#ffffff'\n  secondary-container: '#dfdfe4'\n  on-secondary-container: '#616267'\n  tertiary: '#9b3e3b'\n  on-tertiary: '#ffffff'\n  tertiary-container: '#ba5551'\n  on-tertiary-container: '#fffbff'\n  error: '#ba1a1a'\n  on-error: '#ffffff'\n  error-container: '#ffdad6'\n  on-error-container: '#93000a'\n  primary-fixed: '#85f8c4'\n  primary-fixed-dim: '#68dba9'\n  on-primary-fixed: '#002114'\n  on-primary-fixed-variant: '#005137'\n  secondary-fixed: '#e2e2e7'\n  secondary-fixed-dim: '#c6c6cb'\n  on-secondary-fixed: '#1a1c1f'\n  on-secondary-fixed-variant: '#45474b'\n  tertiary-fixed: '#ffdad7'\n  tertiary-fixed-dim: '#ffb3ae'\n  on-tertiary-fixed: '#410004'\n  on-tertiary-fixed-variant: '#7f2928'\n  background: '#f5fbf5'\n  on-background: '#171d19'\n  surface-variant: '#dee4de'\n  apple-black: '#1d1d1f'\n  muted-foreground: '#8e8e93'\n  destructive-red: '#ff3b30'\n  warning-orange: '#ff9f0a'\n  info-blue: '#007aff'\n  border-subtle: rgba(0,0,0,0.08)\ntypography:\n  headline-xl:\n    fontFamily: Inter\n    fontSize: 36px\n    fontWeight: '700'\n    lineHeight: 44px\n    letterSpacing: -0.02em\n  headline-lg:\n    fontFamily: Inter\n    fontSize: 28px\n    fontWeight: '600'\n    lineHeight: 34px\n    letterSpacing: -0.01em\n  headline-md:\n    fontFamily: Inter\n    fontSize: 20px\n    fontWeight: '600'\n    lineHeight: 28px\n    letterSpacing: -0.01em\n  body-lg:\n    fontFamily: Inter\n    fontSize: 18px\n    fontWeight: '400'\n    lineHeight: 28px\n  body-md:\n    fontFamily: Inter\n    fontSize: 16px\n    fontWeight: '400'\n    lineHeight: 24px\n  body-sm:\n    fontFamily: Inter\n    fontSize: 14px\n    fontWeight: '400'\n    lineHeight: 20px\n  label-md:\n    fontFamily: Inter\n    fontSize: 14px\n    fontWeight: '500'\n    lineHeight: 16px\n  label-sm:\n    fontFamily: Inter\n    fontSize: 12px\n    fontWeight: '600'\n    lineHeight: 16px\n    letterSpacing: 0.02em\nrounded:\n  sm: 0.25rem\n  DEFAULT: 0.5rem\n  md: 0.75rem\n  lg: 1rem\n  xl: 1.5rem\n  full: 9999px\nspacing:\n  base: 8px\n  xs: 4px\n  sm: 12px\n  md: 16px\n  lg: 24px\n  xl: 32px\n  gutter: 24px\n  margin-page: 40px\n---\n\n# HRM Dashboard Design System\n\n## Brand Personality\n- **Professional & Efficient**: Clean layouts that prioritize data clarity.\n- **Apple-Inspired Aesthetic**: Minimalist, high contrast, subtle shadows, and rounded corners (12px-16px).\n- **Modern Growth**: Accented with a vibrant emerald green (`#059669`) for primary actions and positive indicators.\n\n## Color Palette\n### Core Colors\n- **Primary**: `#059669` (Modern Green)\n- **Background**: `#ffffff` (White)\n- **Foreground**: `#1d1d1f` (Apple Black)\n- **Secondary**: `#f2f2f7` (Light Gray)\n- **Muted**: `#f2f2f7`\n- **Muted Foreground**: `#8e8e93`\n- **Destructive**: `#ff3b30` (Apple Red)\n\n### Semantic Colors\n- **Success**: `#059669`\n- **Warning**: `#ff9f0a`\n- **Info**: `#007aff`\n- **Error**: `#ff3b30`\n\n## Typography (Inter)\n- **Scale**: Base 16px.\n- **Weights**: Light (300), Normal (400), Medium (500), Semibold (600), Bold (700).\n- **Headings**: Semibold/Bold with tight letter-spacing.\n\n## UI Components\n- **Sidebar**: Light background (`#ffffff`), subtle right border (`rgba(0,0,0,0.08)`).\n- **Cards**: White background, 12px-16px border radius, subtle shadow (`shadow-md`).\n- **Buttons**: Rounded (12px), primary using green gradient.\n- **Inputs**: Light gray background (`#f2f2f7`), focus ring in primary green.\n\n## Spacing & Layout\n- **Grid**: 8px base system.\n- **Radius**: Standard 12px (`--radius`), Large 16px (`--radius-lg`).\n- **Shadows**: Soft Apple-style elevation.\n",
+      "font": "INTER",
+      "headlineFont": "INTER",
+      "headlineFontFamily": "Inter",
+      "labelFont": "INTER",
+      "labelFontFamily": "Inter",
+      "namedColors": {
+        "apple-black": "#1d1d1f",
+        "background": "#f5fbf5",
+        "border-subtle": "rgba(0,0,0,0.08)",
+        "destructive-red": "#ff3b30",
+        "error": "#ba1a1a",
+        "error_container": "#ffdad6",
+        "info-blue": "#007aff",
+        "inverse_on_surface": "#ecf2ec",
+        "inverse_primary": "#68dba9",
+        "inverse_surface": "#2c322e",
+        "muted-foreground": "#8e8e93",
+        "on_background": "#171d19",
+        "on_error": "#ffffff",
+        "on_error_container": "#93000a",
+        "on_primary": "#ffffff",
+        "on_primary_container": "#f5fff7",
+        "on_primary_fixed": "#002114",
+        "on_primary_fixed_variant": "#005137",
+        "on_secondary": "#ffffff",
+        "on_secondary_container": "#616267",
+        "on_secondary_fixed": "#1a1c1f",
+        "on_secondary_fixed_variant": "#45474b",
+        "on_surface": "#171d19",
+        "on_surface_variant": "#3d4a42",
+        "on_tertiary": "#ffffff",
+        "on_tertiary_container": "#fffbff",
+        "on_tertiary_fixed": "#410004",
+        "on_tertiary_fixed_variant": "#7f2928",
+        "outline": "#6d7a72",
+        "outline_variant": "#bccac0",
+        "primary": "#006948",
+        "primary_container": "#00855d",
+        "primary_fixed": "#85f8c4",
+        "primary_fixed_dim": "#68dba9",
+        "secondary": "#5d5e63",
+        "secondary_container": "#dfdfe4",
+        "secondary_fixed": "#e2e2e7",
+        "secondary_fixed_dim": "#c6c6cb",
+        "surface": "#f5fbf5",
+        "surface_bright": "#f5fbf5",
+        "surface_container": "#e9efe9",
+        "surface_container_high": "#e4eae4",
+        "surface_container_highest": "#dee4de",
+        "surface_container_low": "#eff5ef",
+        "surface_container_lowest": "#ffffff",
+        "surface_dim": "#d5dcd6",
+        "surface_tint": "#006c4a",
+        "surface_variant": "#dee4de",
+        "tertiary": "#9b3e3b",
+        "tertiary_container": "#ba5551",
+        "tertiary_fixed": "#ffdad7",
+        "tertiary_fixed_dim": "#ffb3ae",
+        "warning-orange": "#ff9f0a"
+      },
+      "overridePrimaryColor": "#059669",
+      "overrideSecondaryColor": "#f2f2f7",
+      "roundness": "ROUND_EIGHT",
+      "spacing": {
+        "base": "8px",
+        "gutter": "24px",
+        "lg": "24px",
+        "margin-page": "40px",
+        "md": "16px",
+        "sm": "12px",
+        "xl": "32px",
+        "xs": "4px"
+      },
+      "spacingScale": 2,
+      "typography": {
+        "body-lg": {
+          "fontFamily": "Inter",
+          "fontSize": "18px",
+          "fontWeight": "400",
+          "lineHeight": "28px"
+        },
+        "body-md": {
+          "fontFamily": "Inter",
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "24px"
+        },
+        "body-sm": {
+          "fontFamily": "Inter",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "lineHeight": "20px"
+        },
+        "headline-lg": {
+          "fontFamily": "Inter",
+          "fontSize": "28px",
+          "fontWeight": "600",
+          "letterSpacing": "-0.01em",
+          "lineHeight": "34px"
+        },
+        "headline-md": {
+          "fontFamily": "Inter",
+          "fontSize": "20px",
+          "fontWeight": "600",
+          "letterSpacing": "-0.01em",
+          "lineHeight": "28px"
+        },
+        "headline-xl": {
+          "fontFamily": "Inter",
+          "fontSize": "36px",
+          "fontWeight": "700",
+          "letterSpacing": "-0.02em",
+          "lineHeight": "44px"
+        },
+        "label-md": {
+          "fontFamily": "Inter",
+          "fontSize": "14px",
+          "fontWeight": "500",
+          "lineHeight": "16px"
+        },
+        "label-sm": {
+          "fontFamily": "Inter",
+          "fontSize": "12px",
+          "fontWeight": "600",
+          "letterSpacing": "0.02em",
+          "lineHeight": "16px"
+        }
+      }
+    }
+  },
+  "name": "assets/aa8eca683c774077ad12e0718519f3dc",
+  "version": "1"
+}

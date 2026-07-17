@@ -1,0 +1,20 @@
+{
+  "screens": [
+    {
+      "deviceType": "DESKTOP",
+      "height": "2600",
+      "htmlCode": {
+        "downloadUrl": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sX2ZjMDJlMmQxYmY4MzQyMzY4OWFkYjU3NDc3ZjM2MjZiEgsSBxD1gd_3wg8YAZIBIwoKcHJvamVjdF9pZBIVQhM3NjAxNjQ1OTIwOTQ0MzE5MDE3&filename=&opi=89354086",
+        "mimeType": "text/html",
+        "name": "projects/7601645920944319017/files/372f282b191a44bc93092ff6276e089e"
+      },
+      "name": "projects/7601645920944319017/screens/e9dc00b779774b25b778aceb12e10be2",
+      "screenshot": {
+        "downloadUrl": "https://lh3.googleusercontent.com/aida/AP1WRLvWTDIOlK99a0CFtwRzdIEkuxSwA7giXJCFZZxv-Ot1Jyj-Z2GdIJxNmQMIVUUQW3eqzMDBQFLj7tHCrzSiaL57ta36gmlT8bMt4CyWvW3_5-8bQwIZ3NwCVxiGmj_zkCryec95DF-HaW_E67PdikdwYPFG4MUHefPnk_pDMxWglXKoE8Q2DjtXO0laI-6Os9fO_EUU5ny4C6idrS8y7KxIt84S5pFbJax-jDIy-LRlVQx_b67sLdUt-Cw",
+        "name": "projects/7601645920944319017/files/a6470afa14d044baa642b2dce5c4b436"
+      },
+      "title": "HRM Dashboard - Overview",
+      "width": "2560"
+    }
+  ]
+}
