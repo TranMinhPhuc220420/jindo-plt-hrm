@@ -1,0 +1,15 @@
+---
+description: Keep docs/09-roadmap/PROGRESS.md updated after every implementation step
+alwaysApply: true
+---
+
+# Progress tracking
+
+Before starting implementation work, read `docs/09-roadmap/PROGRESS.md`.
+
+- **Write all PROGRESS.md updates in English** (status, notes, activity log, snapshot).
+- Work only on the current phase’s next `Todo` / `In progress` step. Do not skip ahead or start a later phase early.
+- When starting a step: set its status to `In progress` and update Snapshot.
+- When finishing a step: set status to `Done` (or `Blocked` with reason), tick checkboxes, update Snapshot (`Current step`, `Next action`, `Last updated`), and append an Activity log row.
+- Mention the PROGRESS.md change (step id + next action) in the final user summary.
+- Spec details stay in `PHASE_0X_*.md`; PROGRESS.md is the living status board only.

@@ -11,6 +11,7 @@ Business boundaries: [BUSINESS_SCOPE.md](../00-overview/BUSINESS_SCOPE.md)
 
 | File | Purpose |
 |------|---------|
+| [PROGRESS.md](./PROGRESS.md) | **Living progress** — step status, next action, activity log (update after every step) |
 | [MASTER_ROADMAP.md](./MASTER_ROADMAP.md) | Phase map, dependencies, exit criteria |
 | [PHASE_01_FOUNDATION.md](./PHASE_01_FOUNDATION.md) | Auth, authz, org, settings, shell |
 | [PHASE_02_EMPLOYEE.md](./PHASE_02_EMPLOYEE.md) | Employee master data |
@@ -26,10 +27,11 @@ Business boundaries: [BUSINESS_SCOPE.md](../00-overview/BUSINESS_SCOPE.md)
 
 ## How to Use
 
-1. Read **MASTER_ROADMAP** for order and dependencies.
-2. Implement one phase at a time; do not skip foundation.
-3. Each phase links to business, API, DB, and UI docs.
-4. Update phase status in MASTER when a phase completes.
+1. Read **[PROGRESS.md](./PROGRESS.md)** for current step and what’s left.
+2. Read **MASTER_ROADMAP** for order and dependencies.
+3. Implement **one step at a time**; do not skip foundation or jump phases.
+4. Each phase links to business, API, DB, and UI docs.
+5. After each finished step: update **PROGRESS.md**. When a whole phase completes: update MASTER status too.
 
 ---
 

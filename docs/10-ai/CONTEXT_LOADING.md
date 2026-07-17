@@ -17,11 +17,12 @@ This repo’s `docs/` is the contract. Code implements the docs.
 
 Always load:
 
-1. [PROJECT_LOGIC.md](../00-overview/PROJECT_LOGIC.md) — or the relevant section if already known
-2. [DEVELOPMENT_PRINCIPLES.md](../00-overview/DEVELOPMENT_PRINCIPLES.md)
-3. [STACK_DECISION.md](../01-architecture/STACK_DECISION.md) — REST + Sanctum SPA
-4. [DEPENDENCY_RULES.md](../01-architecture/DEPENDENCY_RULES.md)
-5. [AI_RULES.md](./AI_RULES.md)
+1. [PROGRESS.md](../09-roadmap/PROGRESS.md) — current step, blockers, what not to skip
+2. [PROJECT_LOGIC.md](../00-overview/PROJECT_LOGIC.md) — or the relevant section if already known
+3. [DEVELOPMENT_PRINCIPLES.md](../00-overview/DEVELOPMENT_PRINCIPLES.md)
+4. [STACK_DECISION.md](../01-architecture/STACK_DECISION.md) — REST + Sanctum SPA
+5. [DEPENDENCY_RULES.md](../01-architecture/DEPENDENCY_RULES.md)
+6. [AI_RULES.md](./AI_RULES.md)
 
 ---
 

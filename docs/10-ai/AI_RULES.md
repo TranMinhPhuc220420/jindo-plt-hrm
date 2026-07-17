@@ -72,11 +72,14 @@
 
 Run the mental checklist in [DEVELOPMENT_PRINCIPLES.md](../00-overview/DEVELOPMENT_PRINCIPLES.md) and [REVIEW_CHECKLIST.md](../08-development/REVIEW_CHECKLIST.md).
 
+**Always update [PROGRESS.md](../09-roadmap/PROGRESS.md):** mark the step `Done` (or `Blocked`), tick checkboxes, refresh Snapshot + Activity log. Do not claim a step complete without updating that file.
+
 ---
 
 ## Related
 
 - [PROMPT_GUIDELINES.md](./PROMPT_GUIDELINES.md)
 - [CONTEXT_LOADING.md](./CONTEXT_LOADING.md)
+- [../09-roadmap/PROGRESS.md](../09-roadmap/PROGRESS.md)
 - [FILE_PRIORITY.md](./FILE_PRIORITY.md)
 - [AI_WORKFLOW.md](./AI_WORKFLOW.md)

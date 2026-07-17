@@ -11,6 +11,8 @@
 
 Ship a modular HRM for SMEs covering the employee lifecycle, with permission-first access, auditability, REST API, and Efficient Growth (Stitch) UI — ready for multi-company later without rewrite.
 
+**Living status:** [PROGRESS.md](./PROGRESS.md) — update after every implementation step.
+
 ---
 
 ## Phase Overview

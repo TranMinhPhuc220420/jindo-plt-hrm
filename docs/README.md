@@ -8,6 +8,8 @@ Documentation for the Jindo PLT HRM platform.
 
 **AI agents start here:** [10-ai/AI_RULES.md](./10-ai/AI_RULES.md) → [10-ai/CONTEXT_LOADING.md](./10-ai/CONTEXT_LOADING.md)
 
+**Progress (what’s done / next):** [09-roadmap/PROGRESS.md](./09-roadmap/PROGRESS.md)
+
 ---
 
 ## Index

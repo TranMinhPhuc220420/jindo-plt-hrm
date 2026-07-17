@@ -9,18 +9,20 @@
 ## Standard Feature Workflow
 
 ```
-1. Clarify module + goal (from user prompt)
-2. Load P0 + P1 docs for that module
-3. Survey existing code (reuse first)
-4. Plan minimal slice (API → service → policy → UI)
-5. Implement backend contract
-6. Implement frontend against API + UI rules
-7. Add/adjust tests
-8. Self-check review checklist
-9. Summarize changes for the user
+1. Read PROGRESS.md — confirm current step / do not skip ahead
+2. Clarify module + goal (from user prompt)
+3. Load P0 + P1 docs for that module
+4. Survey existing code (reuse first)
+5. Plan minimal slice (API → service → policy → UI)
+6. Implement backend contract
+7. Implement frontend against API + UI rules
+8. Add/adjust tests
+9. Self-check review checklist
+10. Update PROGRESS.md (status, checkboxes, snapshot, activity log)
+11. Summarize changes for the user
 ```
 
-Do not skip step 2–3.
+Do not skip context loading or the PROGRESS.md update.
 
 ---
 
@@ -98,13 +100,24 @@ Minimum:
 Run [REVIEW_CHECKLIST.md](../08-development/REVIEW_CHECKLIST.md).  
 Fix blockers before claiming done.
 
-### 9. Report
+### 10. Update progress
+
+Edit [PROGRESS.md](../09-roadmap/PROGRESS.md):
+
+1. Set the finished step to `Done` (or `Blocked` + reason).
+2. Tick completed checkboxes; fill Notes if useful.
+3. Refresh **Snapshot** (`Current step`, `Next action`, `Last updated`).
+4. Append a row to **Activity log**.
+5. If the user is about to start the next step in the same session, set that step to `In progress`.
+
+### 11. Report
 
 Tell the user:
 
 - What was implemented
 - Key files
 - Tests added
+- PROGRESS.md updates (step id + new next action)
 - Follow-ups / deferred items
 
 ---
@@ -158,5 +171,6 @@ See [GIT_WORKFLOW.md](../08-development/GIT_WORKFLOW.md).
 ## Related
 
 - [PROMPT_GUIDELINES.md](./PROMPT_GUIDELINES.md)
+- [../09-roadmap/PROGRESS.md](../09-roadmap/PROGRESS.md)
 - [../09-roadmap/MASTER_ROADMAP.md](../09-roadmap/MASTER_ROADMAP.md)
 - [../08-development/CODING_STANDARD.md](../08-development/CODING_STANDARD.md)
