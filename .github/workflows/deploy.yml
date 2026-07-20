@@ -125,14 +125,13 @@ jobs:
           npm ci
           npm run build
 
-      - name: Create deploy.zip
+      - name: Prepare release files
         run: |
           rm -rf .git .github tests node_modules
           rm -rf storage/logs/*
-          mkdir -p deploy-bundle
-          zip -r deploy-bundle/deploy.zip . -x "deploy-bundle/*"
+          mv htaccess .htaccess
 
-      - name: Upload deploy.zip via FTPS
+      - name: Upload release via FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_HOST }}
@@ -140,5 +139,12 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftps
           port: 21
-          local-dir: ./deploy-bundle/
+          local-dir: ./
           server-dir: /
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/tests/**
+            .env
+            .env.example
