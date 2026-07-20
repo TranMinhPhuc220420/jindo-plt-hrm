@@ -7,7 +7,7 @@ use App\Jobs\GeneratePayslipPdfJob;
 use App\Models\Payslip;
 use App\Models\User;
 use App\Services\Organization\CompanyContext;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 

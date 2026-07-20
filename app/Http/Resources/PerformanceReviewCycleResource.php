@@ -25,7 +25,7 @@ class PerformanceReviewCycleResource extends JsonResource
             'starts_on' => $this->starts_on?->toDateString(),
             'ends_on' => $this->ends_on?->toDateString(),
             'participant_employee_ids' => $this->participant_employee_ids ?? [],
-            'participants_count' => $this->when($this->participants_count !== null, $this->participants_count),
+            'participants_count' => $this->participants_count,
             'started_at' => $this->started_at?->toIso8601String(),
             'finalized_at' => $this->finalized_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),

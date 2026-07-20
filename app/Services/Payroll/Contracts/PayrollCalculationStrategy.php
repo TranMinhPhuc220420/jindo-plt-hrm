@@ -11,9 +11,9 @@ interface PayrollCalculationStrategy
      *     period_end: string,
      *     base_amount: float,
      *     currency: string,
-     *     allowances: list<array{code: string, name: string, amount: float}>,
-     *     bonuses: list<array{code: string, name: string, amount: float}>,
-     *     deductions: list<array{code: string, name: string, amount: float}>,
+     *     allowances: array<int, array{code: string, name: string, amount: float}>,
+     *     bonuses: array<int, array{code: string, name: string, amount: float}>,
+     *     deductions: array<int, array{code: string, name: string, amount: float}>,
      *     overtime_minutes: int,
      *     unpaid_leave_days: float
      * }  $input

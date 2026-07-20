@@ -6,8 +6,8 @@ use App\Exceptions\DomainException;
 use App\Models\Shift;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\QueryException;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ShiftService
 {
@@ -38,7 +38,7 @@ class ShiftService
             $query->where('kind', $filters['kind']);
         }
 
-        if (array_key_exists('is_active', $filters) && $filters['is_active'] !== null && $filters['is_active'] !== '') {
+        if (array_key_exists('is_active', $filters) && $filters['is_active'] !== '') {
             $active = filter_var($filters['is_active'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
             if ($active !== null) {
                 $query->where('is_active', $active);

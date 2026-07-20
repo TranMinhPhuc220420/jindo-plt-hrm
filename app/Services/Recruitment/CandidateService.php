@@ -8,7 +8,7 @@ use App\Models\Candidate;
 use App\Models\JobOpening;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class CandidateService
 {
@@ -73,7 +73,7 @@ class CandidateService
             ->where('company_id', $companyId)
             ->find($data['job_opening_id']);
 
-        if ($opening === null) {
+        if (! $opening instanceof JobOpening) {
             throw new DomainException(
                 message: 'Job opening is outside the current company scope.',
                 errorCode: 'COMPANY_SCOPE_MISMATCH',

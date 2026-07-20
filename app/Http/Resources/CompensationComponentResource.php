@@ -2,9 +2,15 @@
 
 namespace App\Http\Resources;
 
+use App\Models\EmployeeAllowance;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * Shared shape for EmployeeAllowance / EmployeeDeduction / EmployeeBonus.
+ *
+ * @mixin EmployeeAllowance
+ */
 class CompensationComponentResource extends JsonResource
 {
     /**

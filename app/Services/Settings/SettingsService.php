@@ -57,6 +57,7 @@ class SettingsService
 
     /**
      * @param  array<string, array<string, mixed>>  $payload
+     * @param  array<string, mixed>  $payload
      * @return array<string, array<string, mixed>>
      */
     public function update(array $payload): array

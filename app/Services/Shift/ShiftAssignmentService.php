@@ -11,7 +11,7 @@ use App\Models\ShiftAssignment;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
 use Carbon\CarbonImmutable;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ShiftAssignmentService
 {
@@ -51,7 +51,7 @@ class ShiftAssignmentService
     }
 
     /**
-     * @param  array{employee_id: int, shift_id: int, start_date: string, end_date?: string|null}  $data
+     * @param  array<string, mixed>  $data
      */
     public function create(array $data): ShiftAssignment
     {
@@ -60,8 +60,8 @@ class ShiftAssignmentService
         $shift = $this->assertShiftInCompany((int) $data['shift_id'], $companyId);
 
         $startDate = CarbonImmutable::parse($data['start_date'])->toDateString();
-        $endDate = isset($data['end_date']) && $data['end_date'] !== null && $data['end_date'] !== ''
-            ? CarbonImmutable::parse($data['end_date'])->toDateString()
+        $endDate = ! empty($data['end_date'])
+            ? CarbonImmutable::parse((string) $data['end_date'])->toDateString()
             : null;
 
         $this->assertDateOrder($startDate, $endDate);

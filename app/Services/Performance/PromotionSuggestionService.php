@@ -7,7 +7,7 @@ use App\Models\PerformancePromotionSuggestion;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class PromotionSuggestionService
 {
@@ -64,7 +64,7 @@ class PromotionSuggestionService
         }
 
         $suggestion->status = 'acknowledged';
-        $suggestion->acknowledged_by = $actor->id;
+        $suggestion->acknowledged_by = max(0, $actor->id);
         $suggestion->acknowledged_at = now();
         $suggestion->save();
 

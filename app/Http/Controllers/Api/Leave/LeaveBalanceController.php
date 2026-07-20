@@ -21,10 +21,13 @@ class LeaveBalanceController extends Controller
         $this->authorize('viewAny', LeaveBalance::class);
 
         $employeeId = (int) $request->integer('employee_id');
-        $year = (string) ($request->query('year') ?? now()->year);
+        $yearQuery = $request->query('year');
+        $year = is_scalar($yearQuery) && (string) $yearQuery !== ''
+            ? (string) $yearQuery
+            : (string) now()->year;
 
         if ($employeeId <= 0) {
-            $employeeId = (int) ($request->user()?->employee?->id ?? 0);
+            $employeeId = (int) ($request->user()?->employee->id ?? 0);
         }
 
         if ($employeeId <= 0) {
@@ -36,7 +39,7 @@ class LeaveBalanceController extends Controller
         }
 
         $viewer = $request->user();
-        $ownId = $viewer?->employee?->id;
+        $ownId = $viewer?->employee->id;
         if (
             $ownId !== $employeeId
             && ! $viewer?->can('can_manage_leave_balances')

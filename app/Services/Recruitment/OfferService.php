@@ -12,6 +12,7 @@ use App\Services\Audit\AuditLogger;
 use App\Services\Employee\EmployeeService;
 use App\Services\Onboarding\OnboardingService;
 use App\Services\Organization\CompanyContext;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -87,7 +88,7 @@ class OfferService
 
         $offer->status = 'sent';
         $offer->sent_at = now();
-        $offer->sent_by = $actor->id;
+        $offer->sent_by = max(0, $actor->id);
         $offer->save();
 
         $this->audit->write(
@@ -135,11 +136,13 @@ class OfferService
             $case = $this->onboarding->startFromOffer($offer, $employee);
 
             $candidate->stage = 'hired';
-            $candidate->employee_id = $employee->id;
+            $candidate->employee_id = max(0, $employee->id);
             $candidate->save();
 
             $offer->status = 'accepted';
-            $offer->accepted_at = ! empty($data['accepted_at']) ? $data['accepted_at'] : now();
+            $offer->accepted_at = ! empty($data['accepted_at'])
+                ? CarbonImmutable::parse($data['accepted_at'])
+                : CarbonImmutable::now();
             $offer->save();
 
             $this->audit->write(

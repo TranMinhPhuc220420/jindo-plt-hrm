@@ -15,7 +15,7 @@ use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
 use App\Support\SettingsDefaults;
 use Carbon\CarbonImmutable;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 class AttendanceService
@@ -201,7 +201,7 @@ class AttendanceService
         }
 
         $record->status = 'approved';
-        $record->approved_by = $actor->id;
+        $record->approved_by = max(0, $actor->id);
         $record->approved_at = now();
         $record->save();
 
@@ -215,7 +215,7 @@ class AttendanceService
     }
 
     /**
-     * @param  array{date_from: string, date_to: string}  $data
+     * @param  array<string, mixed>  $data
      * @return int Number of records locked
      */
     public function lockPeriod(array $data): int
@@ -243,12 +243,7 @@ class AttendanceService
     }
 
     /**
-     * @param  array{
-     *     attendance_record_id: int,
-     *     proposed_check_in_at?: string|null,
-     *     proposed_check_out_at?: string|null,
-     *     reason: string
-     * }  $data
+     * @param  array<string, mixed>  $data
      */
     public function requestCorrection(User $actor, array $data): AttendanceCorrection
     {
@@ -373,7 +368,7 @@ class AttendanceService
         $record->save();
 
         $correction->status = 'approved';
-        $correction->reviewed_by = $actor->id;
+        $correction->reviewed_by = max(0, $actor->id);
         $correction->reviewed_at = now();
         $correction->save();
 
@@ -401,7 +396,7 @@ class AttendanceService
         }
 
         $correction->status = 'rejected';
-        $correction->reviewed_by = $actor->id;
+        $correction->reviewed_by = max(0, $actor->id);
         $correction->reviewed_at = now();
         $correction->review_note = $note;
         $correction->save();
@@ -429,9 +424,7 @@ class AttendanceService
     {
         $metrics = $this->metrics->compute(
             employeeId: $record->employee_id,
-            workDate: $record->work_date instanceof \DateTimeInterface
-                ? $record->work_date->format('Y-m-d')
-                : (string) $record->work_date,
+            workDate: $record->work_date->format('Y-m-d'),
             checkInAt: $record->check_in_at
                 ? CarbonImmutable::parse($record->check_in_at)
                 : null,

@@ -16,7 +16,7 @@ use App\Services\Audit\AuditLogger;
 use App\Services\Employee\EmployeeAccountService;
 use App\Services\Employee\EmployeeService;
 use App\Services\Organization\CompanyContext;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class OnboardingService
@@ -110,7 +110,7 @@ class OnboardingService
     }
 
     /**
-     * @param  array{employee_id: int, template_id?: int|null, offer_id?: int|null, probation_ends_on?: string|null}  $data
+     * @param  array<string, mixed>  $data
      */
     public function startManual(array $data): OnboardingCase
     {
@@ -118,9 +118,9 @@ class OnboardingService
 
         $employee = Employee::query()
             ->where('company_id', $companyId)
-            ->find($data['employee_id']);
+            ->find((int) $data['employee_id']);
 
-        if ($employee === null) {
+        if (! $employee instanceof Employee) {
             throw new DomainException(
                 message: 'Employee is outside the current company scope.',
                 errorCode: 'COMPANY_SCOPE_MISMATCH',
@@ -183,7 +183,7 @@ class OnboardingService
     }
 
     /**
-     * @return list<array{key: string, title: string, description?: string|null, mandatory: bool, assignee_type: string, sort_order?: int}>
+     * @return array<int, array{key: string, title: string, description?: string|null, mandatory: bool, assignee_type: string, sort_order?: int}>
      */
     private function resolveItems(int $companyId, ?int $templateId): array
     {
@@ -243,7 +243,7 @@ class OnboardingService
 
             $task->status = 'done';
             $task->completed_at = now();
-            $task->completed_by = $actor->id;
+            $task->completed_by = max(0, $actor->id);
             $task->save();
 
             $this->audit->write(
@@ -360,7 +360,7 @@ class OnboardingService
     }
 
     /**
-     * @param  array{name: string, description?: string|null, is_active?: bool, items?: list<array<string, mixed>>}  $data
+     * @param  array<string, mixed>  $data
      */
     public function createTemplate(array $data): OnboardingTemplate
     {
@@ -421,11 +421,11 @@ class OnboardingService
     }
 
     /**
-     * @param  list<array<string, mixed>>  $items
+     * @param  array<int, array<string, mixed>>  $items
      */
     private function syncTemplateItems(OnboardingTemplate $template, array $items): void
     {
-        foreach (array_values($items) as $index => $item) {
+        foreach ($items as $index => $item) {
             $template->items()->create([
                 'company_id' => $template->company_id,
                 'key' => $item['key'],

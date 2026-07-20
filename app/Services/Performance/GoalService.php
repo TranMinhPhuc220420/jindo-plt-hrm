@@ -8,7 +8,7 @@ use App\Models\PerformanceGoal;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class GoalService
 {

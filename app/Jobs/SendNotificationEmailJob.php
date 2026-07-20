@@ -29,7 +29,7 @@ class SendNotificationEmailJob implements ShouldQueue
         }
 
         $email = $notification->user->email;
-        if ($email === null || $email === '') {
+        if ($email === '') {
             return;
         }
 

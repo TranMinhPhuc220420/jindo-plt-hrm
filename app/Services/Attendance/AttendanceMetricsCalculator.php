@@ -57,7 +57,7 @@ class AttendanceMetricsCalculator
 
         if ($window !== null && $checkOutAt !== null) {
             $scheduledEnd = $this->atDate($workDate, $window['end_time']);
-            if (($window['is_night'] ?? false) && $window['end_time'] < $window['start_time']) {
+            if (($window['is_night']) && $window['end_time'] < $window['start_time']) {
                 $scheduledEnd = $scheduledEnd->addDay();
             }
 
@@ -147,11 +147,7 @@ class AttendanceMetricsCalculator
             ];
         }
 
-        if ($coverage === 'hours') {
-            return $this->applyHourlyLeave($window, $start, $end, $leave);
-        }
-
-        return $window;
+        return $this->applyHourlyLeave($window, $start, $end, $leave);
     }
 
     /**
@@ -233,7 +229,11 @@ class AttendanceMetricsCalculator
             ->orderBy('code')
             ->first();
 
-        return (int) ($rule?->applies_after_minutes ?? 0);
+        if ($rule === null) {
+            return 0;
+        }
+
+        return (int) ($rule->applies_after_minutes ?? 0);
     }
 
     private function atDate(string $workDate, string $time): CarbonImmutable

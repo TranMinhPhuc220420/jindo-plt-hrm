@@ -84,7 +84,7 @@ class AuthService
 
         $user = User::query()->find($userId);
 
-        if (! $user || ! $this->requiresTwoFactorChallenge($user)) {
+        if (! $user instanceof User || ! $this->requiresTwoFactorChallenge($user)) {
             session()->forget(['login.id', 'login.remember']);
 
             throw new DomainException(
@@ -116,7 +116,16 @@ class AuthService
         Auth::login($user, $remember);
         request()->session()->regenerate();
 
-        return $this->authPayload($user->fresh());
+        $fresh = $user->fresh();
+        if (! $fresh instanceof User) {
+            throw new DomainException(
+                message: 'Authenticated user could not be refreshed.',
+                errorCode: 'AUTH_USER_NOT_FOUND',
+                status: 500,
+            );
+        }
+
+        return $this->authPayload($fresh);
     }
 
     public function logout(): void
@@ -147,7 +156,7 @@ class AuthService
     }
 
     /**
-     * @param  array{email: string, password: string, password_confirmation: string, token: string}  $credentials
+     * @param  array<string, mixed>  $credentials
      */
     public function resetPassword(array $credentials): void
     {
@@ -192,7 +201,16 @@ class AuthService
 
         app()->setLocale($this->localeResolver->resolve($user->fresh()));
 
-        return $this->authPayload($user->fresh());
+        $fresh = $user->fresh();
+        if (! $fresh instanceof User) {
+            throw new DomainException(
+                message: 'Authenticated user could not be refreshed.',
+                errorCode: 'AUTH_USER_NOT_FOUND',
+                status: 500,
+            );
+        }
+
+        return $this->authPayload($fresh);
     }
 
     /**

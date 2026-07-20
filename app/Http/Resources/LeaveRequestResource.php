@@ -21,7 +21,7 @@ class LeaveRequestResource extends JsonResource
             'company_id' => $this->company_id,
             'employee_id' => $this->employee_id,
             'employee_code' => $this->whenLoaded('employee', fn () => $this->employee?->code),
-            'employee_name' => $this->whenLoaded('employee', fn () => $this->employee?->full_name ?? $this->employee?->name),
+            'employee_name' => $this->whenLoaded('employee', fn () => $this->employee?->full_name),
             'leave_type_id' => $this->leave_type_id,
             'leave_type_name' => $this->whenLoaded('leaveType', fn () => $this->leaveType?->name),
             'leave_type_code' => $this->whenLoaded('leaveType', fn () => $this->leaveType?->code),

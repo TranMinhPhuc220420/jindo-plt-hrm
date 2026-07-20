@@ -47,7 +47,7 @@ class GenerateReportExportJob implements ShouldQueue
     }
 
     /**
-     * @param  list<array<string, mixed>>  $rows
+     * @param  array<int, array<string, mixed>>  $rows
      */
     private function toCsv(array $rows): string
     {
@@ -57,6 +57,9 @@ class GenerateReportExportJob implements ShouldQueue
 
         $headers = array_keys($rows[0]);
         $handle = fopen('php://temp', 'r+');
+        if ($handle === false) {
+            throw new \RuntimeException('Unable to open temporary stream for CSV export.');
+        }
         fputcsv($handle, $headers);
 
         foreach ($rows as $row) {

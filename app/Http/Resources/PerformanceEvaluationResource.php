@@ -22,7 +22,7 @@ class PerformanceEvaluationResource extends JsonResource
             'review_cycle_id' => $this->review_cycle_id,
             'review_cycle_name' => $this->whenLoaded('reviewCycle', fn () => $this->reviewCycle?->name),
             'employee_id' => $this->employee_id,
-            'employee_name' => $this->whenLoaded('employee', fn () => $this->employee?->full_name ?? $this->employee?->code),
+            'employee_name' => $this->whenLoaded('employee', fn () => $this->employee->full_name ?? $this->employee?->code),
             'evaluator_id' => $this->evaluator_id,
             'overall_score' => (float) $this->overall_score,
             'summary' => $this->summary,

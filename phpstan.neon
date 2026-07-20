@@ -11,3 +11,11 @@ parameters:
         - routes/
 
     level: 7
+
+    # Larastan: parse casts() method bodies so date/datetime attributes type as Carbon
+    # (models use casts() with @return array<string, string>, which otherwise hides cast keys).
+    parseModelCastsMethod: true
+
+    # Larastan often types nullable date casts as non-null Carbon; Resources still need ?-> at runtime.
+    ignoreErrors:
+        - identifier: nullsafe.neverNull

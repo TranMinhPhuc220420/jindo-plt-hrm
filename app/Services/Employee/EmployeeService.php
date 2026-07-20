@@ -20,9 +20,9 @@ use App\Models\Position;
 use App\Models\Team;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class EmployeeService
@@ -155,7 +155,7 @@ class EmployeeService
     }
 
     /**
-     * @param  array{status: string, reason?: string|null}  $data
+     * @param  array<string, mixed>  $data
      */
     public function changeStatus(Employee $employee, array $data): Employee
     {

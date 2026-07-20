@@ -29,6 +29,6 @@ final class EmployeeStatusTransitions
             return true;
         }
 
-        return in_array($to, self::ALLOWED[$from] ?? [], true);
+        return in_array($to, self::ALLOWED[$from], true);
     }
 }

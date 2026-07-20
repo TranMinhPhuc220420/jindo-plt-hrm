@@ -9,8 +9,8 @@ use App\Models\Document;
 use App\Models\Employee;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -67,7 +67,7 @@ class DocumentService
     }
 
     /**
-     * @param  array{owner_type: string, owner_id?: int|null, category?: string, title?: string|null}  $data
+     * @param  array<string, mixed>  $data
      */
     public function upload(UploadedFile $file, array $data): Document
     {

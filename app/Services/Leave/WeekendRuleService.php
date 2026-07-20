@@ -24,7 +24,7 @@ class WeekendRuleService
     }
 
     /**
-     * @param  array{weekend_days: list<int>}  $data
+     * @param  array<string, mixed>  $data
      */
     public function upsert(array $data): WeekendRule
     {

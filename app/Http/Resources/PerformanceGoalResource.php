@@ -21,7 +21,7 @@ class PerformanceGoalResource extends JsonResource
             'company_id' => $this->company_id,
             'review_cycle_id' => $this->review_cycle_id,
             'employee_id' => $this->employee_id,
-            'employee_name' => $this->whenLoaded('employee', fn () => $this->employee?->full_name ?? $this->employee?->code),
+            'employee_name' => $this->whenLoaded('employee', fn () => $this->employee->full_name ?? $this->employee?->code),
             'title' => $this->title,
             'description' => $this->description,
             'type' => $this->type,

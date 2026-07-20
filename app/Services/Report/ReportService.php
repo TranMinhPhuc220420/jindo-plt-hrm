@@ -43,7 +43,7 @@ class ReportService
      * Generate report rows, enforcing the report's permission gate.
      *
      * @param  array<string, mixed>  $filters
-     * @return list<array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public function generate(string $report, array $filters, User $actor): array
     {
@@ -70,13 +70,12 @@ class ReportService
             'departments' => $this->departments($filters),
             'payroll' => $this->payroll($filters),
             'performance' => $this->performance($filters),
-            default => [],
         };
     }
 
     /**
      * @param  array<string, mixed>  $filters
-     * @return list<array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     private function attendance(array $filters): array
     {
@@ -104,7 +103,7 @@ class ReportService
             $employee = $records->first()->employee;
             $rows[] = [
                 'employee_id' => (int) $employeeId,
-                'employee_name' => $employee?->full_name ?? $employee?->code,
+                'employee_name' => $employee->full_name ?? $employee?->code,
                 'present_days' => $records->filter(fn (AttendanceRecord $r) => $r->check_in_at !== null)->count(),
                 'late_minutes' => (int) $records->sum('late_minutes'),
                 'overtime_minutes' => (int) $records->sum('overtime_minutes'),
@@ -117,7 +116,7 @@ class ReportService
 
     /**
      * @param  array<string, mixed>  $filters
-     * @return list<array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     private function leave(array $filters): array
     {
@@ -141,11 +140,11 @@ class ReportService
         return $query->get()->map(fn (LeaveRequest $r) => [
             'leave_request_id' => $r->id,
             'employee_id' => $r->employee_id,
-            'employee_name' => $r->employee?->full_name ?? $r->employee?->code,
+            'employee_name' => $r->employee->full_name ?? $r->employee?->code,
             'leave_type' => $r->leaveType?->name,
             'leave_type_code' => $r->leaveType?->code,
-            'start_date' => $r->start_date?->toDateString(),
-            'end_date' => $r->end_date?->toDateString(),
+            'start_date' => $r->start_date->toDateString(),
+            'end_date' => $r->end_date->toDateString(),
             'quantity' => (float) $r->quantity,
             'status' => $r->status,
         ])->values()->all();
@@ -153,7 +152,7 @@ class ReportService
 
     /**
      * @param  array<string, mixed>  $filters
-     * @return list<array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     private function employees(array $filters): array
     {
@@ -177,13 +176,13 @@ class ReportService
             'employee_name' => $e->full_name,
             'department' => $e->department?->name,
             'status' => $e->status,
-            'hired_at' => $e->hired_at?->toDateString(),
+            'hired_at' => $e->hired_at->toDateString(),
         ])->values()->all();
     }
 
     /**
      * @param  array<string, mixed>  $filters
-     * @return list<array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     private function departments(array $filters): array
     {
@@ -211,7 +210,7 @@ class ReportService
 
     /**
      * @param  array<string, mixed>  $filters
-     * @return list<array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     private function payroll(array $filters): array
     {
@@ -234,8 +233,8 @@ class ReportService
         return $query->get()->map(fn (PayrollRun $r) => [
             'payroll_run_id' => $r->id,
             'name' => $r->name,
-            'period_start' => $r->period_start?->toDateString(),
-            'period_end' => $r->period_end?->toDateString(),
+            'period_start' => $r->period_start->toDateString(),
+            'period_end' => $r->period_end->toDateString(),
             'status' => $r->status,
             'employee_count' => (int) $r->employee_count,
             'total_gross' => (float) $r->total_gross,
@@ -245,7 +244,7 @@ class ReportService
 
     /**
      * @param  array<string, mixed>  $filters
-     * @return list<array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     private function performance(array $filters): array
     {
@@ -266,10 +265,10 @@ class ReportService
         return $query->get()->map(fn (PerformanceEvaluation $e) => [
             'evaluation_id' => $e->id,
             'employee_id' => $e->employee_id,
-            'employee_name' => $e->employee?->full_name ?? $e->employee?->code,
+            'employee_name' => $e->employee->full_name ?? $e->employee?->code,
             'review_cycle' => $e->reviewCycle?->name,
             'overall_score' => (float) $e->overall_score,
-            'submitted_at' => $e->submitted_at?->toIso8601String(),
+            'submitted_at' => $e->submitted_at->toIso8601String(),
         ])->values()->all();
     }
 }

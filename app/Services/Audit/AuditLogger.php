@@ -5,8 +5,8 @@ namespace App\Services\Audit;
 use App\Models\AuditLog;
 use App\Models\User;
 use App\Services\Organization\CompanyContext;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 

@@ -105,9 +105,11 @@ class EmployeeCompensationService
     }
 
     /**
-     * @param  class-string  $modelClass
+     * @template TModel of Model
+     *
+     * @param  class-string<TModel>  $modelClass
      * @param  list<array{code: string, name: string, amount: mixed, is_taxable?: bool, is_active?: bool}>  $items
-     * @return Collection<int, Model>
+     * @return Collection<int, TModel>
      */
     private function replaceComponents(int $employeeId, array $items, string $modelClass, string $auditAction): Collection
     {

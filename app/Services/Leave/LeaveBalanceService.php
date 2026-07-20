@@ -18,7 +18,7 @@ class LeaveBalanceService
     ) {}
 
     /**
-     * @return list<array{
+     * @return array<int, array{
      *     leave_type_id: int,
      *     leave_type_name: string,
      *     leave_type_code: string,
@@ -44,8 +44,8 @@ class LeaveBalanceService
         return $balances->map(function (LeaveBalance $balance): array {
             return [
                 'leave_type_id' => $balance->leave_type_id,
-                'leave_type_name' => $balance->leaveType?->name ?? '',
-                'leave_type_code' => $balance->leaveType?->code ?? '',
+                'leave_type_name' => $balance->leaveType->name ?? '',
+                'leave_type_code' => $balance->leaveType->code ?? '',
                 'period_key' => $balance->period_key,
                 'entitled' => (float) $balance->entitled,
                 'used' => (float) $balance->used,
@@ -56,7 +56,7 @@ class LeaveBalanceService
     }
 
     /**
-     * @param  array{employee_id: int, leave_type_id: int, period_key?: string, delta: float|int|string, note?: string}  $data
+     * @param  array<string, mixed>  $data
      */
     public function adjust(array $data): LeaveBalance
     {

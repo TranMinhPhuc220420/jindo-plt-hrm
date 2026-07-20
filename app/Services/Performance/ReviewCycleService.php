@@ -11,7 +11,7 @@ use App\Models\PerformanceReviewCycle;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class ReviewCycleService

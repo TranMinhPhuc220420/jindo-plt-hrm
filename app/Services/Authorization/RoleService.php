@@ -7,8 +7,8 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class RoleService
@@ -45,7 +45,7 @@ class RoleService
     }
 
     /**
-     * @param  array{key: string, name: string, description?: string|null}  $data
+     * @param  array<string, mixed>  $data
      */
     public function createRole(array $data): Role
     {

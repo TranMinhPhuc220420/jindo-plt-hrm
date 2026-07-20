@@ -10,7 +10,7 @@ use App\Models\NotificationPreference;
 use App\Models\User;
 use App\Services\Organization\CompanyContext;
 use App\Support\Locale\LocaleResolver;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class NotificationService
 {
@@ -87,7 +87,7 @@ class NotificationService
             return null;
         }
 
-        return $this->notify($user, $type, $title, $body, $data, $companyId ?? $employee?->company_id);
+        return $this->notify($user, $type, $title, $body, $data, $companyId ?? $employee->company_id);
     }
 
     /**
@@ -103,7 +103,8 @@ class NotificationService
         $titleKey = "notifications.{$type}.title";
         $bodyKey = "notifications.{$type}.body";
 
-        $resolvedTitle = $title ?? __($titleKey, [], $locale);
+        $translatedTitle = __($titleKey, [], $locale);
+        $resolvedTitle = $title ?? (is_string($translatedTitle) ? $translatedTitle : $type);
         if ($resolvedTitle === $titleKey) {
             $resolvedTitle = $title ?? $type;
         }
@@ -111,7 +112,7 @@ class NotificationService
         $resolvedBody = $body;
         if ($resolvedBody === null) {
             $translated = __($bodyKey, [], $locale);
-            $resolvedBody = $translated === $bodyKey ? null : $translated;
+            $resolvedBody = is_string($translated) && $translated !== $bodyKey ? $translated : null;
         }
 
         return [$resolvedTitle, $resolvedBody];
@@ -202,7 +203,7 @@ class NotificationService
     {
         $categories = $prefs->categories ?? [];
 
-        if (is_array($categories) && array_key_exists($category, $categories)) {
+        if (array_key_exists($category, $categories)) {
             $override = $categories[$category];
             if (is_array($override) && array_key_exists('email', $override)) {
                 return (bool) $override['email'];
@@ -231,7 +232,7 @@ class NotificationService
         $count = 0;
         foreach ($userIds as $userId) {
             $user = User::query()->find($userId);
-            if ($user === null) {
+            if (! $user instanceof User) {
                 continue;
             }
 

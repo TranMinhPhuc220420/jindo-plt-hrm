@@ -14,7 +14,7 @@ use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
 use Carbon\CarbonImmutable;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -276,7 +276,7 @@ class LeaveRequestService
             }
 
             $request->status = 'approved';
-            $request->reviewed_by = $actor->id;
+            $request->reviewed_by = max(0, $actor->id);
             $request->reviewed_at = now();
             $request->review_note = $data['note'] ?? null;
             $request->save();
@@ -310,7 +310,7 @@ class LeaveRequestService
             $this->releasePending($request);
 
             $request->status = 'rejected';
-            $request->reviewed_by = $actor->id;
+            $request->reviewed_by = max(0, $actor->id);
             $request->reviewed_at = now();
             $request->review_note = $data['reason'] ?? null;
             $request->save();

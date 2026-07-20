@@ -46,7 +46,7 @@ class EmployeeAccountService
             'password' => $this->defaultPassword(),
         ]);
 
-        $employee->user_id = $user->id;
+        $employee->user_id = max(0, $user->id);
         $employee->save();
 
         $this->audit->write(

@@ -98,8 +98,8 @@ class LeaveCoverageService
     {
         $base = [
             'request_id' => $request->id,
-            'leave_type_name' => (string) ($request->leaveType?->name ?? ''),
-            'is_paid' => (bool) ($request->leaveType?->is_paid ?? true),
+            'leave_type_name' => (string) ($request->leaveType->name ?? ''),
+            'is_paid' => (bool) ($request->leaveType->is_paid ?? true),
             'unit' => $request->unit,
             'start_at' => null,
             'end_at' => null,

@@ -20,7 +20,7 @@ class PerformancePromotionSuggestionResource extends JsonResource
             'id' => $this->id,
             'company_id' => $this->company_id,
             'employee_id' => $this->employee_id,
-            'employee_name' => $this->whenLoaded('employee', fn () => $this->employee?->full_name ?? $this->employee?->code),
+            'employee_name' => $this->whenLoaded('employee', fn () => $this->employee->full_name ?? $this->employee?->code),
             'review_cycle_id' => $this->review_cycle_id,
             'evaluation_id' => $this->evaluation_id,
             'overall_score' => (float) $this->overall_score,

@@ -21,13 +21,13 @@ class GeneratePayslipPdfJob implements ShouldQueue
             return;
         }
 
-        $employeeName = $payslip->employee?->full_name ?? ('Employee #'.$payslip->employee_id);
+        $employeeName = $payslip->employee->full_name ?? ('Employee #'.$payslip->employee_id);
         $text = sprintf(
             'Payslip #%d | %s | %s to %s | Gross %s | Net %s',
             $payslip->id,
             $employeeName,
-            $payslip->period_start?->toDateString(),
-            $payslip->period_end?->toDateString(),
+            $payslip->period_start->toDateString(),
+            $payslip->period_end->toDateString(),
             (string) $payslip->gross,
             (string) $payslip->net,
         );

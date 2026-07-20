@@ -3,7 +3,7 @@
 namespace App\Support;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Pagination\AbstractPaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ApiResponse
 {
@@ -56,8 +56,14 @@ class ApiResponse
         return self::success($data, $message, 202, $meta);
     }
 
+    /**
+     * @template TKey of array-key
+     * @template TValue
+     *
+     * @param  LengthAwarePaginator<TKey, TValue>  $paginator
+     */
     public static function paginated(
-        AbstractPaginator $paginator,
+        LengthAwarePaginator $paginator,
         ?string $message = null,
     ): JsonResponse {
         return self::success(

@@ -6,8 +6,9 @@ use App\Exceptions\DomainException;
 use App\Models\JobOpening;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\QueryException;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class JobOpeningService
 {
@@ -115,7 +116,7 @@ class JobOpeningService
         $this->assertCompanyScope($opening->company_id);
 
         $opening->status = 'closed';
-        $opening->closed_at = now()->toDateString();
+        $opening->closed_at = CarbonImmutable::now();
         $opening->save();
 
         $this->audit->write(

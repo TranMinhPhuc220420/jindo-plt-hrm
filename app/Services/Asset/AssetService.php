@@ -13,9 +13,10 @@ use App\Models\Employee;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class AssetService
@@ -162,7 +163,7 @@ class AssetService
     }
 
     /**
-     * @param  array{employee_id: int, assigned_at?: string, note?: string|null}  $data
+     * @param  array<string, mixed>  $data
      */
     public function assign(Asset $asset, array $data, User $actor): AssetAssignment
     {
@@ -186,9 +187,9 @@ class AssetService
 
         $employee = Employee::query()
             ->where('company_id', $asset->company_id)
-            ->find($data['employee_id']);
+            ->find((int) $data['employee_id']);
 
-        if ($employee === null) {
+        if (! $employee instanceof Employee) {
             throw new DomainException(
                 message: 'Employee is outside the current company scope.',
                 errorCode: 'COMPANY_SCOPE_MISMATCH',
@@ -208,7 +209,7 @@ class AssetService
             ]);
 
             $asset->status = 'assigned';
-            $asset->assigned_to = $employee->id;
+            $asset->assigned_to = max(0, $employee->id);
             $asset->save();
 
             $this->audit->write(
@@ -257,7 +258,7 @@ class AssetService
 
         return DB::transaction(function () use ($asset, $assignment, $data): AssetAssignment {
             $assignment->status = 'returned';
-            $assignment->returned_at = $data['returned_at'] ?? now()->toDateString();
+            $assignment->returned_at = CarbonImmutable::parse($data['returned_at'] ?? now()->toDateString());
             $assignment->return_condition = $data['condition'] ?? null;
             if (! empty($data['note'])) {
                 $assignment->note = $data['note'];
@@ -285,6 +286,7 @@ class AssetService
     }
 
     /**
+     * @param  array<string, mixed>  $filters
      * @return LengthAwarePaginator<int, AssetAssignment>
      */
     public function listAssignments(array $filters = [], int $perPage = 20): LengthAwarePaginator
@@ -383,7 +385,7 @@ class AssetService
 
                 if ($assignment !== null) {
                     $assignment->status = 'returned';
-                    $assignment->returned_at = now()->toDateString();
+                    $assignment->returned_at = CarbonImmutable::now();
                     $assignment->return_condition = 'replaced';
                     $assignment->save();
                 }

@@ -9,7 +9,7 @@ use App\Models\EmployeeSalary;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
 use Carbon\CarbonImmutable;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class EmployeeSalaryService
@@ -43,7 +43,7 @@ class EmployeeSalaryService
     }
 
     /**
-     * @param  array{amount: mixed, currency?: string, effective_from: string, strategy?: string}  $data
+     * @param  array<string, mixed>  $data
      */
     public function upsert(int $employeeId, array $data): EmployeeSalary
     {

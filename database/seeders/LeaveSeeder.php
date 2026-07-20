@@ -47,10 +47,8 @@ class LeaveSeeder extends Seeder
             ['code' => 'COMP', 'name' => 'Compensation Leave', 'is_paid' => true, 'requires_balance' => true],
         ];
 
-        $annual = null;
-
         foreach ($types as $row) {
-            $type = LeaveType::query()->updateOrCreate(
+            LeaveType::query()->updateOrCreate(
                 [
                     'company_id' => $company->id,
                     'code' => $row['code'],
@@ -64,11 +62,12 @@ class LeaveSeeder extends Seeder
                     'is_active' => true,
                 ],
             );
-
-            if ($row['code'] === 'ANNUAL') {
-                $annual = $type;
-            }
         }
+
+        $annual = LeaveType::query()
+            ->where('company_id', $company->id)
+            ->where('code', 'ANNUAL')
+            ->firstOrFail();
 
         $year = (string) now()->year;
 
@@ -87,10 +86,6 @@ class LeaveSeeder extends Seeder
             ],
             ['name' => 'National Day'],
         );
-
-        if ($annual === null) {
-            return;
-        }
 
         LeaveBalance::query()->updateOrCreate(
             [

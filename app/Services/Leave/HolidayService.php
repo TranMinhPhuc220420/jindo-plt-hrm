@@ -49,7 +49,7 @@ class HolidayService
     }
 
     /**
-     * @param  array{date: string, name: string}  $data
+     * @param  array<string, mixed>  $data
      */
     public function create(array $data): Holiday
     {
@@ -85,7 +85,7 @@ class HolidayService
 
     public function delete(Holiday $holiday): void
     {
-        $date = $holiday->date?->toDateString();
+        $date = $holiday->date->toDateString();
         $holiday->delete();
 
         $this->audit->write(

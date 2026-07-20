@@ -21,7 +21,7 @@ use App\Services\Leave\LeaveCoverageService;
 use App\Services\Organization\CompanyContext;
 use App\Services\Payroll\Strategies\MonthlyPayrollStrategy;
 use Carbon\CarbonImmutable;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class PayrollRunService
@@ -71,7 +71,7 @@ class PayrollRunService
     }
 
     /**
-     * @param  array{period_start: string, period_end: string, name: string}  $data
+     * @param  array<string, mixed>  $data
      */
     public function create(array $data): PayrollRun
     {
@@ -121,7 +121,7 @@ class PayrollRunService
     }
 
     /**
-     * @param  array{period_start: string, period_end: string, name: string}  $data
+     * @param  array<string, mixed>  $data
      */
     public function update(PayrollRun $run, array $data): PayrollRun
     {
@@ -161,8 +161,8 @@ class PayrollRunService
         }
 
         $run->name = $data['name'];
-        $run->period_start = $start;
-        $run->period_end = $end;
+        $run->period_start = CarbonImmutable::parse($start);
+        $run->period_end = CarbonImmutable::parse($end);
         $run->save();
 
         $this->audit->write(
@@ -188,8 +188,8 @@ class PayrollRunService
             payload: [
                 'name' => $run->name,
                 'status' => $run->status,
-                'period_start' => $run->period_start?->toDateString(),
-                'period_end' => $run->period_end?->toDateString(),
+                'period_start' => $run->period_start->toDateString(),
+                'period_end' => $run->period_end->toDateString(),
             ],
         );
 
@@ -283,7 +283,7 @@ class PayrollRunService
                     ->all();
 
                 $result = $this->strategy->calculate([
-                    'employee_id' => $employee->id,
+                    'employee_id' => max(0, $employee->id),
                     'period_start' => $periodStart,
                     'period_end' => $periodEnd,
                     'base_amount' => (float) $salary->amount,
@@ -314,7 +314,7 @@ class PayrollRunService
             $run->total_gross = round($totalGross, 2);
             $run->total_net = round($totalNet, 2);
             $run->calculated_at = now();
-            $run->calculated_by = $actor->id;
+            $run->calculated_by = max(0, $actor->id);
             $run->save();
 
             $this->audit->write(
@@ -346,7 +346,7 @@ class PayrollRunService
 
         $run->status = 'approved';
         $run->approved_at = now();
-        $run->approved_by = $actor->id;
+        $run->approved_by = max(0, $actor->id);
         $run->save();
 
         $this->audit->write(
@@ -403,7 +403,7 @@ class PayrollRunService
 
             $run->status = 'finalized';
             $run->finalized_at = now();
-            $run->finalized_by = $actor->id;
+            $run->finalized_by = max(0, $actor->id);
             $run->save();
 
             $this->audit->write(

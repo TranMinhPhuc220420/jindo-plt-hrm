@@ -108,7 +108,7 @@ class OrganizationService
     }
 
     /**
-     * @param  array{name: string, code: string, address?: string|null, is_active?: bool}  $data
+     * @param  array<string, mixed>  $data
      */
     public function createBranch(array $data): Branch
     {
@@ -194,7 +194,7 @@ class OrganizationService
     }
 
     /**
-     * @param  array{branch_id: int, name: string, code: string, is_active?: bool}  $data
+     * @param  array<string, mixed>  $data
      */
     public function createDepartment(array $data): Department
     {
@@ -294,7 +294,7 @@ class OrganizationService
     }
 
     /**
-     * @param  array{department_id: int, name: string, code: string, is_active?: bool}  $data
+     * @param  array<string, mixed>  $data
      */
     public function createTeam(array $data): Team
     {
@@ -380,7 +380,7 @@ class OrganizationService
     }
 
     /**
-     * @param  array{name: string, code: string, description?: string|null, is_active?: bool}  $data
+     * @param  array<string, mixed>  $data
      */
     public function createPosition(array $data): Position
     {

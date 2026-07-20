@@ -71,7 +71,7 @@ class User extends Authenticatable implements PasskeyUser
     /**
      * Effective permission keys from all assigned roles.
      *
-     * @return list<string>
+     * @return array<int, string>
      */
     public function permissionKeys(): array
     {
@@ -79,7 +79,8 @@ class User extends Authenticatable implements PasskeyUser
             $this->loadMissing('roles.permissions');
 
             return $this->roles
-                ->flatMap(fn (Role $role) => $role->permissions->pluck('key'))
+                ->flatMap(fn (Role $role) => $role->permissions->pluck('key')->all())
+                ->map(fn (mixed $key): string => (string) $key)
                 ->unique()
                 ->values()
                 ->all();

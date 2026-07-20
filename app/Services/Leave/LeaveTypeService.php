@@ -6,7 +6,7 @@ use App\Exceptions\DomainException;
 use App\Models\LeaveType;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class LeaveTypeService
 {
@@ -33,7 +33,7 @@ class LeaveTypeService
             });
         }
 
-        if (array_key_exists('is_active', $filters) && $filters['is_active'] !== null && $filters['is_active'] !== '') {
+        if (array_key_exists('is_active', $filters) && $filters['is_active'] !== '') {
             $query->where('is_active', filter_var($filters['is_active'], FILTER_VALIDATE_BOOLEAN));
         }
 

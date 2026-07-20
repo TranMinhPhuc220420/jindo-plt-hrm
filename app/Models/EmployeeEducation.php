@@ -2,9 +2,21 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $company_id
+ * @property int $employee_id
+ * @property string|null $school
+ * @property string|null $degree
+ * @property string|null $field_of_study
+ * @property CarbonImmutable|null $started_on
+ * @property CarbonImmutable|null $ended_on
+ * @property string|null $notes
+ */
 class EmployeeEducation extends Model
 {
     protected $fillable = [

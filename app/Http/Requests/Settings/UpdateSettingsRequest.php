@@ -6,6 +6,7 @@ use App\Support\Locale\SupportedLocales;
 use App\Support\SettingsDefaults;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class UpdateSettingsRequest extends FormRequest
 {
@@ -40,9 +41,9 @@ class UpdateSettingsRequest extends FormRequest
         return $rules;
     }
 
-    public function withValidator($validator): void
+    public function withValidator(Validator $validator): void
     {
-        $validator->after(function ($validator): void {
+        $validator->after(function (Validator $validator): void {
             $payload = collect($this->all())
                 ->only(SettingsDefaults::allowedGroups())
                 ->filter(fn ($value) => is_array($value) && $value !== []);
