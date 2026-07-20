@@ -31,8 +31,17 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Setup Application
-        run: composer setup
+      - name: Prepare environment
+        run: cp .env.example .env
+
+      - name: Install dependencies and build
+        run: |
+          composer install --prefer-dist --no-interaction
+          npm ci
+          npm run build
+
+      - name: Generate app key
+        run: php artisan key:generate
 
       - name: Run CI Checks
         run: composer ci:check
