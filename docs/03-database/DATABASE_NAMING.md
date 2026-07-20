@@ -46,7 +46,7 @@ Names below are the **target vocabulary**. Phased delivery may create them over 
 
 | Table | Purpose |
 |-------|---------|
-| `users` | Login identity |
+| `users` | Login identity (`locale` nullable preference: `vi` \| `en`) |
 | `roles` | Role definitions |
 | `permissions` | Permission definitions |
 | `permission_role` | Role ↔ permission |
@@ -117,11 +117,14 @@ Prefer `employee_*` prefixes for satellite tables owned by the Employee module.
 | `interviews` | Interviews |
 | `candidate_evaluations` | Evaluations |
 | `offers` | Offers |
+| `onboarding_templates` | Reusable onboarding checklist templates |
+| `onboarding_template_items` | Checklist items belonging to a template |
 | `onboarding_cases` | Onboarding instances |
 | `onboarding_tasks` | Checklist tasks |
 | `performance_review_cycles` | Review cycles |
 | `performance_goals` | Goals |
 | `performance_evaluations` | Evaluations |
+| `performance_promotion_suggestions` | Advisory promotion suggestions derived from evaluations |
 
 ### Assets / Documents / Notifications
 
@@ -134,6 +137,8 @@ Prefer `employee_*` prefixes for satellite tables owned by the Employee module.
 | `documents` | File metadata |
 | `notifications` | In-app notifications |
 | `notification_deliveries` | Channel delivery status (if split) |
+| `notification_preferences` | Per-user notification channel/category preferences |
+| `report_exports` | Queued report export jobs and their output status |
 
 ---
 

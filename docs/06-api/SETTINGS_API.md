@@ -55,6 +55,16 @@
 }
 ```
 
+### Company locale
+
+| Key | Allowed | Default |
+|-----|---------|---------|
+| `company.locale` | `vi`, `en` | `vi` |
+
+Invalid values → **422** (`SETTINGS_LOCALE_INVALID` or validation error).
+
+Company locale is the default for users with `users.locale = null`. Personal override: [AUTH_API.md](./AUTH_API.md) `PUT /api/me/locale`.
+
 ---
 
 ## Update
@@ -65,6 +75,7 @@
 {
   "company": {
     "timezone": "Asia/Ho_Chi_Minh",
+    "locale": "vi",
     "currency": "VND"
   }
 }

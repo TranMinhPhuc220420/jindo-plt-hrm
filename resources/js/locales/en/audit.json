@@ -1,0 +1,249 @@
+{
+  "title": "Audit logs",
+  "description": "History of important system actions. Entries are recorded permanently and cannot be edited.",
+  "loading": "Loading audit logs…",
+  "error_load": "Failed to load audit logs.",
+  "empty": "No audit events yet. Update settings or company profile to generate sample entries.",
+  "col_when": "When",
+  "col_action": "Action",
+  "col_actor": "Actor",
+  "col_subject": "Subject",
+  "filter_action": "Action",
+  "filter_action_all": "All actions",
+  "filter_action_placeholder": "Select an action",
+  "filter_subject_type": "Subject type",
+  "filter_subject_all": "All subject types",
+  "filter_subject_placeholder": "Select a subject type",
+  "filter_date_from": "From",
+  "filter_date_to": "To",
+  "filter_apply": "Apply filters",
+  "filter_reset": "Reset",
+  "filter_domain": {
+    "settings": "Settings",
+    "company": "Company",
+    "branch": "Branches",
+    "department": "Departments",
+    "team": "Teams",
+    "position": "Positions",
+    "role": "Roles",
+    "user": "Users",
+    "employee": "Employees",
+    "shift": "Shifts",
+    "overtime_rules": "Overtime",
+    "attendance": "Attendance",
+    "leave": "Leave",
+    "payroll": "Payroll",
+    "document": "Documents",
+    "asset": "Assets",
+    "job_opening": "Job openings",
+    "candidate": "Candidates",
+    "interview": "Interviews",
+    "offer": "Offers",
+    "onboarding": "Onboarding",
+    "performance": "Performance"
+  },
+  "detail_title": "Event detail",
+  "detail_close": "Close",
+  "detail_hint": "Select a row to inspect the full event payload.",
+  "detail_ip": "IP address",
+  "detail_payload": "Payload",
+  "detail_no_payload": "No payload recorded.",
+  "detail_action_code": "Action code",
+  "actor_user": "User #{{id}}",
+  "subject_with_id": "{{type}} #{{id}}",
+  "actions": {
+    "settings": {
+      "updated": "Settings updated"
+    },
+    "company": {
+      "updated": "Company updated"
+    },
+    "branch": {
+      "created": "Branch created",
+      "updated": "Branch updated",
+      "deleted": "Branch deleted"
+    },
+    "department": {
+      "created": "Department created",
+      "updated": "Department updated",
+      "deleted": "Department deleted"
+    },
+    "team": {
+      "created": "Team created",
+      "updated": "Team updated",
+      "deleted": "Team deleted"
+    },
+    "position": {
+      "created": "Position created",
+      "updated": "Position updated",
+      "deleted": "Position deleted"
+    },
+    "role": {
+      "created": "Role created",
+      "updated": "Role updated",
+      "deleted": "Role deleted",
+      "permissions_synced": "Role permissions updated"
+    },
+    "user": {
+      "roles_synced": "User roles updated"
+    },
+    "employee": {
+      "created": "Employee created",
+      "updated": "Employee updated",
+      "archived": "Employee archived",
+      "status_changed": "Employee status changed",
+      "emergency_contacts_updated": "Emergency contacts updated",
+      "education_created": "Education record created",
+      "education_updated": "Education record updated",
+      "education_deleted": "Education record deleted",
+      "work_history_created": "Work history created",
+      "work_history_updated": "Work history updated",
+      "work_history_deleted": "Work history deleted",
+      "family_member_created": "Family member added",
+      "family_member_updated": "Family member updated",
+      "family_member_deleted": "Family member removed",
+      "contract_created": "Contract created",
+      "contract_updated": "Contract updated",
+      "bank_account_updated": "Bank account updated",
+      "tax_profile_updated": "Tax profile updated",
+      "insurance_updated": "Insurance updated",
+      "password_changed": "Employee password changed",
+      "password_reset_to_default": "Employee password reset to default"
+    },
+    "shift": {
+      "created": "Shift created",
+      "updated": "Shift updated",
+      "deleted": "Shift deleted",
+      "assignment_created": "Shift assignment created",
+      "assignment_updated": "Shift assignment updated",
+      "assignment_deleted": "Shift assignment deleted"
+    },
+    "overtime_rules": {
+      "updated": "Overtime rules updated"
+    },
+    "attendance": {
+      "checked_in": "Checked in",
+      "checked_out": "Checked out",
+      "record_approved": "Attendance record approved",
+      "period_locked": "Attendance period locked",
+      "correction_requested": "Attendance correction requested",
+      "correction_approved": "Attendance correction approved",
+      "correction_rejected": "Attendance correction rejected"
+    },
+    "leave": {
+      "requested": "Leave requested",
+      "cancelled": "Leave cancelled",
+      "approved": "Leave approved",
+      "rejected": "Leave rejected",
+      "balance_adjusted": "Leave balance adjusted",
+      "type_created": "Leave type created",
+      "type_updated": "Leave type updated",
+      "holiday_created": "Holiday created",
+      "holiday_deleted": "Holiday deleted",
+      "weekend_rules_updated": "Weekend rules updated"
+    },
+    "payroll": {
+      "run_created": "Payroll run created",
+      "run_calculated": "Payroll run calculated",
+      "run_approved": "Payroll run approved",
+      "run_finalized": "Payroll run finalized",
+      "salary_changed": "Salary changed",
+      "allowances_replaced": "Allowances replaced",
+      "deductions_replaced": "Deductions replaced",
+      "bonuses_replaced": "Bonuses replaced"
+    },
+    "document": {
+      "uploaded": "Document uploaded",
+      "updated": "Document updated",
+      "deleted": "Document deleted"
+    },
+    "asset": {
+      "created": "Asset created",
+      "updated": "Asset updated",
+      "retired": "Asset retired",
+      "assigned": "Asset assigned",
+      "returned": "Asset returned",
+      "maintenance_added": "Asset maintenance recorded",
+      "damage_reported": "Asset damage reported",
+      "replaced": "Asset replaced"
+    },
+    "job_opening": {
+      "created": "Job opening created",
+      "updated": "Job opening updated",
+      "closed": "Job opening closed"
+    },
+    "candidate": {
+      "created": "Candidate created",
+      "updated": "Candidate updated",
+      "stage_changed": "Candidate stage changed"
+    },
+    "interview": {
+      "scheduled": "Interview scheduled",
+      "evaluated": "Interview evaluated"
+    },
+    "offer": {
+      "created": "Offer created",
+      "sent": "Offer sent",
+      "accepted": "Offer accepted",
+      "rejected": "Offer rejected"
+    },
+    "onboarding": {
+      "started": "Onboarding started",
+      "task_completed": "Onboarding task completed",
+      "task_reopened": "Onboarding task reopened",
+      "completed": "Onboarding completed",
+      "template_created": "Onboarding template created",
+      "template_updated": "Onboarding template updated",
+      "account_provisioned": "Account provisioned"
+    },
+    "performance": {
+      "goal_created": "Goal created",
+      "goal_updated": "Goal updated",
+      "cycle_created": "Review cycle created",
+      "cycle_started": "Review cycle started",
+      "cycle_finalized": "Review cycle finalized",
+      "evaluation_submitted": "Evaluation submitted",
+      "promotion_suggested": "Promotion suggested",
+      "promotion_acknowledged": "Promotion suggestion acknowledged"
+    }
+  },
+  "subjects": {
+    "Company": "Company",
+    "Branch": "Branch",
+    "Department": "Department",
+    "Team": "Team",
+    "Position": "Position",
+    "Employee": "Employee",
+    "Role": "Role",
+    "User": "User",
+    "Setting": "Setting",
+    "LeaveRequest": "Leave request",
+    "LeaveType": "Leave type",
+    "LeaveBalance": "Leave balance",
+    "Holiday": "Holiday",
+    "WeekendRule": "Weekend rule",
+    "Shift": "Shift",
+    "ShiftAssignment": "Shift assignment",
+    "OvertimeRule": "Overtime rule",
+    "AttendanceRecord": "Attendance record",
+    "AttendanceCorrection": "Attendance correction",
+    "PayrollRun": "Payroll run",
+    "EmployeeSalary": "Employee salary",
+    "Document": "Document",
+    "Asset": "Asset",
+    "AssetAssignment": "Asset assignment",
+    "AssetMaintenance": "Asset maintenance",
+    "AssetDamageReport": "Asset damage report",
+    "JobOpening": "Job opening",
+    "Candidate": "Candidate",
+    "Interview": "Interview",
+    "Offer": "Offer",
+    "OnboardingCase": "Onboarding case",
+    "OnboardingTask": "Onboarding task",
+    "OnboardingTemplate": "Onboarding template",
+    "PerformanceGoal": "Performance goal",
+    "PerformanceReviewCycle": "Review cycle",
+    "PerformanceEvaluation": "Performance evaluation",
+    "PerformancePromotionSuggestion": "Promotion suggestion"
+  }
+}

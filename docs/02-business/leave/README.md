@@ -37,6 +37,8 @@ Manage leave entitlements and requests so employees can take time off under comp
 5. Holidays and weekend rules are company-scoped configuration used during validation.
 6. Half-day and hourly leave must use consistent unit conversion against the working calendar/shift definitions via services.
 7. Approved leave may be consulted by Attendance when interpreting a day; Leave does not rewrite attendance punches.
+8. Working-calendar API responses enrich assigned days with approved leave overlays (`LeaveCoverageService`) without Shift owning leave data.
+9. Payroll reads unpaid leave day-equivalents for a period through `LeaveCoverageService::unpaidDayEquivalentInPeriod` (prorated; paid leave excluded).
 
 ---
 

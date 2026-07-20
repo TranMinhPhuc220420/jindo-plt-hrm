@@ -34,6 +34,8 @@ Record when employees work and compute attendance facts (hours, late, early leav
 1. Attendance rows belong to an **employee** and **company**.
 2. v1 capture method is **manual check-in/out**; providers (GPS, face, fingerprint, QR) must plug in behind the same service boundary later.
 3. Late / early / overtime interpretation should consult **Shift / working calendar** (and approved leave when relevant) via services — not duplicate shift tables.
+   - Full-day approved leave clears late/early/OT windows (worked minutes from punches still computed).
+   - Half-day leave shrinks the expected window to the non-leave half; hourly leave shrinks or clears the window for the covered span.
 4. Corrections require authorization and typically approval before they become canonical.
 5. Approving attendance is auditable.
 6. Summaries used by payroll are produced/owned by Attendance (or a read contract it exposes), not copied into Payroll as a second write model for raw punches.

@@ -1,0 +1,10 @@
+{
+  "title": "Tổng quan",
+  "description": "Các chỉ số chính trong công ty của bạn.",
+  "loading": "Đang tải tổng quan…",
+  "error_load": "Không tải được tổng quan.",
+  "kpi_active_employees": "Nhân viên đang làm việc",
+  "kpi_pending_leave": "Đơn nghỉ chờ duyệt",
+  "kpi_open_payroll": "Đợt lương đang mở",
+  "kpi_unread_notifications": "Thông báo chưa đọc"
+}

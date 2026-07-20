@@ -76,10 +76,10 @@ Add structured performance management, cross-domain reporting/exports, reliable 
 
 ## Exit Criteria
 
-- [ ] Review cycle can be run end-to-end
-- [ ] At least core reports work with permission gates (incl. payroll sensitivity)
-- [ ] Export job 202 → ready download on staging
-- [ ] Inbox shows leave/payroll (and other) events
-- [ ] Audit entries visible for salary/leave/attendance/asset/employee critical actions
-- [ ] Dashboard summary feeds Overview KPIs
-- [ ] Milestone toward `v0.6.0` / discuss `v1.0.0` readiness
+- [x] Review cycle can be run end-to-end
+- [x] At least core reports work with permission gates (incl. payroll sensitivity)
+- [x] Export job 202 → ready download on staging
+- [x] Inbox shows leave/payroll (and other) events
+- [x] Audit entries visible for salary/leave/attendance/asset/employee critical actions
+- [x] Dashboard summary feeds Overview KPIs
+- [x] Milestone toward `v0.6.0` / discuss `v1.0.0` readiness

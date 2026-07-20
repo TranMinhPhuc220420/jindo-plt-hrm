@@ -71,12 +71,12 @@ Close the loop from candidate → offer → onboarding → active employee, with
 
 ## Exit Criteria
 
-- [ ] Offer accept creates/starts onboarding
-- [ ] Mandatory onboarding tasks block completion
-- [ ] Employee files upload/download authorized
-- [ ] Asset assign/return audited
-- [ ] No candidate rows treated as employees before activation
-- [ ] Milestone toward `v0.5.0`
+- [x] Offer accept creates/starts onboarding
+- [x] Mandatory onboarding tasks block completion
+- [x] Employee files upload/download authorized
+- [x] Asset assign/return audited
+- [x] No candidate rows treated as employees before activation
+- [x] Milestone toward `v0.5.0`
 
 ---
 

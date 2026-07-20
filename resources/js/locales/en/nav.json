@@ -1,0 +1,23 @@
+{
+  "workspace": "Workspace",
+  "dashboard": "Dashboard",
+  "employees": "Employees",
+  "shifts": "Shifts",
+  "my_schedule": "My schedule",
+  "attendance": "Attendance",
+  "leave": "Leave",
+  "payroll": "Payroll",
+  "performance": "Performance",
+  "reports": "Reports",
+  "notifications": "Notifications",
+  "recruitment": "Recruitment",
+  "onboarding": "Onboarding",
+  "assets": "Assets",
+  "documents": "Documents",
+  "organization": "Organization",
+  "roles": "Roles",
+  "settings": "Settings",
+  "audit": "Audit",
+  "log_out": "Log out",
+  "platform": "Platform"
+}

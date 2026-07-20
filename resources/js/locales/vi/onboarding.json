@@ -1,0 +1,70 @@
+{
+  "index": {
+    "title": "Nhận việc",
+    "description": "Theo dõi hồ sơ nhận việc và danh sách công việc.",
+    "error_load": "Không tải được hồ sơ nhận việc.",
+    "loading": "Đang tải nhận việc…",
+    "empty": "Chưa có hồ sơ nhận việc nào.",
+    "start_title": "Bắt đầu nhận việc",
+    "employee": "Nhân viên",
+    "template": "Mẫu",
+    "default_template": "Danh sách mặc định",
+    "start": "Bắt đầu",
+    "col_employee": "Nhân viên",
+    "col_status": "Trạng thái",
+    "col_progress": "Tiến độ",
+    "open": "Mở",
+    "toast_started": "Đã bắt đầu nhận việc",
+    "toast_error": "Thao tác thất bại"
+  },
+  "show": {
+    "title": "Hồ sơ nhận việc",
+    "description": "Hoàn thành công việc và kết thúc hồ sơ nhận việc.",
+    "back": "Quay lại nhận việc",
+    "loading": "Đang tải hồ sơ…",
+    "error_load": "Không tải được hồ sơ nhận việc.",
+    "toast_error": "Thao tác thất bại",
+    "employee": "Nhân viên",
+    "status": "Trạng thái",
+    "progress": "Tiến độ",
+    "probation_ends": "Kết thúc thử việc",
+    "tasks_title": "Công việc",
+    "empty_tasks": "Chưa có công việc nào.",
+    "mandatory": "Bắt buộc",
+    "assignee": "Người phụ trách",
+    "reopen": "Mở lại",
+    "complete_task": "Hoàn thành",
+    "complete_case": "Hoàn thành nhận việc",
+    "mandatory_pending": "Còn {{count}} công việc bắt buộc chưa hoàn thành.",
+    "toast_reopened": "Đã mở lại công việc",
+    "toast_task_done": "Đã hoàn thành công việc",
+    "toast_completed": "Đã hoàn thành nhận việc"
+  },
+  "status": {
+    "in_progress": "Đang thực hiện",
+    "completed": "Hoàn thành"
+  },
+  "task_status": {
+    "pending": "Chờ xử lý",
+    "done": "Hoàn thành"
+  },
+  "progress_of": "{{done}}/{{total}}",
+  "tasks": {
+    "create_account": "Tạo tài khoản người dùng",
+    "collect_documents": "Thu thập tài liệu nhận việc",
+    "collect_docs": "Thu thập tài liệu nhận việc",
+    "assign_equipment": "Cấp phát thiết bị",
+    "orientation": "Định hướng & đào tạo",
+    "probation_review": "Đánh giá thử việc",
+    "probation_ack": "Xác nhận thử việc"
+  },
+  "templates": {
+    "default_onboarding": "Nhận việc mặc định"
+  },
+  "assignee": {
+    "hr": "Nhân sự",
+    "it": "CNTT",
+    "manager": "Quản lý",
+    "employee": "Nhân viên"
+  }
+}

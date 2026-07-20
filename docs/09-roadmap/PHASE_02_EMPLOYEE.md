@@ -51,9 +51,9 @@ Deliver create/read/update of employees with org placement, status lifecycle, an
 
 ## Exit Criteria
 
-- [ ] HR can create/update employees under company scope
-- [ ] Sensitive fields hidden without permission
-- [ ] Status transitions validated + audited
-- [ ] List filters (status, department, search) work
-- [ ] API + UI aligned; tests for 403 on sensitive update
-- [ ] Tag path toward `v0.2.0`
+- [x] HR can create/update employees under company scope
+- [x] Sensitive fields hidden without permission
+- [x] Status transitions validated + audited
+- [x] List filters (status, department, search) work
+- [x] API + UI aligned; tests for 403 on sensitive update
+- [ ] Tag path toward `v0.2.0` (deferred until release request)
