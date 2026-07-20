@@ -1,10 +1,9 @@
-name: Build cPanel release zip
+name: Deploy to cPanel
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   test:
@@ -41,10 +40,11 @@ jobs:
         run: php artisan key:generate
 
       # Runs lint:check, format:check, types:check (ESLint/Prettier/tsc + Pint/PHPStan) and the Pest suite.
+      # Requires no secrets beyond what's already in .env.example (SQLite test DB).
       - name: Run full CI check
         run: composer ci:check
 
-  package:
+  deploy:
     needs: [test]
     runs-on: ubuntu-latest
 
@@ -65,65 +65,31 @@ jobs:
           node-version: "22"
           cache: npm
 
-      - name: Install production dependencies and build assets
+      - name: Install dependencies and build
         run: |
-          composer install --no-dev --optimize-autoloader --prefer-dist --no-interaction
+          composer install --no-dev --optimize-autoloader
           npm ci
           npm run build
 
-      - name: Prepare release directory
+      # Same pattern as vsport-3: zip the release, FTP only the zip.
+      # Extract manually in cPanel File Manager after upload.
+      - name: Create deploy.zip
         run: |
-          mkdir -p release
-          rsync -a \
-            --exclude='.git' \
-            --exclude='.github' \
-            --exclude='node_modules' \
-            --exclude='tests' \
-            --exclude='e2e' \
-            --exclude='.env' \
-            --exclude='.env.*' \
-            --exclude='storage/logs/*' \
-            --exclude='storage/framework/cache/data/*' \
-            --exclude='storage/framework/sessions/*' \
-            --exclude='storage/framework/views/*' \
-            --exclude='database/*.sqlite' \
-            --exclude='release' \
-            --exclude='*.zip' \
-            ./ release/
-
-          # cPanel document root expects .htaccess
-          if [ -f release/htaccess ]; then
-            mv release/htaccess release/.htaccess
+          rm -rf .git .github tests node_modules
+          rm -rf storage/logs/*
+          if [ -f htaccess ]; then
+            mv htaccess .htaccess
           fi
+          mkdir -p deploy-bundle
+          zip -r deploy-bundle/deploy.zip . -x "deploy-bundle/*"
 
-          # Keep empty storage dirs in the zip
-          mkdir -p \
-            release/storage/logs \
-            release/storage/framework/cache/data \
-            release/storage/framework/sessions \
-            release/storage/framework/views \
-            release/bootstrap/cache
-          touch \
-            release/storage/logs/.gitkeep \
-            release/storage/framework/cache/data/.gitkeep \
-            release/storage/framework/sessions/.gitkeep \
-            release/storage/framework/views/.gitkeep \
-            release/bootstrap/cache/.gitkeep
-
-      - name: Create zip archive
-        run: |
-          VERSION="${GITHUB_SHA::7}"
-          ZIP_NAME="jindo-plt-hrm-${VERSION}.zip"
-          echo "ZIP_NAME=${ZIP_NAME}" >> "$GITHUB_ENV"
-          cd release
-          zip -r "../${ZIP_NAME}" . -q
-          cd ..
-          ls -lh "${ZIP_NAME}"
-
-      - name: Upload zip artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload deploy.zip via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          name: cpanel-release-zip
-          path: ${{ env.ZIP_NAME }}
-          if-no-files-found: error
-          retention-days: 14
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./deploy-bundle/
+          server-dir: /
