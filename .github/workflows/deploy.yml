@@ -1,9 +1,10 @@
-name: Deploy to cPanel
+name: Build cPanel release zip
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   test:
@@ -40,11 +41,10 @@ jobs:
         run: php artisan key:generate
 
       # Runs lint:check, format:check, types:check (ESLint/Prettier/tsc + Pint/PHPStan) and the Pest suite.
-      # Requires no secrets beyond what's already in .env.example (SQLite test DB).
       - name: Run full CI check
         run: composer ci:check
 
-  deploy:
+  package:
     needs: [test]
     runs-on: ubuntu-latest
 
@@ -65,32 +65,65 @@ jobs:
           node-version: "22"
           cache: npm
 
-      - name: Install dependencies and build
+      - name: Install production dependencies and build assets
         run: |
-          composer install --no-dev --optimize-autoloader
+          composer install --no-dev --optimize-autoloader --prefer-dist --no-interaction
           npm ci
           npm run build
 
-      - name: Prepare release files
+      - name: Prepare release directory
         run: |
-          rm -rf .git .github tests node_modules
-          rm -rf storage/logs/*
-          mv htaccess .htaccess
+          mkdir -p release
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='tests' \
+            --exclude='e2e' \
+            --exclude='.env' \
+            --exclude='.env.*' \
+            --exclude='storage/logs/*' \
+            --exclude='storage/framework/cache/data/*' \
+            --exclude='storage/framework/sessions/*' \
+            --exclude='storage/framework/views/*' \
+            --exclude='database/*.sqlite' \
+            --exclude='release' \
+            --exclude='*.zip' \
+            ./ release/
 
-      - name: Upload release via FTPS
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+          # cPanel document root expects .htaccess
+          if [ -f release/htaccess ]; then
+            mv release/htaccess release/.htaccess
+          fi
+
+          # Keep empty storage dirs in the zip
+          mkdir -p \
+            release/storage/logs \
+            release/storage/framework/cache/data \
+            release/storage/framework/sessions \
+            release/storage/framework/views \
+            release/bootstrap/cache
+          touch \
+            release/storage/logs/.gitkeep \
+            release/storage/framework/cache/data/.gitkeep \
+            release/storage/framework/sessions/.gitkeep \
+            release/storage/framework/views/.gitkeep \
+            release/bootstrap/cache/.gitkeep
+
+      - name: Create zip archive
+        run: |
+          VERSION="${GITHUB_SHA::7}"
+          ZIP_NAME="jindo-plt-hrm-${VERSION}.zip"
+          echo "ZIP_NAME=${ZIP_NAME}" >> "$GITHUB_ENV"
+          cd release
+          zip -r "../${ZIP_NAME}" . -q
+          cd ..
+          ls -lh "${ZIP_NAME}"
+
+      - name: Upload zip artifact
+        uses: actions/upload-artifact@v4
         with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
-          port: 21
-          local-dir: ./
-          server-dir: /
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/tests/**
-            .env
-            .env.example
+          name: cpanel-release-zip
+          path: ${{ env.ZIP_NAME }}
+          if-no-files-found: error
+          retention-days: 14
