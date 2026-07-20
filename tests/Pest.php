@@ -1,5 +1,11 @@
 <?php
 
+use App\Models\Employee;
+use App\Models\Permission;
+use App\Models\Role;
+use App\Models\User;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,6 +23,12 @@ use Tests\TestCase;
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature');
+
+pest()->extend(TestCase::class)
+    ->in('Unit/Support');
+
+pest()->extend(TestCase::class)
+    ->in('Unit/Services');
 
 /*
 |--------------------------------------------------------------------------
@@ -47,4 +59,49 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+/**
+ * Headers so Sanctum treats the request as a first-party SPA call in tests.
+ *
+ * @return array<string, string>
+ */
+function spaJsonHeaders(): array
+{
+    return [
+        'Origin' => 'http://localhost',
+        'Referer' => 'http://localhost',
+    ];
+}
+
+/**
+ * Seeds the permission/role catalog shared by every domain's auth helper.
+ */
+function seedAuthCatalog(): void
+{
+    test()->seed(PermissionSeeder::class);
+    test()->seed(RoleSeeder::class);
+}
+
+/**
+ * Builds a user with a throwaway role scoped to exactly the given permission
+ * keys, optionally linking it to an existing Employee (for own-scope checks).
+ *
+ * @param  array<int, string>  $permissionKeys
+ */
+function actingUser(array $permissionKeys, ?Employee $employee = null, string $prefix = 'test'): User
+{
+    seedAuthCatalog();
+
+    $user = User::factory()->create();
+    $role = Role::factory()->create(['key' => $prefix.'_'.uniqid(), 'is_system' => false]);
+    $ids = Permission::query()->whereIn('key', $permissionKeys)->pluck('id');
+    $role->permissions()->sync($ids);
+    $user->roles()->attach($role);
+
+    if ($employee !== null) {
+        $employee->update(['user_id' => $user->id]);
+    }
+
+    return $user->fresh('roles.permissions');
 }

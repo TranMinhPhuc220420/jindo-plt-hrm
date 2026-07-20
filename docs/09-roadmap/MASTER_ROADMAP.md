@@ -37,14 +37,14 @@ Ship a modular HRM for SMEs covering the employee lifecycle, with permission-fir
 
 | Phase | Name | Delivers | Depends on | Status |
 |-------|------|----------|------------|--------|
-| 01 | Foundation | Auth, authz, org, settings, app shell | — | Planned |
-| 02 | Employee | Employee master + satellites | 01 | Planned |
-| 03 | Attendance | Punches, corrections, summaries | 02 (05 recommended) | Planned |
-| 04 | Leave | Types, balances, requests, holidays | 02 (05 helpful) | Planned |
-| 05 | Shift | Definitions, assignments, calendar, OT rules | 02 | Planned |
-| 06 | Payroll | Salary, runs, payslips | 02 + 03 (+ 04 unpaid effects) | Planned |
-| 07 | Recruitment & Ops | Recruitment, onboarding, documents, assets | 02 | Planned |
-| 08 | Insight | Performance, reports, notifications, audit UX (`PHASE_08_PERFORMANCE.md`) | 02+ domains | Planned |
+| 01 | Foundation | Auth, authz, org, settings, app shell | — | Done |
+| 02 | Employee | Employee master + satellites | 01 | Done |
+| 03 | Attendance | Punches, corrections, summaries | 02 (05 recommended) | Done |
+| 04 | Leave | Types, balances, requests, holidays | 02 (05 helpful) | Done |
+| 05 | Shift | Definitions, assignments, calendar, OT rules | 02 | Done |
+| 06 | Payroll | Salary, runs, payslips | 02 + 03 (+ 04 unpaid effects) | Done |
+| 07 | Recruitment & Ops | Recruitment, onboarding, documents, assets | 02 | Done |
+| 08 | Insight | Performance, reports, notifications, audit UX (`PHASE_08_PERFORMANCE.md`) | 02+ domains | Done |
 | ∞ | Future | SaaS, devices, AI, mobile, public API | Stable core | Backlog |
 
 Recommended build order inside the time domain: **05 Shift → 03 Attendance → 04 Leave** (file numbers are historical; dependencies matter more than numeric order).

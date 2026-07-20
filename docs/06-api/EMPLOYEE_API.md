@@ -21,7 +21,7 @@
 |------------|-----------|
 | `can_view_employee` | list, show |
 | `can_create_employee` | store |
-| `can_update_employee` | update (non-sensitive) |
+| `can_update_employee` | update (non-sensitive), password set/reset |
 | `can_manage_employee_sensitive` | bank/tax/insurance fields |
 | `can_change_employee_status` | status / archive |
 | `can_view_own_profile` | self show/update limited fields |
@@ -48,6 +48,7 @@
 | `PUT` | `/api/employees/{id}/bank-account` | Update bank (sensitive) |
 | `GET` | `/api/employees/{id}/tax-profile` | Tax (sensitive) |
 | `PUT` | `/api/employees/{id}/tax-profile` | Update tax (sensitive) |
+| `PUT` | `/api/employees/{id}/password` | Set or reset linked user password |
 
 ---
 
@@ -95,7 +96,8 @@
 }
 ```
 
-**201** → employee resource. Audited.
+**201** → employee resource. Audited.  
+Does **not** create a login `User` — that happens during onboarding (`create_account` task) using `EMPLOYEE_DEFAULT_PASSWORD`.
 
 ---
 
@@ -114,6 +116,29 @@ Invalid transitions → `409` + `error_code`.
 
 ---
 
+## Account password
+
+`PUT /api/employees/{id}/password` — requires `can_update_employee` and a linked `user_id`.
+
+Reset to env default (`EMPLOYEE_DEFAULT_PASSWORD` / `config('hrm.employee_default_password')`):
+
+```json
+{ "use_default": true }
+```
+
+Or set a custom password:
+
+```json
+{
+  "password": "new-password",
+  "password_confirmation": "new-password"
+}
+```
+
+Never returns the password value. Audited as `employee.password_reset_to_default` or `employee.password_changed`.
+
+---
+
 ## Sensitive Fields
 
 Bank/tax/insurance omitted from default show unless permitted.  
@@ -127,6 +152,8 @@ Salary belongs to Payroll API — do not embed payslip math here.
 |------|------|
 | `EMPLOYEE_CODE_DUPLICATE` | Code unique per company |
 | `EMPLOYEE_INVALID_STATUS_TRANSITION` | Illegal status change |
+| `EMPLOYEE_NO_USER_ACCOUNT` | Password change without linked user |
+| `EMPLOYEE_DEFAULT_PASSWORD_MISSING` | Default password env not configured |
 | `COMPANY_SCOPE_MISMATCH` | Cross-company reference |
 
 ---

@@ -15,6 +15,7 @@
 | Vite | Bundler |
 | TailwindCSS | Styling (Efficient Growth tokens) |
 | REST API client | Typed HTTP to Laravel API |
+| i18n | `i18next` + `react-i18next` — [I18N.md](./I18N.md) |
 
 The starter kit may include Inertia/Wayfinder scaffolding. HRM domain screens should still follow this structure and the REST contract in `docs/06-api/`.
 
@@ -24,7 +25,7 @@ The starter kit may include Inertia/Wayfinder scaffolding. HRM domain screens sh
 
 ```
 resources/js/
-  app.tsx                    # bootstrap
+  app.tsx                    # bootstrap (+ I18nextProvider)
   pages/                     # route-level screens (compose features)
     dashboard/
     employee/
@@ -49,13 +50,17 @@ resources/js/
   components/
     ui/                      # primitives (button, input, card, dialog, table…)
     layout/                  # sidebar, header, page shell pieces
-    shared/                  # empty states, permission gates, status badges
+    shared/                  # empty states, permission gates, language-switcher…
   layouts/
     app-layout.tsx           # authenticated shell (sidebar + main)
     auth-layout.tsx
+  locales/                   # JSON catalogs
+    vi/
+    en/
   lib/
     api/                     # API client, endpoints, error helpers
     auth/                    # session helpers, permission checks
+    i18n/                    # i18next init + helpers
     utils.ts
   hooks/                     # shared hooks
   types/                     # shared TS types / API DTOs
@@ -105,6 +110,7 @@ Frontend modules mirror backend / business docs:
 
 ## Related Documents
 
+- [I18N.md](./I18N.md)
 - [ROUTING.md](./ROUTING.md)
 - [LAYOUT.md](./LAYOUT.md)
 - [COMPONENT_GUIDELINE.md](./COMPONENT_GUIDELINE.md)

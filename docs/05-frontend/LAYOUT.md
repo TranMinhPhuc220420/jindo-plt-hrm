@@ -68,6 +68,12 @@ Admin section is usually collapsed for non-admin users (hidden when no keys matc
 - Subtitle: muted `body-sm` / `body-md`
 - Actions: right-aligned primary/secondary buttons
 
+### Language switcher
+
+- Place in the **app header** and/or **user menu** (authenticated shell).
+- Persists personal preference via `PUT /api/me/locale`; company default via Company settings.
+- Labels and options come from i18n catalogs — see [I18N.md](./I18N.md).
+
 ---
 
 ## Layout Variants

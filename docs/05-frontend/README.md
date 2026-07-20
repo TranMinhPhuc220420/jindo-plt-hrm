@@ -12,6 +12,7 @@ Design: [../07-uiux/DESIGN_SYSTEM.md](../07-uiux/DESIGN_SYSTEM.md) (Efficient Gr
 | File | Purpose |
 |------|---------|
 | [REACT_STRUCTURE.md](./REACT_STRUCTURE.md) | Folder layout |
+| [I18N.md](./I18N.md) | Locales (`vi`/`en`), catalogs, agent rules |
 | [ROUTING.md](./ROUTING.md) | Client routes |
 | [LAYOUT.md](./LAYOUT.md) | App shell |
 | [COMPONENT_GUIDELINE.md](./COMPONENT_GUIDELINE.md) | Components |
@@ -26,7 +27,7 @@ Design: [../07-uiux/DESIGN_SYSTEM.md](../07-uiux/DESIGN_SYSTEM.md) (Efficient Gr
 
 ## Reading Order
 
-1. **UI_RULES** + design system  
+1. **UI_RULES** + design system + **I18N**  
 2. **REACT_STRUCTURE** + **LAYOUT** + **ROUTING**  
 3. Patterns (form/table/modal) for the screen  
 4. **API_CLIENT** for data fetching  

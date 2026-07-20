@@ -1,0 +1,10 @@
+{
+  "title": "Dashboard",
+  "description": "Key metrics across your company.",
+  "loading": "Loading dashboard…",
+  "error_load": "Failed to load dashboard.",
+  "kpi_active_employees": "Active employees",
+  "kpi_pending_leave": "Pending leave requests",
+  "kpi_open_payroll": "Open payroll runs",
+  "kpi_unread_notifications": "Unread notifications"
+}

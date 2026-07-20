@@ -50,8 +50,9 @@ Capture working time and produce **summaries** consumable by Payroll — without
 
 ## Exit Criteria
 
-- [ ] Employee can check in/out
-- [ ] Correction + approval path works with permissions
-- [ ] Summary endpoint stable for payroll input contract
-- [ ] No payroll tables written from attendance module
-- [ ] Tests for double check-in and period locked cases
+- [x] Employee can check in/out
+- [x] Correction + approval path works with permissions
+- [x] Summary endpoint stable for payroll input contract
+- [x] No payroll tables written from attendance module
+- [x] Tests for double check-in and period locked cases
+- [ ] Tag path toward `v0.3.0` (deferred until release request)

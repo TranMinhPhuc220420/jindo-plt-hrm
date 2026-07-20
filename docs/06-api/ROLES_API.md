@@ -32,7 +32,7 @@
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/api/permissions` | List all permission keys |
+| `GET` | `/api/permissions` | List permissions (`key`, `name`, `group`, `description`) |
 | `GET` | `/api/roles` | List roles |
 | `POST` | `/api/roles` | Create role |
 | `GET` | `/api/roles/{id}` | Role + permissions |

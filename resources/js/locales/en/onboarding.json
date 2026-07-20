@@ -1,0 +1,70 @@
+{
+  "index": {
+    "title": "Onboarding",
+    "description": "Track onboarding cases and checklists.",
+    "error_load": "Failed to load onboarding cases.",
+    "loading": "Loading onboarding…",
+    "empty": "No onboarding cases yet.",
+    "start_title": "Start onboarding",
+    "employee": "Employee",
+    "template": "Template",
+    "default_template": "Default checklist",
+    "start": "Start",
+    "col_employee": "Employee",
+    "col_status": "Status",
+    "col_progress": "Progress",
+    "open": "Open",
+    "toast_started": "Onboarding started",
+    "toast_error": "Action failed"
+  },
+  "show": {
+    "title": "Onboarding case",
+    "description": "Complete tasks and finish the onboarding case.",
+    "back": "Back to onboarding",
+    "loading": "Loading case…",
+    "error_load": "Failed to load onboarding case.",
+    "toast_error": "Action failed",
+    "employee": "Employee",
+    "status": "Status",
+    "progress": "Progress",
+    "probation_ends": "Probation ends",
+    "tasks_title": "Tasks",
+    "empty_tasks": "No tasks yet.",
+    "mandatory": "Mandatory",
+    "assignee": "Assignee",
+    "reopen": "Reopen",
+    "complete_task": "Complete",
+    "complete_case": "Complete onboarding",
+    "mandatory_pending": "{{count}} mandatory task(s) still pending.",
+    "toast_reopened": "Task reopened",
+    "toast_task_done": "Task completed",
+    "toast_completed": "Onboarding completed"
+  },
+  "status": {
+    "in_progress": "In progress",
+    "completed": "Completed"
+  },
+  "task_status": {
+    "pending": "Pending",
+    "done": "Done"
+  },
+  "progress_of": "{{done}}/{{total}}",
+  "tasks": {
+    "create_account": "Create user account",
+    "collect_documents": "Collect onboarding documents",
+    "collect_docs": "Collect onboarding documents",
+    "assign_equipment": "Assign equipment",
+    "orientation": "Orientation & training",
+    "probation_review": "Probation review",
+    "probation_ack": "Probation acknowledgement"
+  },
+  "templates": {
+    "default_onboarding": "Default onboarding"
+  },
+  "assignee": {
+    "hr": "HR",
+    "it": "IT",
+    "manager": "Manager",
+    "employee": "Employee"
+  }
+}

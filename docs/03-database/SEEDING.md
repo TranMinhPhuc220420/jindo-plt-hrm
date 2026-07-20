@@ -59,11 +59,14 @@ Align with roadmap phases; do not require full HRM demo data before foundation e
 
 | Phase | Seed focus |
 |-------|------------|
-| Foundation | Permissions, roles, company, org units, admin user, sample employees |
-| Time | Leave types, holidays, shifts, sample attendance/leave |
-| Payroll | Salary components, draft payroll sample (non-prod) |
-| Hire & ops | Job opening, candidate, onboarding checklist templates, assets, documents samples |
-| Insight | Notification templates, sample report fixtures if needed |
+| Foundation | Permissions, roles, company, org units, admin user |
+| Employee (Phase 02) | Sample employees (non-prod) |
+| Shift (Phase 05) | Shift definitions, sample assignments, default OT rule (non-prod) |
+| Attendance (Phase 03) | Sample attendance records (non-prod) |
+| Leave (Phase 04) | Leave types, holidays, weekend rules, sample balances/requests (non-prod) |
+| Payroll (Phase 06) | Salary + allowance/deduction for E-0001; sample finalized run + payslip (non-prod) |
+| Hire & ops (Phase 07) | Company policy document, one available asset, one open job + screening candidate, default onboarding template with checklist items (non-prod) |
+| Insight (Phase 08) | Sample notification inbox for the admin user; one active performance review cycle with goals for E-0001 (non-prod) |
 
 ---
 

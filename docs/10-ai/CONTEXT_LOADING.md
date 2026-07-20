@@ -42,11 +42,12 @@ Always load:
 
 | Order | Doc |
 |-------|-----|
-| 1 | `docs/05-frontend/UI_RULES.md` + `LAYOUT.md` |
+| 1 | `docs/05-frontend/UI_RULES.md` + `LAYOUT.md` + **`I18N.md`** |
 | 2 | `docs/07-uiux/DESIGN_SYSTEM.md` (+ color/type as needed) |
 | 3 | Matching `docs/06-api/` + `docs/05-frontend/API_CLIENT.md` |
 | 4 | `docs/02-business/{module}/` for labels/flows |
 | 5 | Existing pages/components in that module |
+| 6 | Add/update `resources/js/locales/{vi,en}/` keys with the UI change |
 
 ### Database / migration
 

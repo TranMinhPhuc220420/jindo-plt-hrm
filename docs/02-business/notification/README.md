@@ -94,6 +94,30 @@ Upstream producers: Leave, Attendance, Payroll, Recruitment, Onboarding, Assets,
 
 Notification mostly **consumes** events. It may emit operational events such as `NotificationFailed` for monitoring, not for re-driving business approvals.
 
+### Shipped notification types
+
+| Type | Recipient |
+|------|-----------|
+| `leave.requested` | Requester |
+| `leave.pending_approval` | Manager (or leave approvers) |
+| `leave.approved` / `leave.rejected` / `leave.cancelled` | Requester |
+| `leave.cancelled_pending` | Manager when a pending request is cancelled |
+| `attendance.correction_requested` | Approver |
+| `attendance.correction_approved` / `rejected` | Requester |
+| `shift.assigned` / `shift.changed` | Employee |
+| `asset.assigned` / `asset.returned` | Employee |
+| `payroll.salary_changed` / `payroll.finalized` | Employee |
+| `payroll.calculated` / `payroll.approved` | Payroll ops (permission-scoped) |
+| `performance.cycle_started` / `cycle_finalized` | Cycle participants |
+| `performance.evaluation_submitted` | Manager / review cycle managers |
+| `onboarding.started` / `completed` | Employee |
+| `onboarding.task_completed` | Onboarding owners |
+| `employee.created` / `created_hr` / `status_changed` | Employee / HR / manager |
+| `report.export_ready` | Export requester |
+| `recruitment.offer_sent` / `offer_accepted` / `stage_changed` | Recruiters |
+| `document.shared` / `document.uploaded` | Employee owner / document viewers |
+| `broadcast.announcement` | All company employees (via `POST /api/notifications/broadcast`) |
+
 ---
 
 ## Out of Scope / Future

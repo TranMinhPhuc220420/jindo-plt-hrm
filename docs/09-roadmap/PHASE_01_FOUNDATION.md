@@ -75,13 +75,13 @@ None (first phase).
 
 ## Exit Criteria
 
-- [ ] User can log in/out; `/api/me` returns permissions
-- [ ] Permissions are DB-driven; catalog keys for Phase 01 seeded ([SEEDING.md](../03-database/SEEDING.md))
-- [ ] Org hierarchy CRUD works under company scope
-- [ ] Settings + roles APIs usable; SPA routes `/organization`, `/roles`, `/settings`, `/audit-logs` gated
-- [ ] App shell matches Stitch sidebar pattern (desktop); Admin section permission-aware
-- [ ] Audit writer usable by later modules (read UI may be minimal)
-- [ ] Tests cover authz deny paths
+- [x] User can log in/out; `/api/me` returns permissions
+- [x] Permissions are DB-driven; catalog keys for Phase 01 seeded ([SEEDING.md](../03-database/SEEDING.md))
+- [x] Org hierarchy CRUD works under company scope
+- [x] Settings + roles APIs usable; SPA routes `/organization`, `/roles`, `/settings`, `/audit-logs` gated
+- [x] App shell matches Stitch sidebar pattern (desktop); Admin section permission-aware
+- [x] Audit writer usable by later modules (read UI may be minimal)
+- [x] Tests cover authz deny paths
 
 ---
 

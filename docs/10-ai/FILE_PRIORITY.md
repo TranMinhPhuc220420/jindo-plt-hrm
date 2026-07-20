@@ -24,7 +24,7 @@
 | HTTP contract | `docs/06-api/REST_STANDARD.md`, `docs/06-api/{MODULE}_API.md` |
 | Data rules | `docs/03-database/DATABASE_NAMING.md`, `DATABASE_CONVENTIONS.md`, `MIGRATION_RULES.md` |
 | Backend patterns | `docs/04-backend/SERVICES.md`, `VALIDATION.md`, `POLICIES.md`, `API_RESPONSE.md` |
-| Frontend patterns | `docs/05-frontend/UI_RULES.md`, `API_CLIENT.md`, `REACT_STRUCTURE.md` |
+| Frontend patterns | `docs/05-frontend/UI_RULES.md`, `I18N.md`, `API_CLIENT.md`, `REACT_STRUCTURE.md` |
 | Design | `docs/07-uiux/DESIGN_SYSTEM.md`, `COLOR_SYSTEM.md` |
 
 ### P2 — Supporting architecture

@@ -91,6 +91,8 @@ Overlap conflicts → `409` / `SHIFT_ASSIGNMENT_OVERLAP`.
 
 `GET /api/working-calendar?employee_id=10&date_from=2026-08-01&date_to=2026-08-07`
 
+Resolves assigned shift windows and overlays **approved** leave for the employee (via Leave services in the controller — Shift `WorkingCalendarService` does not depend on Leave). Pending leave is ignored. When multiple approved leaves cover the same day, the lowest `request_id` wins.
+
 ```json
 {
   "success": true,
@@ -101,11 +103,31 @@ Overlap conflicts → `409` / `SHIFT_ASSIGNMENT_OVERLAP`.
       "shift_name": "Morning",
       "start_time": "08:00",
       "end_time": "17:00",
-      "is_holiday": false
+      "is_holiday": false,
+      "leave": null
+    },
+    {
+      "date": "2026-08-02",
+      "shift_id": 3,
+      "shift_name": "Morning",
+      "start_time": "08:00",
+      "end_time": "17:00",
+      "is_holiday": false,
+      "leave": {
+        "request_id": 12,
+        "leave_type_name": "Annual Leave",
+        "is_paid": true,
+        "unit": "day",
+        "coverage": "full",
+        "start_at": null,
+        "end_at": null
+      }
     }
   ]
 }
 ```
+
+`leave.coverage`: `full` | `am` | `pm` | `hours`. Shift fields remain present when on leave so clients can show the roster plus a leave label.
 
 Consumed by Attendance/Leave validation via services (not only by clients).
 

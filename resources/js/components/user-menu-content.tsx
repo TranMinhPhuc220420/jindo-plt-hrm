@@ -1,5 +1,6 @@
-import { Link, router } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { LogOut, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
@@ -8,7 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
-import { logout } from '@/routes';
+import { useAuth } from '@/lib/auth/auth-context';
 import { edit } from '@/routes/profile';
 import type { User } from '@/types';
 
@@ -17,11 +18,13 @@ type Props = {
 };
 
 export function UserMenuContent({ user }: Props) {
+    const { t } = useTranslation('nav');
     const cleanup = useMobileNavigation();
+    const { logout } = useAuth();
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         cleanup();
-        router.flushAll();
+        await logout();
     };
 
     return (
@@ -41,22 +44,21 @@ export function UserMenuContent({ user }: Props) {
                         onClick={cleanup}
                     >
                         <Settings className="mr-2" />
-                        Settings
+                        {t('settings')}
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-                <Link
-                    className="block w-full cursor-pointer"
-                    href={logout()}
-                    as="button"
-                    onClick={handleLogout}
-                    data-test="logout-button"
-                >
-                    <LogOut className="mr-2" />
-                    Log out
-                </Link>
+            <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={(event) => {
+                    event.preventDefault();
+                    void handleLogout();
+                }}
+                data-test="logout-button"
+            >
+                <LogOut className="mr-2" />
+                {t('log_out')}
             </DropdownMenuItem>
         </>
     );
