@@ -1,0 +1,144 @@
+name: Deploy to cPanel
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, pdo_sqlite, sqlite3
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+
+      - name: Install dependencies and build
+        run: |
+          composer install --prefer-dist --no-interaction
+          npm ci
+          npm run build
+
+      - name: Generate app key
+        run: php artisan key:generate
+
+      # Runs lint:check, format:check, types:check (ESLint/Prettier/tsc + Pint/PHPStan) and the Pest suite.
+      # Requires no secrets beyond what's already in .env.example (SQLite test DB).
+      - name: Run full CI check
+        run: composer ci:check
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, pdo_sqlite, sqlite3
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          echo "DB_CONNECTION=sqlite" >> .env
+          echo "DB_DATABASE=database/e2e.sqlite" >> .env
+          touch database/e2e.sqlite
+
+      - name: Install dependencies and build
+        run: |
+          composer install --prefer-dist --no-interaction
+          npm ci
+          npm run build
+          npx playwright install --with-deps chromium
+
+      - name: Generate app key and seed database
+        run: |
+          php artisan key:generate
+          php artisan migrate:fresh --seed --seeder=E2eSeeder --force
+
+      - name: Start application server
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8000 &
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8000/up && break
+            sleep 2
+          done
+
+      - name: Run Playwright smoke tests
+        run: npm run e2e:ci
+        env:
+          CI: true
+          E2E_BASE_URL: http://127.0.0.1:8000
+
+  deploy:
+    needs: [test, e2e]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, pdo_mysql
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies and build
+        run: |
+          composer install --no-dev --optimize-autoloader
+          npm ci
+          npm run build
+
+      - name: Create deploy.zip
+        run: |
+          rm -rf .git .github tests node_modules
+          rm -rf storage/logs/*
+          mkdir -p deploy-bundle
+          zip -r deploy-bundle/deploy.zip . -x "deploy-bundle/*"
+
+      - name: Upload deploy.zip via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./deploy-bundle/
+          server-dir: /
