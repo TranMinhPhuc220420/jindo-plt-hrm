@@ -44,7 +44,7 @@
 | `POST` | `/api/onboarding-templates` | Create template |
 | `PATCH` | `/api/onboarding-templates/{id}` | Update template |
 
-Equipment assignment uses [ASSET_API.md](./ASSET_API.md); documents use [DOCUMENT_API.md](./DOCUMENT_API.md); account creation uses Auth/user provisioning inside services.
+Equipment assignment uses [ASSET_API.md](./ASSET_API.md); documents use [DOCUMENT_API.md](./DOCUMENT_API.md); account creation provisions a `User` with `EMPLOYEE_DEFAULT_PASSWORD` (see [EMPLOYEE_API.md](./EMPLOYEE_API.md) Account password).
 
 ---
 

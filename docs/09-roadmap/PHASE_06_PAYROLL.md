@@ -53,9 +53,9 @@ Calculate and finalize pay for a period using Employee compensation + Attendance
 
 ## Exit Criteria
 
-- [ ] Salary changes audited
-- [ ] Calculate uses AttendanceService summaries (not punch table ownership)
-- [ ] Finalize is immutable (`PAYROLL_ALREADY_FINALIZED`)
-- [ ] Employee can view own payslip only with permission/scope
-- [ ] Staging smoke with demo employees
-- [ ] Milestone toward `v0.4.0`
+- [x] Salary changes audited
+- [x] Calculate uses AttendanceService summaries (not punch table ownership)
+- [x] Finalize is immutable (`PAYROLL_ALREADY_FINALIZED`)
+- [x] Employee can view own payslip only with permission/scope
+- [x] Staging smoke with demo employees
+- [x] Milestone toward `v0.4.0`

@@ -49,8 +49,8 @@ Let employees request time off with balance checks and manager/HR approval, incl
 
 ## Exit Criteria
 
-- [ ] Request → approve/reject updates balance correctly
-- [ ] `LEAVE_BALANCE_INSUFFICIENT` returned when applicable
-- [ ] Holidays block/affect validation per rules
-- [ ] Permission `can_approve_leave` enforced with relationship scope
-- [ ] Tests for overlap and illegal transitions
+- [x] Request → approve/reject updates balance correctly
+- [x] `LEAVE_BALANCE_INSUFFICIENT` returned when applicable
+- [x] Holidays block/affect validation per rules
+- [x] Permission `can_approve_leave` enforced with relationship scope
+- [x] Tests for overlap and illegal transitions

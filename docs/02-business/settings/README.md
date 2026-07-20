@@ -30,6 +30,17 @@ Store configurable values that modules read (locale defaults, session policies, 
 3. Modules read settings via a Settings service — not ad-hoc env for business rules.
 4. Secrets (SMTP passwords, API keys) belong in env/secret manager, not the settings UI store.
 
+### Locale
+
+| Scope | Storage | Notes |
+|-------|---------|--------|
+| Company default | `company.locale` in settings (`vi` \| `en`, default **`vi`**) | Requires `can_manage_settings` |
+| User preference | `users.locale` (nullable) | Any authenticated user; `null` = follow company |
+
+Effective UI locale: `user.locale ?? company.locale ?? app default (vi)`.
+
+See [I18N.md](../../05-frontend/I18N.md) and [AUTH_API.md](../../06-api/AUTH_API.md) (`PUT /api/me/locale`).
+
 ---
 
 ## Permissions

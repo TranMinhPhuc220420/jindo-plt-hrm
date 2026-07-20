@@ -1,0 +1,314 @@
+{
+  "can_view_organization": {
+    "name": "Xem tổ chức",
+    "description": "Xem cây tổ chức (công ty, chi nhánh, phòng ban, nhóm và vị trí)."
+  },
+  "can_manage_organization": {
+    "name": "Quản lý tổ chức",
+    "description": "Tạo, cập nhật và xóa chi nhánh, phòng ban, nhóm và vị trí."
+  },
+  "can_manage_company": {
+    "name": "Quản lý công ty",
+    "description": "Cập nhật hồ sơ công ty và cấu hình tổ chức cấp công ty."
+  },
+  "can_view_roles": {
+    "name": "Xem vai trò",
+    "description": "Xem danh sách vai trò và catalog quyền."
+  },
+  "can_manage_roles": {
+    "name": "Quản lý vai trò",
+    "description": "Tạo, xóa vai trò và thay đổi tập quyền của từng vai trò."
+  },
+  "can_assign_roles": {
+    "name": "Gán vai trò",
+    "description": "Gán hoặc gỡ vai trò cho tài khoản người dùng."
+  },
+  "can_view_settings": {
+    "name": "Xem cài đặt",
+    "description": "Xem các giá trị cài đặt công ty và hệ thống."
+  },
+  "can_manage_settings": {
+    "name": "Quản lý cài đặt",
+    "description": "Thay đổi các giá trị cài đặt công ty và hệ thống."
+  },
+  "can_view_audit_logs": {
+    "name": "Xem nhật ký kiểm toán",
+    "description": "Duyệt nhật ký các thao tác nhạy cảm trong hệ thống."
+  },
+  "can_view_employee": {
+    "name": "Xem nhân viên",
+    "description": "Xem danh sách và hồ sơ nhân viên trong phạm vi được phép."
+  },
+  "can_create_employee": {
+    "name": "Tạo nhân viên",
+    "description": "Tạo hồ sơ nhân viên mới."
+  },
+  "can_update_employee": {
+    "name": "Cập nhật nhân viên",
+    "description": "Cập nhật các trường hồ sơ nhân viên không nhạy cảm."
+  },
+  "can_manage_employee_sensitive": {
+    "name": "Quản lý dữ liệu nhạy cảm nhân viên",
+    "description": "Xem và chỉnh sửa các trường nhạy cảm như ngân hàng, thuế và bảo hiểm."
+  },
+  "can_change_employee_status": {
+    "name": "Đổi trạng thái nhân viên",
+    "description": "Thay đổi trạng thái làm việc, lưu trữ hoặc kích hoạt lại nhân viên."
+  },
+  "can_view_own_profile": {
+    "name": "Xem hồ sơ của mình",
+    "description": "Xem hồ sơ nhân viên giới hạn của chính người đang đăng nhập."
+  },
+  "can_view_shifts": {
+    "name": "Xem ca làm",
+    "description": "Xem định nghĩa ca và phân ca."
+  },
+  "can_manage_shift_definitions": {
+    "name": "Quản lý định nghĩa ca",
+    "description": "Tạo, cập nhật và xóa định nghĩa ca làm việc."
+  },
+  "can_assign_shifts": {
+    "name": "Phân ca",
+    "description": "Gán ca cho nhân viên và quản lý thay đổi phân ca."
+  },
+  "can_manage_overtime_rules": {
+    "name": "Quản lý quy tắc làm thêm giờ",
+    "description": "Cấu hình quy tắc tính làm thêm giờ."
+  },
+  "can_view_own_schedule": {
+    "name": "Xem lịch của mình",
+    "description": "Xem lịch làm việc của chính người đang đăng nhập."
+  },
+  "can_check_in_out": {
+    "name": "Chấm công vào/ra",
+    "description": "Ghi nhận giờ vào ca và ra ca của chính người đang đăng nhập."
+  },
+  "can_view_attendance": {
+    "name": "Xem chấm công",
+    "description": "Xem danh sách và tổng hợp chấm công trong phạm vi được phép."
+  },
+  "can_request_attendance_correction": {
+    "name": "Yêu cầu sửa chấm công",
+    "description": "Gửi yêu cầu chỉnh sửa bản ghi chấm công."
+  },
+  "can_approve_attendance": {
+    "name": "Duyệt chấm công",
+    "description": "Phê duyệt hoặc từ chối bản ghi chấm công và yêu cầu chỉnh sửa."
+  },
+  "can_manage_attendance": {
+    "name": "Quản lý chấm công",
+    "description": "Thực hiện thao tác HR như khóa kỳ hoặc điều chỉnh dữ liệu chấm công."
+  },
+  "can_request_leave": {
+    "name": "Xin nghỉ phép",
+    "description": "Tạo và hủy đơn nghỉ phép của chính người đang đăng nhập."
+  },
+  "can_view_leave": {
+    "name": "Xem nghỉ phép",
+    "description": "Xem đơn nghỉ và số dư phép trong phạm vi được phép."
+  },
+  "can_approve_leave": {
+    "name": "Duyệt nghỉ phép",
+    "description": "Phê duyệt hoặc từ chối đơn nghỉ phép."
+  },
+  "can_manage_leave_types": {
+    "name": "Quản lý loại nghỉ",
+    "description": "Tạo, cập nhật và xóa loại nghỉ phép."
+  },
+  "can_manage_leave_balances": {
+    "name": "Quản lý số dư phép",
+    "description": "Điều chỉnh thủ công số dư nghỉ phép của nhân viên."
+  },
+  "can_manage_holidays": {
+    "name": "Quản lý ngày lễ và quy tắc cuối tuần",
+    "description": "Cấu hình ngày lễ và quy tắc cuối tuần dùng cho tính nghỉ phép."
+  },
+  "can_view_salary": {
+    "name": "Xem lương và phiếu lương",
+    "description": "Xem chi tiết lương và phiếu lương trong phạm vi được phép."
+  },
+  "can_manage_salary": {
+    "name": "Quản lý thành phần lương",
+    "description": "Chỉnh sửa các thành phần thu nhập như lương cơ bản, phụ cấp và khấu trừ."
+  },
+  "can_run_payroll": {
+    "name": "Chạy tính lương",
+    "description": "Tạo kỳ lương và tính toán kết quả bảng lương."
+  },
+  "can_approve_payroll": {
+    "name": "Duyệt kỳ lương",
+    "description": "Phê duyệt kỳ lương trước khi chốt."
+  },
+  "can_view_payroll_history": {
+    "name": "Xem lịch sử lương",
+    "description": "Xem các kỳ lương và kết quả đã chạy trước đây."
+  },
+  "can_manage_payslips": {
+    "name": "Quản lý phiếu lương",
+    "description": "Thực hiện thao tác quản trị phiếu lương như tạo lại hoặc phát hành."
+  },
+  "can_view_company_documents": {
+    "name": "Xem tài liệu công ty",
+    "description": "Xem tài liệu và tệp cấp công ty."
+  },
+  "can_manage_company_documents": {
+    "name": "Quản lý tài liệu công ty",
+    "description": "Tải lên, cập nhật và xóa tài liệu cấp công ty."
+  },
+  "can_view_employee_documents": {
+    "name": "Xem tài liệu nhân viên",
+    "description": "Xem tài liệu nhân viên trong phạm vi được phép."
+  },
+  "can_manage_employee_documents": {
+    "name": "Quản lý tài liệu nhân viên",
+    "description": "Tải lên, cập nhật và xóa tài liệu nhân viên trong phạm vi được phép."
+  },
+  "can_upload_own_documents": {
+    "name": "Tải lên tài liệu của mình",
+    "description": "Tải tài liệu lên hồ sơ nhân viên của chính người đang đăng nhập."
+  },
+  "can_manage_document_templates": {
+    "name": "Quản lý mẫu tài liệu",
+    "description": "Cấu hình mẫu tài liệu và chính sách tài liệu liên quan."
+  },
+  "can_view_assets": {
+    "name": "Xem tài sản",
+    "description": "Xem danh mục tài sản của công ty."
+  },
+  "can_manage_assets": {
+    "name": "Quản lý tài sản",
+    "description": "Tạo, cập nhật và xóa bản ghi tài sản."
+  },
+  "can_assign_asset": {
+    "name": "Cấp phát tài sản",
+    "description": "Gán tài sản cho nhân viên."
+  },
+  "can_return_asset": {
+    "name": "Thu hồi tài sản",
+    "description": "Xử lý việc nhân viên trả lại tài sản."
+  },
+  "can_report_asset_damage": {
+    "name": "Báo hỏng tài sản",
+    "description": "Báo cáo hư hỏng hoặc sự cố với tài sản được giao."
+  },
+  "can_manage_asset_maintenance": {
+    "name": "Quản lý bảo trì tài sản",
+    "description": "Theo dõi và quản lý hoạt động bảo trì tài sản."
+  },
+  "can_manage_job_positions": {
+    "name": "Quản lý vị trí tuyển dụng",
+    "description": "Tạo và quản lý các vị trí tuyển dụng."
+  },
+  "can_view_candidates": {
+    "name": "Xem ứng viên",
+    "description": "Xem ứng viên trong pipeline tuyển dụng."
+  },
+  "can_manage_candidates": {
+    "name": "Quản lý ứng viên",
+    "description": "Tạo, cập nhật và chuyển ứng viên qua các bước tuyển dụng."
+  },
+  "can_manage_interviews": {
+    "name": "Quản lý phỏng vấn",
+    "description": "Lên lịch và quản lý buổi phỏng vấn ứng viên."
+  },
+  "can_create_offer": {
+    "name": "Tạo đề nghị tuyển dụng",
+    "description": "Tạo thư mời nhận việc / offer cho ứng viên."
+  },
+  "can_approve_offer": {
+    "name": "Duyệt và gửi offer",
+    "description": "Phê duyệt offer và gửi cho ứng viên khi cần kiểm soát kép."
+  },
+  "can_hire_candidate": {
+    "name": "Tuyển dụng ứng viên / chấp nhận offer",
+    "description": "Đánh dấu ứng viên đã được tuyển và chuyển sang nhận việc."
+  },
+  "can_view_onboarding": {
+    "name": "Xem nhận việc",
+    "description": "Xem các hồ sơ nhận việc và tiến độ."
+  },
+  "can_manage_onboarding": {
+    "name": "Quản lý nhận việc",
+    "description": "Tạo và cấu hình hồ sơ nhận việc cho nhân viên mới."
+  },
+  "can_complete_onboarding_task": {
+    "name": "Hoàn thành nhiệm vụ nhận việc",
+    "description": "Hoàn thành các nhiệm vụ nhận việc được giao cho người đang đăng nhập."
+  },
+  "can_complete_onboarding": {
+    "name": "Hoàn tất hồ sơ nhận việc",
+    "description": "Đánh dấu một hồ sơ nhận việc đã hoàn tất."
+  },
+  "can_manage_onboarding_templates": {
+    "name": "Quản lý mẫu nhận việc",
+    "description": "Tạo và duy trì các mẫu nhận việc dùng cho nhân viên mới."
+  },
+  "can_view_performance": {
+    "name": "Xem hiệu suất",
+    "description": "Xem chu kỳ đánh giá, mục tiêu và đánh giá hiệu suất trong phạm vi được phép."
+  },
+  "can_manage_goals": {
+    "name": "Quản lý mục tiêu",
+    "description": "Tạo và cập nhật mục tiêu / KPI / OKR của nhân viên."
+  },
+  "can_evaluate_employee": {
+    "name": "Đánh giá nhân viên",
+    "description": "Gửi đánh giá hiệu suất cho nhân viên đủ điều kiện."
+  },
+  "can_manage_review_cycles": {
+    "name": "Quản lý chu kỳ đánh giá",
+    "description": "Tạo, bắt đầu và chốt chu kỳ đánh giá hiệu suất."
+  },
+  "can_view_promotion_suggestions": {
+    "name": "Xem gợi ý thăng tiến",
+    "description": "Xem các gợi ý thăng tiến mang tính tư vấn từ kết quả đánh giá."
+  },
+  "can_manage_performance_settings": {
+    "name": "Quản lý cài đặt hiệu suất",
+    "description": "Cấu hình khung đánh giá hiệu suất của công ty."
+  },
+  "can_view_attendance_reports": {
+    "name": "Xem báo cáo chấm công",
+    "description": "Chạy và xem báo cáo chấm công."
+  },
+  "can_view_payroll_reports": {
+    "name": "Xem báo cáo lương",
+    "description": "Chạy và xem báo cáo lương nhạy cảm."
+  },
+  "can_view_leave_reports": {
+    "name": "Xem báo cáo nghỉ phép",
+    "description": "Chạy và xem báo cáo nghỉ phép."
+  },
+  "can_view_employee_reports": {
+    "name": "Xem báo cáo nhân sự",
+    "description": "Chạy và xem báo cáo nhân viên và biên chế."
+  },
+  "can_view_performance_reports": {
+    "name": "Xem báo cáo hiệu suất",
+    "description": "Chạy và xem báo cáo hiệu suất."
+  },
+  "can_manage_custom_reports": {
+    "name": "Quản lý báo cáo tùy chỉnh",
+    "description": "Tạo và quản lý định nghĩa báo cáo tùy chỉnh (dự phòng)."
+  },
+  "can_export_reports": {
+    "name": "Xuất báo cáo",
+    "description": "Xếp hàng và tải xuống file xuất báo cáo."
+  },
+  "can_view_own_notifications": {
+    "name": "Xem thông báo của mình",
+    "description": "Xem và quản lý hộp thư thông báo của người đang đăng nhập."
+  },
+  "can_manage_notification_templates": {
+    "name": "Quản lý mẫu thông báo",
+    "description": "Quản lý mẫu thông báo (admin; dự phòng cho MVP)."
+  },
+  "can_send_broadcast_notification": {
+    "name": "Gửi thông báo broadcast",
+    "description": "Gửi thông báo broadcast tới người dùng (dự phòng cho MVP)."
+  },
+  "can_manage_notification_settings": {
+    "name": "Quản lý cài đặt thông báo",
+    "description": "Quản lý mặc định và cài đặt thông báo cấp công ty."
+  }
+}

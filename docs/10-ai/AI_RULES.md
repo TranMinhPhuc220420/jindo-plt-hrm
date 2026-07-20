@@ -38,6 +38,7 @@
 | Invent API shapes that contradict `docs/06-api/` | Update docs first if contract must change |
 | Invent schema that contradicts `docs/03-database/` | Follow naming/conventions/migrations |
 | Purple/indigo “AI default” UI theme | Efficient Growth / Stitch tokens (`docs/07-uiux/`) |
+| Hardcoded user-facing EN/VI strings in new HRM UI | `t('ns:key')` + both locale catalogs ([I18N.md](../05-frontend/I18N.md)) |
 | Commit secrets or real PII | `.env.example` placeholders only |
 | `--no-verify` / skip tests casually | Fix CI; add proportional tests |
 | Circular module/event dependencies | Follow [DEPENDENCY_RULES.md](../01-architecture/DEPENDENCY_RULES.md) |
@@ -65,6 +66,7 @@
 
 - Follow [UI_RULES.md](../05-frontend/UI_RULES.md) and [DESIGN_SYSTEM.md](../07-uiux/DESIGN_SYSTEM.md).
 - Permission-gate menus and actions; API remains the real enforcement.
+- **i18n:** Supported locales are `vi` (default) and `en`. New user-facing copy must go through translation keys (`resources/js/locales/{vi,en}/`) — no hardcoded UI strings in new pages/features. Follow [I18N.md](../05-frontend/I18N.md).
 
 ---
 

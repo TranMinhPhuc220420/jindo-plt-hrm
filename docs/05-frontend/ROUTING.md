@@ -40,9 +40,14 @@ Permission gates use keys from [PERMISSIONS_CATALOG.md](../01-architecture/PERMI
 | `/organization` | Org tree / units | Organization | `can_view_organization` |
 | `/organization/branches` | Branches (optional nested) | — | `can_view_organization` |
 | `/roles` | Roles & permissions admin | Roles | `can_view_roles` |
-| `/settings` | Settings hub | Settings | `can_view_settings` |
-| `/settings/:group` | Settings group (`company`, `auth`, …) | — | `can_view_settings` |
+| `/settings` | Redirects to `/settings/company` (HRM settings hub) | Settings | `can_view_settings` |
+| `/settings/company` | Company / app settings (REST) | Settings | `can_view_settings` |
+| `/settings/profile` | Personal account profile (starter kit) | — (user menu) | authenticated |
+| `/settings/security` | Password / 2FA enrollment (Fortify) | — (user menu) | authenticated |
+| `/settings/appearance` | Appearance | — (user menu) | authenticated |
 | `/audit-logs` | Audit trail | Audit | `can_view_audit_logs` |
+
+> **Note:** HRM company settings use `app-layout` only. Personal account pages (`profile` / `security` / `appearance`) keep the starter settings subnav. Sidebar “Settings” points at `/settings/company`.
 
 Mutations on these screens still require the matching `can_manage_*` / `can_assign_roles` / `can_manage_company` keys (enforced by API).
 

@@ -46,6 +46,8 @@
 | `GET` | `/api/payroll-runs` | List runs |
 | `POST` | `/api/payroll-runs` | Create run (draft) |
 | `GET` | `/api/payroll-runs/{id}` | Run detail + items summary |
+| `PUT` | `/api/payroll-runs/{id}` | Update name/period (**draft only**) |
+| `DELETE` | `/api/payroll-runs/{id}` | Delete run (**before finalize**) |
 | `POST` | `/api/payroll-runs/{id}/calculate` | Run calculation |
 | `POST` | `/api/payroll-runs/{id}/approve` | Approve |
 | `POST` | `/api/payroll-runs/{id}/finalize` | Finalize + payslips |
@@ -116,6 +118,16 @@ Generates payslips; notifies employees (queued).
 
 ---
 
+## Update & delete run
+
+`PUT /api/payroll-runs/{id}` — update `name`, `period_start`, `period_end` while status is **draft** only.  
+Non-draft → `PAYROLL_NOT_DRAFT`. Duplicate period → `PAYROLL_DUPLICATE_PERIOD`.
+
+`DELETE /api/payroll-runs/{id}` — allowed for `draft`, `calculated`, or `approved`.  
+Finalized → `PAYROLL_ALREADY_FINALIZED`. Cascades `payroll_items` / `payslips` via FK.
+
+---
+
 ## Payslip
 
 `GET /api/payslips/{id}`
@@ -145,7 +157,8 @@ Generates payslips; notifies employees (queued).
 
 | Code | When |
 |------|------|
-| `PAYROLL_ALREADY_FINALIZED` | Mutating finalized run |
+| `PAYROLL_ALREADY_FINALIZED` | Mutating finalized run (including delete) |
+| `PAYROLL_NOT_DRAFT` | Updating a non-draft run |
 | `PAYROLL_NOT_CALCULATED` | Approve before calculate |
 | `PAYROLL_DUPLICATE_PERIOD` | Duplicate run for period |
 | `PAYROLL_CALCULATION_FAILED` | Engine failure |

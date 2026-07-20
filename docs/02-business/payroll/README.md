@@ -77,7 +77,7 @@ After finalize
 |---------------|--------------------|
 | Employee (identity, bank, tax, insurance fields) | Being called by Attendance to “create payslip” |
 | Attendance services (summaries/overtime inputs) | Circular dependency with Attendance |
-| Leave services (unpaid leave effects, when modeled) | Report module for calculation |
+| Leave services (unpaid leave effects via `LeaveCoverageService`) | Report module for calculation |
 | Shift overtime rules (interpretation inputs) | |
 
 **Allowed:** Payroll → AttendanceService  

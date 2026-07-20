@@ -43,7 +43,8 @@ Paths below are the **stable product contract**. Map Fortify/Sanctum internals t
 | `POST` | `/api/auth/logout` | Yes | Invalidate session/token |
 | `POST` | `/api/auth/forgot-password` | Guest | Request reset link/token |
 | `POST` | `/api/auth/reset-password` | Guest | Reset with token |
-| `GET` | `/api/me` | Yes | Current user + permissions |
+| `GET` | `/api/me` | Yes | Current user + permissions + locale |
+| `PUT` | `/api/me/locale` | Yes | Set personal locale preference (`vi` \| `en` \| `null`) |
 | `POST` | `/api/auth/two-factor/enable` | Yes | Start 2FA enrollment |
 | `POST` | `/api/auth/two-factor/confirm` | Yes | Confirm 2FA setup |
 | `POST` | `/api/auth/two-factor/challenge` | Guest/partial | Complete 2FA during login |
@@ -105,12 +106,44 @@ If 2FA required, return a challenge state (still authenticated only after challe
   "data": {
     "user": { "id": 1, "name": "Alex Rodriguez", "email": "admin@example.test" },
     "permissions": ["can_create_employee", "can_approve_leave", "can_view_salary"],
-    "employee_id": 10
+    "employee_id": 10,
+    "locale": "vi",
+    "user_locale": null,
+    "company_locale": "vi"
   }
 }
 ```
 
-UI builds menus from `permissions`.
+| Field | Meaning |
+|-------|---------|
+| `locale` | Effective locale for UI (`user_locale ?? company_locale ?? app default`) |
+| `user_locale` | Personal preference; `null` = follow company |
+| `company_locale` | From settings `company.locale` |
+
+UI builds menus from `permissions`. SPA syncs `react-i18next` from `locale` — see [I18N.md](../05-frontend/I18N.md).
+
+---
+
+## Update personal locale
+
+`PUT /api/me/locale`
+
+```json
+{ "locale": "en" }
+```
+
+| `locale` value | Effect |
+|----------------|--------|
+| `"vi"` / `"en"` | Persist preference on `users.locale` |
+| `null` | Clear preference; follow company default |
+
+**200** — same shape as `/api/me` (updated `locale` / `user_locale`).
+
+**422** — invalid locale (not `vi`, `en`, or `null`).
+
+No special permission: any authenticated user updates **own** preference only.
+
+Company-wide default remains `PUT /api/settings` (`can_manage_settings`).
 
 ---
 

@@ -1,0 +1,41 @@
+{
+  "index": {
+    "title": "Documents",
+    "description": "Upload and manage company, employee, and candidate documents.",
+    "error_load": "Failed to load documents.",
+    "loading": "Loading documents…",
+    "empty": "No documents yet.",
+    "upload_title": "Upload document",
+    "file": "File",
+    "owner_type": "Owner type",
+    "owner_id": "Owner ID",
+    "category": "Category",
+    "doc_title": "Title",
+    "upload": "Upload",
+    "filter_owner": "Owner",
+    "filter_category": "Category",
+    "all": "All",
+    "col_title": "Title",
+    "col_owner": "Owner",
+    "col_category": "Category",
+    "col_file": "File",
+    "download": "Download",
+    "delete": "Delete",
+    "file_required": "Please choose a file.",
+    "toast_uploaded": "Document uploaded",
+    "toast_deleted": "Document deleted",
+    "toast_error": "Action failed"
+  },
+  "owner_type": {
+    "company": "Company",
+    "employee": "Employee",
+    "candidate": "Candidate"
+  },
+  "category": {
+    "policy": "Policy",
+    "template": "Template",
+    "contract": "Contract",
+    "certificate": "Certificate",
+    "other": "Other"
+  }
+}

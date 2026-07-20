@@ -1,0 +1,41 @@
+{
+  "index": {
+    "title": "Tài liệu",
+    "description": "Tải lên và quản lý tài liệu công ty, nhân viên và ứng viên.",
+    "error_load": "Không tải được danh sách tài liệu.",
+    "loading": "Đang tải tài liệu…",
+    "empty": "Chưa có tài liệu nào.",
+    "upload_title": "Tải lên tài liệu",
+    "file": "Tệp",
+    "owner_type": "Loại chủ sở hữu",
+    "owner_id": "Mã chủ sở hữu",
+    "category": "Phân loại",
+    "doc_title": "Tiêu đề",
+    "upload": "Tải lên",
+    "filter_owner": "Chủ sở hữu",
+    "filter_category": "Phân loại",
+    "all": "Tất cả",
+    "col_title": "Tiêu đề",
+    "col_owner": "Chủ sở hữu",
+    "col_category": "Phân loại",
+    "col_file": "Tệp",
+    "download": "Tải xuống",
+    "delete": "Xóa",
+    "file_required": "Vui lòng chọn tệp.",
+    "toast_uploaded": "Đã tải lên tài liệu",
+    "toast_deleted": "Đã xóa tài liệu",
+    "toast_error": "Thao tác thất bại"
+  },
+  "owner_type": {
+    "company": "Công ty",
+    "employee": "Nhân viên",
+    "candidate": "Ứng viên"
+  },
+  "category": {
+    "policy": "Chính sách",
+    "template": "Biểu mẫu",
+    "contract": "Hợp đồng",
+    "certificate": "Chứng chỉ",
+    "other": "Khác"
+  }
+}

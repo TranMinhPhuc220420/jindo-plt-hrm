@@ -49,8 +49,9 @@ Define when employees are expected to work so Attendance and Leave can validate 
 
 ## Exit Criteria
 
-- [ ] HR can define and assign shifts without overlap bugs
-- [ ] Working calendar returns expected windows per day
-- [ ] Attendance/Leave can call shift services (integration smoke)
-- [ ] Overtime rules readable by payroll later
-- [ ] Tests for assignment overlap
+- [x] HR can define and assign shifts without overlap bugs
+- [x] Working calendar returns expected windows per day
+- [x] Attendance/Leave can call shift services (integration smoke)
+- [x] Overtime rules readable by payroll later
+- [x] Tests for assignment overlap
+- [ ] Tag path toward `v0.3.0` (deferred until release request)

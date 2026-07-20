@@ -1,0 +1,249 @@
+{
+  "title": "Nhật ký hệ thống",
+  "description": "Lịch sử các thao tác quan trọng. Bản ghi được lưu vĩnh viễn và không thể chỉnh sửa.",
+  "loading": "Đang tải nhật ký…",
+  "error_load": "Không tải được nhật ký.",
+  "empty": "Chưa có sự kiện. Cập nhật cài đặt hoặc hồ sơ công ty để tạo mẫu.",
+  "col_when": "Thời gian",
+  "col_action": "Hành động",
+  "col_actor": "Người thực hiện",
+  "col_subject": "Đối tượng",
+  "filter_action": "Hành động",
+  "filter_action_all": "Tất cả hành động",
+  "filter_action_placeholder": "Chọn hành động",
+  "filter_subject_type": "Loại đối tượng",
+  "filter_subject_all": "Tất cả loại đối tượng",
+  "filter_subject_placeholder": "Chọn loại đối tượng",
+  "filter_date_from": "Từ ngày",
+  "filter_date_to": "Đến ngày",
+  "filter_apply": "Áp dụng bộ lọc",
+  "filter_reset": "Đặt lại",
+  "filter_domain": {
+    "settings": "Cài đặt",
+    "company": "Công ty",
+    "branch": "Chi nhánh",
+    "department": "Phòng ban",
+    "team": "Nhóm",
+    "position": "Vị trí",
+    "role": "Vai trò",
+    "user": "Người dùng",
+    "employee": "Nhân viên",
+    "shift": "Ca làm",
+    "overtime_rules": "Làm thêm giờ",
+    "attendance": "Chấm công",
+    "leave": "Nghỉ phép",
+    "payroll": "Lương",
+    "document": "Tài liệu",
+    "asset": "Tài sản",
+    "job_opening": "Tuyển dụng",
+    "candidate": "Ứng viên",
+    "interview": "Phỏng vấn",
+    "offer": "Offer",
+    "onboarding": "Nhận việc",
+    "performance": "Hiệu suất"
+  },
+  "detail_title": "Chi tiết sự kiện",
+  "detail_close": "Đóng",
+  "detail_hint": "Chọn một dòng để xem toàn bộ dữ liệu sự kiện.",
+  "detail_ip": "Địa chỉ IP",
+  "detail_payload": "Dữ liệu",
+  "detail_no_payload": "Không có dữ liệu.",
+  "detail_action_code": "Mã hành động",
+  "actor_user": "Người dùng #{{id}}",
+  "subject_with_id": "{{type}} #{{id}}",
+  "actions": {
+    "settings": {
+      "updated": "Cập nhật cài đặt"
+    },
+    "company": {
+      "updated": "Cập nhật công ty"
+    },
+    "branch": {
+      "created": "Tạo chi nhánh",
+      "updated": "Cập nhật chi nhánh",
+      "deleted": "Xóa chi nhánh"
+    },
+    "department": {
+      "created": "Tạo phòng ban",
+      "updated": "Cập nhật phòng ban",
+      "deleted": "Xóa phòng ban"
+    },
+    "team": {
+      "created": "Tạo nhóm",
+      "updated": "Cập nhật nhóm",
+      "deleted": "Xóa nhóm"
+    },
+    "position": {
+      "created": "Tạo vị trí",
+      "updated": "Cập nhật vị trí",
+      "deleted": "Xóa vị trí"
+    },
+    "role": {
+      "created": "Tạo vai trò",
+      "updated": "Cập nhật vai trò",
+      "deleted": "Xóa vai trò",
+      "permissions_synced": "Cập nhật quyền vai trò"
+    },
+    "user": {
+      "roles_synced": "Cập nhật vai trò người dùng"
+    },
+    "employee": {
+      "created": "Tạo nhân viên",
+      "updated": "Cập nhật nhân viên",
+      "archived": "Lưu trữ nhân viên",
+      "status_changed": "Đổi trạng thái nhân viên",
+      "emergency_contacts_updated": "Cập nhật liên hệ khẩn cấp",
+      "education_created": "Thêm học vấn",
+      "education_updated": "Cập nhật học vấn",
+      "education_deleted": "Xóa học vấn",
+      "work_history_created": "Thêm quá trình công tác",
+      "work_history_updated": "Cập nhật quá trình công tác",
+      "work_history_deleted": "Xóa quá trình công tác",
+      "family_member_created": "Thêm thành viên gia đình",
+      "family_member_updated": "Cập nhật thành viên gia đình",
+      "family_member_deleted": "Xóa thành viên gia đình",
+      "contract_created": "Tạo hợp đồng",
+      "contract_updated": "Cập nhật hợp đồng",
+      "bank_account_updated": "Cập nhật tài khoản ngân hàng",
+      "tax_profile_updated": "Cập nhật hồ sơ thuế",
+      "insurance_updated": "Cập nhật bảo hiểm",
+      "password_changed": "Đổi mật khẩu nhân viên",
+      "password_reset_to_default": "Đặt lại mật khẩu mặc định cho nhân viên"
+    },
+    "shift": {
+      "created": "Tạo ca làm",
+      "updated": "Cập nhật ca làm",
+      "deleted": "Xóa ca làm",
+      "assignment_created": "Tạo phân ca",
+      "assignment_updated": "Cập nhật phân ca",
+      "assignment_deleted": "Xóa phân ca"
+    },
+    "overtime_rules": {
+      "updated": "Cập nhật quy tắc làm thêm giờ"
+    },
+    "attendance": {
+      "checked_in": "Chấm công vào",
+      "checked_out": "Chấm công ra",
+      "record_approved": "Duyệt bản ghi chấm công",
+      "period_locked": "Khóa kỳ chấm công",
+      "correction_requested": "Yêu cầu sửa chấm công",
+      "correction_approved": "Duyệt sửa chấm công",
+      "correction_rejected": "Từ chối sửa chấm công"
+    },
+    "leave": {
+      "requested": "Xin nghỉ phép",
+      "cancelled": "Hủy đơn nghỉ",
+      "approved": "Duyệt nghỉ phép",
+      "rejected": "Từ chối nghỉ phép",
+      "balance_adjusted": "Điều chỉnh số dư phép",
+      "type_created": "Tạo loại nghỉ",
+      "type_updated": "Cập nhật loại nghỉ",
+      "holiday_created": "Tạo ngày lễ",
+      "holiday_deleted": "Xóa ngày lễ",
+      "weekend_rules_updated": "Cập nhật quy tắc cuối tuần"
+    },
+    "payroll": {
+      "run_created": "Tạo kỳ lương",
+      "run_calculated": "Tính toán kỳ lương",
+      "run_approved": "Duyệt kỳ lương",
+      "run_finalized": "Chốt kỳ lương",
+      "salary_changed": "Thay đổi lương",
+      "allowances_replaced": "Thay thế phụ cấp",
+      "deductions_replaced": "Thay thế khấu trừ",
+      "bonuses_replaced": "Thay thế thưởng"
+    },
+    "document": {
+      "uploaded": "Tải lên tài liệu",
+      "updated": "Cập nhật tài liệu",
+      "deleted": "Xóa tài liệu"
+    },
+    "asset": {
+      "created": "Tạo tài sản",
+      "updated": "Cập nhật tài sản",
+      "retired": "Thanh lý tài sản",
+      "assigned": "Cấp phát tài sản",
+      "returned": "Thu hồi tài sản",
+      "maintenance_added": "Ghi nhận bảo trì tài sản",
+      "damage_reported": "Báo hỏng tài sản",
+      "replaced": "Thay thế tài sản"
+    },
+    "job_opening": {
+      "created": "Tạo vị trí tuyển dụng",
+      "updated": "Cập nhật vị trí tuyển dụng",
+      "closed": "Đóng vị trí tuyển dụng"
+    },
+    "candidate": {
+      "created": "Tạo ứng viên",
+      "updated": "Cập nhật ứng viên",
+      "stage_changed": "Đổi giai đoạn ứng viên"
+    },
+    "interview": {
+      "scheduled": "Lên lịch phỏng vấn",
+      "evaluated": "Đánh giá phỏng vấn"
+    },
+    "offer": {
+      "created": "Tạo offer",
+      "sent": "Gửi offer",
+      "accepted": "Chấp nhận offer",
+      "rejected": "Từ chối offer"
+    },
+    "onboarding": {
+      "started": "Bắt đầu nhận việc",
+      "task_completed": "Hoàn thành nhiệm vụ nhận việc",
+      "task_reopened": "Mở lại nhiệm vụ nhận việc",
+      "completed": "Hoàn tất nhận việc",
+      "template_created": "Tạo mẫu nhận việc",
+      "template_updated": "Cập nhật mẫu nhận việc",
+      "account_provisioned": "Cấp tài khoản"
+    },
+    "performance": {
+      "goal_created": "Tạo mục tiêu",
+      "goal_updated": "Cập nhật mục tiêu",
+      "cycle_created": "Tạo chu kỳ đánh giá",
+      "cycle_started": "Bắt đầu chu kỳ đánh giá",
+      "cycle_finalized": "Chốt chu kỳ đánh giá",
+      "evaluation_submitted": "Gửi đánh giá hiệu suất",
+      "promotion_suggested": "Gợi ý thăng tiến",
+      "promotion_acknowledged": "Xác nhận gợi ý thăng tiến"
+    }
+  },
+  "subjects": {
+    "Company": "Công ty",
+    "Branch": "Chi nhánh",
+    "Department": "Phòng ban",
+    "Team": "Nhóm",
+    "Position": "Vị trí",
+    "Employee": "Nhân viên",
+    "Role": "Vai trò",
+    "User": "Người dùng",
+    "Setting": "Cài đặt",
+    "LeaveRequest": "Đơn nghỉ phép",
+    "LeaveType": "Loại nghỉ",
+    "LeaveBalance": "Số dư phép",
+    "Holiday": "Ngày lễ",
+    "WeekendRule": "Quy tắc cuối tuần",
+    "Shift": "Ca làm",
+    "ShiftAssignment": "Phân ca",
+    "OvertimeRule": "Quy tắc làm thêm giờ",
+    "AttendanceRecord": "Bản ghi chấm công",
+    "AttendanceCorrection": "Yêu cầu sửa chấm công",
+    "PayrollRun": "Kỳ lương",
+    "EmployeeSalary": "Lương nhân viên",
+    "Document": "Tài liệu",
+    "Asset": "Tài sản",
+    "AssetAssignment": "Cấp phát tài sản",
+    "AssetMaintenance": "Bảo trì tài sản",
+    "AssetDamageReport": "Báo hỏng tài sản",
+    "JobOpening": "Vị trí tuyển dụng",
+    "Candidate": "Ứng viên",
+    "Interview": "Phỏng vấn",
+    "Offer": "Offer",
+    "OnboardingCase": "Hồ sơ nhận việc",
+    "OnboardingTask": "Nhiệm vụ nhận việc",
+    "OnboardingTemplate": "Mẫu nhận việc",
+    "PerformanceGoal": "Mục tiêu hiệu suất",
+    "PerformanceReviewCycle": "Chu kỳ đánh giá",
+    "PerformanceEvaluation": "Đánh giá hiệu suất",
+    "PerformancePromotionSuggestion": "Gợi ý thăng tiến"
+  }
+}
