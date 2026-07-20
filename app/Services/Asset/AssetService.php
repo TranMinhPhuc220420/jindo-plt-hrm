@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
@@ -308,9 +309,9 @@ class AssetService
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, AssetMaintenance>
+     * @return Collection<int, AssetMaintenance>
      */
-    public function listMaintenances(Asset $asset): \Illuminate\Database\Eloquent\Collection
+    public function listMaintenances(Asset $asset): Collection
     {
         $this->assertCompanyScope($asset->company_id);
 

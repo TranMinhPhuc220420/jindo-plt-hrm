@@ -5,7 +5,7 @@ import {
     startOfMonth,
     subMonths,
 } from 'date-fns';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScheduleMonthCalendar } from '@/components/my-schedule/schedule-month-calendar';
 import { ScheduleTable } from '@/components/my-schedule/schedule-table';
@@ -20,6 +20,7 @@ import {
     ErrorState,
     LoadingState,
 } from '@/components/shared/async-state';
+import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import * as shiftApi from '@/lib/api/modules/shifts';
 import type { WorkingCalendarDay } from '@/lib/api/modules/shifts';
@@ -103,9 +104,7 @@ export function WorkingSchedulePreview({
         }
     }, [employeeId, queryRange.from, queryRange.to, t]);
 
-    useEffect(() => {
-        void load();
-    }, [load, refreshKey]);
+    useLoadEffect(load, [load, refreshKey]);
 
     const handleViewChange = (next: ScheduleViewMode) => {
         setView(next);

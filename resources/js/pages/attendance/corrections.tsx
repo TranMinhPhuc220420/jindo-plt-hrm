@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { format, isValid, parse } from 'date-fns';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -23,6 +23,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import * as attendanceApi from '@/lib/api/modules/attendance';
 import type {
@@ -100,9 +101,7 @@ export default function AttendanceCorrectionsPage() {
         }
     }, [employeeId, canViewOthers, t]);
 
-    useEffect(() => {
-        void load();
-    }, [load]);
+    useLoadEffect(load, [load]);
 
     const selectedExists = useMemo(
         () => records.some((row) => String(row.id) === recordId),

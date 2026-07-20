@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\CandidateFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Candidate extends Model
 {
-    /** @use HasFactory<\Database\Factories\CandidateFactory> */
+    /** @use HasFactory<CandidateFactory> */
     use HasFactory;
 
     public const STAGES = ['applied', 'screening', 'interview', 'offer', 'hired', 'rejected', 'withdrawn'];

@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { Download, Eye } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -21,6 +21,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import * as payrollApi from '@/lib/api/modules/payroll';
 import type { Payslip } from '@/lib/api/modules/payroll';
@@ -82,9 +83,7 @@ export default function PayrollPayslipsPage() {
         }
     }, [employeeFilter, t]);
 
-    useEffect(() => {
-        void load();
-    }, [load]);
+    useLoadEffect(load, [load]);
 
     const breakdown = useMemo(() => {
         if (!selected) {

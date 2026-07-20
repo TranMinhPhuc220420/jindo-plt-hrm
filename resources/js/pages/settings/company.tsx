@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -12,6 +12,7 @@ import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import * as settingsApi from '@/lib/api/modules/settings';
 import type { SettingsMap } from '@/lib/api/modules/settings';
@@ -52,9 +53,7 @@ export default function CompanySettingsPage() {
         }
     }, [t]);
 
-    useEffect(() => {
-        void load();
-    }, [load]);
+    useLoadEffect(load, [load]);
 
     function settingLabel(key: string): string {
         if ((SETTING_KEY_LABELS as readonly string[]).includes(key)) {

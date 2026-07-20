@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\PerformanceReviewCycleFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PerformanceReviewCycle extends Model
 {
-    /** @use HasFactory<\Database\Factories\PerformanceReviewCycleFactory> */
+    /** @use HasFactory<PerformanceReviewCycleFactory> */
     use HasFactory;
 
     public const STATUSES = ['draft', 'active', 'finalized'];

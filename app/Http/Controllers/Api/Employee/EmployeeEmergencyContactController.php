@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Employee;
 
 use App\Http\Controllers\Controller;
-use App\Models\Employee;
 use App\Services\Employee\EmployeeService;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;

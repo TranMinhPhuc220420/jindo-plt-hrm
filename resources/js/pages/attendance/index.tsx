@@ -1,5 +1,5 @@
 import { endOfMonth, startOfMonth } from 'date-fns';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { AttendanceRecordsTable } from '@/components/attendance/attendance-records-table';
@@ -14,6 +14,7 @@ import {
 import { DateRangePicker } from '@/components/shared/date-range-picker';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import * as attendanceApi from '@/lib/api/modules/attendance';
 import type {
@@ -159,17 +160,11 @@ export default function AttendanceIndexPage() {
         }
     }, [employeeId, dateFrom, dateTo, t]);
 
-    useEffect(() => {
-        void loadRecords();
-    }, [loadRecords]);
+    useLoadEffect(loadRecords, [loadRecords]);
 
-    useEffect(() => {
-        void loadSummary();
-    }, [loadSummary]);
+    useLoadEffect(loadSummary, [loadSummary]);
 
-    useEffect(() => {
-        void loadToday();
-    }, [loadToday]);
+    useLoadEffect(loadToday, [loadToday]);
 
     async function refreshAll() {
         await Promise.all([loadRecords(), loadSummary(), loadToday()]);

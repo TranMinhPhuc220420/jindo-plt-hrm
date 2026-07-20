@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import * as documentsApi from '@/lib/api/modules/documents';
 import type {
@@ -83,9 +84,7 @@ export default function DocumentsIndexPage() {
         }
     }, [filterOwner, filterCategory, t]);
 
-    useEffect(() => {
-        void load();
-    }, [load]);
+    useLoadEffect(load, [load]);
 
     function resetUploadForm() {
         setFile(null);

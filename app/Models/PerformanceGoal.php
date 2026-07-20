@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\PerformanceGoalFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PerformanceGoal extends Model
 {
-    /** @use HasFactory<\Database\Factories\PerformanceGoalFactory> */
+    /** @use HasFactory<PerformanceGoalFactory> */
     use HasFactory;
 
     public const TYPES = ['goal', 'kpi', 'okr'];

@@ -43,7 +43,7 @@ class AuditLog extends Model
     }
 
     /**
-     * @return MorphTo<\Illuminate\Database\Eloquent\Model, $this>
+     * @return MorphTo<Model, $this>
      */
     public function actor(): MorphTo
     {
@@ -51,7 +51,7 @@ class AuditLog extends Model
     }
 
     /**
-     * @return MorphTo<\Illuminate\Database\Eloquent\Model, $this>
+     * @return MorphTo<Model, $this>
      */
     public function subject(): MorphTo
     {

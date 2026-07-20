@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Models\LeaveBalance;
 use App\Models\User;
 
 class LeaveBalancePolicy

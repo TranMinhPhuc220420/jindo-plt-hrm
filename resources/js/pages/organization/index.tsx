@@ -1,5 +1,5 @@
 import { ChevronDown } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -13,6 +13,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import * as orgApi from '@/lib/api/modules/organization';
 import type { OrganizationTree } from '@/lib/api/modules/organization';
@@ -98,9 +99,7 @@ export default function OrganizationPage() {
         }
     }, [t]);
 
-    useEffect(() => {
-        void load();
-    }, [load]);
+    useLoadEffect(load, [load]);
 
     const selectedNode = useMemo(
         () => (tree ? resolveOrgNode(tree, selection) : null),

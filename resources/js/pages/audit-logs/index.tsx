@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import AdminPageShell from '@/components/shared/admin-page-shell';
 import {
@@ -8,7 +8,6 @@ import {
 } from '@/components/shared/async-state';
 import { DateRangePicker } from '@/components/shared/date-range-picker';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
     Select,
@@ -19,6 +18,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import * as auditApi from '@/lib/api/modules/audit';
 import type { AuditLog } from '@/lib/api/modules/audit';
@@ -87,7 +87,7 @@ export default function AuditLogsPage() {
         [t],
     );
 
-    useEffect(() => {
+    useLoadEffect(() => {
         void load(1, applied);
     }, [load, applied]);
 

@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -10,6 +10,7 @@ import {
 } from '@/components/shared/async-state';
 import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
+import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import * as onboardingApi from '@/lib/api/modules/onboarding';
 import type {
@@ -53,9 +54,7 @@ export default function OnboardingShowPage({ id }: Props) {
         }
     }, [id, t]);
 
-    useEffect(() => {
-        void load();
-    }, [load]);
+    useLoadEffect(load, [load]);
 
     async function withBusy(fn: () => Promise<void>) {
         setBusy(true);

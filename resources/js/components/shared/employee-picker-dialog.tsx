@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import * as employeesApi from '@/lib/api/modules/employees';
 import type { Employee } from '@/lib/api/modules/employees';
@@ -61,18 +62,19 @@ export function EmployeePickerDialog({
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [wasOpen, setWasOpen] = useState(open);
+
+    if (open !== wasOpen) {
+        setWasOpen(open);
+
+        if (open) {
+            setSearch('');
+            setStatus(statusDefault);
+            setDepartmentId('');
+        }
+    }
 
     const debouncedSearch = useDebouncedValue(search, 300);
-
-    useEffect(() => {
-        if (!open) {
-            return;
-        }
-
-        setSearch('');
-        setStatus(statusDefault);
-        setDepartmentId('');
-    }, [open, statusDefault]);
 
     useEffect(() => {
         if (!open) {
@@ -135,7 +137,7 @@ export function EmployeePickerDialog({
         }
     }, [debouncedSearch, status, departmentId, t]);
 
-    useEffect(() => {
+    useLoadEffect(() => {
         if (!open) {
             return;
         }

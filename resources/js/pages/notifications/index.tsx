@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -9,6 +9,7 @@ import {
     LoadingState,
 } from '@/components/shared/async-state';
 import { Button } from '@/components/ui/button';
+import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import * as notificationsApi from '@/lib/api/modules/notifications';
 import type {
@@ -55,9 +56,7 @@ export default function NotificationsPage() {
         }
     }, [t, unreadOnly]);
 
-    useEffect(() => {
-        void load();
-    }, [load]);
+    useLoadEffect(load, [load]);
 
     async function handleMarkRead(id: number) {
         try {

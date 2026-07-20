@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Organization;
 
+use App\Services\Organization\CompanyContext;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -17,7 +18,7 @@ class UpdateTeamRequest extends FormRequest
      */
     public function rules(): array
     {
-        $companyId = app(\App\Services\Organization\CompanyContext::class)->id();
+        $companyId = app(CompanyContext::class)->id();
         $teamId = (int) $this->route('team');
 
         return [

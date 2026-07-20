@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { Input } from '@/components/ui/input';
 import {
@@ -34,10 +34,14 @@ export function CurrencyInput({
 }: CurrencyInputProps) {
     const code = normalizeCurrency(currency);
     const [display, setDisplay] = useState(() => formatMoneyInput(value, code));
+    const [prevValue, setPrevValue] = useState(value);
+    const [prevCode, setPrevCode] = useState(code);
 
-    useEffect(() => {
+    if (value !== prevValue || code !== prevCode) {
+        setPrevValue(value);
+        setPrevCode(code);
         setDisplay(formatMoneyInput(value, code));
-    }, [value, code]);
+    }
 
     return (
         <Input

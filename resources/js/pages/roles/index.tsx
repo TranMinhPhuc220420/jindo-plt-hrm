@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import type { Employee } from '@/lib/api/modules/employees';
 import * as rolesApi from '@/lib/api/modules/roles';
@@ -166,10 +167,7 @@ export default function RolesPage() {
         }
     }, [selectedRoleId, t]);
 
-    useEffect(() => {
-        void load();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    useLoadEffect(load, []);
 
     function selectRole(role: Role) {
         setSelectedRoleId(role.id);

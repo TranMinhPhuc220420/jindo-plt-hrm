@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\OnboardingCaseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OnboardingCase extends Model
 {
-    /** @use HasFactory<\Database\Factories\OnboardingCaseFactory> */
+    /** @use HasFactory<OnboardingCaseFactory> */
     use HasFactory;
 
     public const STATUSES = ['in_progress', 'completed', 'cancelled'];

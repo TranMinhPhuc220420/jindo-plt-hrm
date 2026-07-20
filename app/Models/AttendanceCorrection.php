@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\AttendanceCorrectionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AttendanceCorrection extends Model
 {
-    /** @use HasFactory<\Database\Factories\AttendanceCorrectionFactory> */
+    /** @use HasFactory<AttendanceCorrectionFactory> */
     use HasFactory;
 
     public const STATUSES = [

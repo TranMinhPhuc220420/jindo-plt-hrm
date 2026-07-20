@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class RoleService
@@ -28,7 +29,7 @@ class RoleService
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Permission>
+     * @return Collection<int, Permission>
      */
     public function listPermissions()
     {
@@ -139,7 +140,7 @@ class RoleService
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Role>
+     * @return Collection<int, Role>
      */
     public function userRoles(User $user)
     {

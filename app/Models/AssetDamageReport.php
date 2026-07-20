@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\AssetDamageReportFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AssetDamageReport extends Model
 {
-    /** @use HasFactory<\Database\Factories\AssetDamageReportFactory> */
+    /** @use HasFactory<AssetDamageReportFactory> */
     use HasFactory;
 
     protected $fillable = [

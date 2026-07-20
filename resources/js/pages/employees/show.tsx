@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -9,6 +9,7 @@ import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import * as employeeApi from '@/lib/api/modules/employees';
 import type { Employee, EmployeeStatus } from '@/lib/api/modules/employees';
@@ -106,9 +107,7 @@ export default function EmployeeShowPage({ id }: Props) {
         }
     }, [can, id, t]);
 
-    useEffect(() => {
-        void load();
-    }, [load]);
+    useLoadEffect(load, [load]);
 
     async function handleSaveProfile(event: FormEvent) {
         event.preventDefault();

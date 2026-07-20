@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import * as leaveApi from '@/lib/api/modules/leave';
 import type { Holiday } from '@/lib/api/modules/leave';
@@ -73,9 +74,7 @@ export default function LeaveHolidaysPage() {
         }
     }, [t]);
 
-    useEffect(() => {
-        void load();
-    }, [load]);
+    useLoadEffect(load, [load]);
 
     function resetHolidayForm() {
         setForm(emptyHolidayForm());

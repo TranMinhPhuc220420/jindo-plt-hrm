@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\EmployeeBonusFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmployeeBonus extends Model
 {
-    /** @use HasFactory<\Database\Factories\EmployeeBonusFactory> */
+    /** @use HasFactory<EmployeeBonusFactory> */
     use HasFactory;
 
     protected $fillable = [

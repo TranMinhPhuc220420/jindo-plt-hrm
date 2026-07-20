@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\OfferFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Offer extends Model
 {
-    /** @use HasFactory<\Database\Factories\OfferFactory> */
+    /** @use HasFactory<OfferFactory> */
     use HasFactory;
 
     public const STATUSES = ['draft', 'sent', 'accepted', 'rejected'];

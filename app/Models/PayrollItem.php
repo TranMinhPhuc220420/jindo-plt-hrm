@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\PayrollItemFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PayrollItem extends Model
 {
-    /** @use HasFactory<\Database\Factories\PayrollItemFactory> */
+    /** @use HasFactory<PayrollItemFactory> */
     use HasFactory;
 
     protected $fillable = [

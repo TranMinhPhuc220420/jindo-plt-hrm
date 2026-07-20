@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Organization\StoreBranchRequest;
 use App\Http\Requests\Organization\UpdateBranchRequest;
 use App\Http\Resources\BranchResource;
-use App\Models\Branch;
 use App\Services\Organization\OrganizationService;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;

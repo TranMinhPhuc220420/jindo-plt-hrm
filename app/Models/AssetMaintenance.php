@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\AssetMaintenanceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AssetMaintenance extends Model
 {
-    /** @use HasFactory<\Database\Factories\AssetMaintenanceFactory> */
+    /** @use HasFactory<AssetMaintenanceFactory> */
     use HasFactory;
 
     public const STATUSES = ['scheduled', 'in_progress', 'completed', 'cancelled'];

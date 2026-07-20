@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\CandidateEvaluationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CandidateEvaluation extends Model
 {
-    /** @use HasFactory<\Database\Factories\CandidateEvaluationFactory> */
+    /** @use HasFactory<CandidateEvaluationFactory> */
     use HasFactory;
 
     public const RECOMMENDATIONS = ['hire', 'no_hire', 'hold'];

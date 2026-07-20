@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\PerformancePromotionSuggestionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PerformancePromotionSuggestion extends Model
 {
-    /** @use HasFactory<\Database\Factories\PerformancePromotionSuggestionFactory> */
+    /** @use HasFactory<PerformancePromotionSuggestionFactory> */
     use HasFactory;
 
     public const STATUSES = ['suggested', 'acknowledged'];

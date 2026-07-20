@@ -1,5 +1,5 @@
 import { XIcon } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EmployeePickerDialog } from '@/components/shared/employee-picker-dialog';
@@ -40,24 +40,27 @@ export function EmployeePickerField({
     const [open, setOpen] = useState(false);
     const [selected, setSelected] = useState<Employee | null>(null);
     const [loadingLabel, setLoadingLabel] = useState(false);
-    const selectedRef = useRef<Employee | null>(null);
-    selectedRef.current = selected;
+
+    if (value === null && selected !== null) {
+        setSelected(null);
+    }
 
     useEffect(() => {
-        if (value === null) {
-            setSelected(null);
-
-            return;
-        }
-
-        if (selectedRef.current?.id === value) {
+        if (value === null || selected?.id === value) {
             return;
         }
 
         let cancelled = false;
-        setLoadingLabel(true);
 
         void (async () => {
+            await Promise.resolve();
+
+            if (cancelled) {
+                return;
+            }
+
+            setLoadingLabel(true);
+
             try {
                 const employee = await employeesApi.getEmployee(value);
 
@@ -78,7 +81,7 @@ export function EmployeePickerField({
         return () => {
             cancelled = true;
         };
-    }, [value]);
+    }, [value, selected?.id]);
 
     function handleSelect(employee: Employee) {
         setSelected(employee);

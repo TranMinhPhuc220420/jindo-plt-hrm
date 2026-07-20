@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\OvertimeRuleFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OvertimeRule extends Model
 {
-    /** @use HasFactory<\Database\Factories\OvertimeRuleFactory> */
+    /** @use HasFactory<OvertimeRuleFactory> */
     use HasFactory;
 
     protected $fillable = [

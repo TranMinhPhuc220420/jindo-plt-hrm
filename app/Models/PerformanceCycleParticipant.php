@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\PerformanceCycleParticipantFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PerformanceCycleParticipant extends Model
 {
-    /** @use HasFactory<\Database\Factories\PerformanceCycleParticipantFactory> */
+    /** @use HasFactory<PerformanceCycleParticipantFactory> */
     use HasFactory;
 
     protected $fillable = [

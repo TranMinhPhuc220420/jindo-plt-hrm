@@ -93,7 +93,10 @@ export function NotificationBell() {
             return;
         }
 
-        void refreshCount();
+        void (async () => {
+            await Promise.resolve();
+            void refreshCount();
+        })();
 
         const intervalId = window.setInterval(() => {
             void refreshCount();

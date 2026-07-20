@@ -90,11 +90,6 @@ export default function ReportsPage() {
         let cancelled = false;
         const filters = buildFilters();
 
-        setLoading(true);
-        setError(null);
-        setExportStatus(null);
-        setExporting(false);
-
         if (pollRef.current) {
             clearTimeout(pollRef.current);
             pollRef.current = null;
@@ -102,6 +97,11 @@ export default function ReportsPage() {
 
         const timer = setTimeout(() => {
             void (async () => {
+                setLoading(true);
+                setError(null);
+                setExportStatus(null);
+                setExporting(false);
+
                 try {
                     const result = await reportsApi.runReport(report, filters);
 
@@ -150,6 +150,8 @@ export default function ReportsPage() {
         }
     }
 
+    const pollFnRef = useRef<(id: number) => void>(() => {});
+
     const poll = useCallback(
         (id: number) => {
             pollRef.current = setTimeout(async () => {
@@ -158,7 +160,7 @@ export default function ReportsPage() {
                     setExportStatus(model.status);
 
                     if (model.status === 'pending') {
-                        poll(id);
+                        pollFnRef.current(id);
                     } else if (model.status === 'ready') {
                         setExporting(false);
                         toast.success(t('export_ready'));
@@ -175,6 +177,10 @@ export default function ReportsPage() {
         },
         [t],
     );
+
+    useEffect(() => {
+        pollFnRef.current = poll;
+    }, [poll]);
 
     async function handleExport() {
         setExporting(true);
