@@ -16,7 +16,9 @@ type UnauthorizedHandler = () => void;
 
 let onUnauthorized: UnauthorizedHandler | null = null;
 
-export function setUnauthorizedHandler(handler: UnauthorizedHandler | null): void {
+export function setUnauthorizedHandler(
+    handler: UnauthorizedHandler | null,
+): void {
     onUnauthorized = handler;
 }
 
@@ -48,7 +50,11 @@ export async function ensureCsrfCookie(): Promise<void> {
         }).then((response) => {
             if (!response.ok) {
                 csrfPromise = null;
-                throw new ApiError('Unable to initialize CSRF cookie.', response.status);
+
+                throw new ApiError(
+                    'Unable to initialize CSRF cookie.',
+                    response.status,
+                );
             }
         });
     }
@@ -104,7 +110,10 @@ export async function apiRequest<T>(
         credentials: 'same-origin',
         headers,
         signal: options.signal,
-        body: options.body === undefined ? undefined : JSON.stringify(options.body),
+        body:
+            options.body === undefined
+                ? undefined
+                : JSON.stringify(options.body),
     });
 
     const body = await parseBody(response);
@@ -131,7 +140,10 @@ export async function apiRequest<T>(
     throw new ApiError('Unexpected API response shape.', response.status);
 }
 
-export function apiGet<T>(path: string, options?: Omit<RequestOptions, 'method' | 'body'>) {
+export function apiGet<T>(
+    path: string,
+    options?: Omit<RequestOptions, 'method' | 'body'>,
+) {
     return apiRequest<T>(path, { ...options, method: 'GET' });
 }
 
@@ -159,6 +171,9 @@ export function apiPatch<T>(
     return apiRequest<T>(path, { ...options, method: 'PATCH', body });
 }
 
-export function apiDelete<T>(path: string, options?: Omit<RequestOptions, 'method' | 'body'>) {
+export function apiDelete<T>(
+    path: string,
+    options?: Omit<RequestOptions, 'method' | 'body'>,
+) {
     return apiRequest<T>(path, { ...options, method: 'DELETE' });
 }

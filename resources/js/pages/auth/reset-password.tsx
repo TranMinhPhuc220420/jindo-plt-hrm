@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
@@ -8,8 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { ApiError } from '@/lib/api/errors';
-import i18n from '@/lib/i18n';
 import { resetPassword } from '@/lib/api/modules/auth';
+import i18n from '@/lib/i18n';
 
 type Props = {
     token: string;
@@ -101,9 +102,7 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
                         autoComplete="new-password"
                         className="mt-1 block w-full"
                         required
-                        placeholder={t(
-                            'register.confirm_password_placeholder',
-                        )}
+                        placeholder={t('register.confirm_password_placeholder')}
                         passwordrules={passwordRules}
                         value={passwordConfirmation}
                         onChange={(event) =>

@@ -73,14 +73,19 @@ export type PromotionSuggestion = {
 
 // Review cycles
 
-export async function listCycles(params: { status?: string; per_page?: number } = {}) {
+export async function listCycles(
+    params: { status?: string; per_page?: number } = {},
+) {
     const query = new URLSearchParams();
+
     if (params.status) {
         query.set('status', params.status);
     }
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<ReviewCycle[]>(
         `/api/performance/review-cycles${suffix}`,
@@ -93,7 +98,9 @@ export async function listCycles(params: { status?: string; per_page?: number } 
 }
 
 export async function getCycle(id: number) {
-    const res = await apiGet<ReviewCycle>(`/api/performance/review-cycles/${id}`);
+    const res = await apiGet<ReviewCycle>(
+        `/api/performance/review-cycles/${id}`,
+    );
 
     return res.data;
 }
@@ -140,18 +147,23 @@ export async function listGoals(
     } = {},
 ) {
     const query = new URLSearchParams();
+
     if (params.employee_id) {
         query.set('employee_id', String(params.employee_id));
     }
+
     if (params.review_cycle_id) {
         query.set('review_cycle_id', String(params.review_cycle_id));
     }
+
     if (params.status) {
         query.set('status', params.status);
     }
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<PerformanceGoal[]>(
         `/api/performance/goals${suffix}`,
@@ -206,18 +218,26 @@ export async function updateGoal(
 // Evaluations
 
 export async function listEvaluations(
-    params: { review_cycle_id?: number; employee_id?: number; per_page?: number } = {},
+    params: {
+        review_cycle_id?: number;
+        employee_id?: number;
+        per_page?: number;
+    } = {},
 ) {
     const query = new URLSearchParams();
+
     if (params.review_cycle_id) {
         query.set('review_cycle_id', String(params.review_cycle_id));
     }
+
     if (params.employee_id) {
         query.set('employee_id', String(params.employee_id));
     }
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<PerformanceEvaluation[]>(
         `/api/performance/evaluations${suffix}`,
@@ -250,15 +270,19 @@ export async function listPromotionSuggestions(
     params: { status?: string; employee_id?: number; per_page?: number } = {},
 ) {
     const query = new URLSearchParams();
+
     if (params.status) {
         query.set('status', params.status);
     }
+
     if (params.employee_id) {
         query.set('employee_id', String(params.employee_id));
     }
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<PromotionSuggestion[]>(
         `/api/performance/promotion-suggestions${suffix}`,

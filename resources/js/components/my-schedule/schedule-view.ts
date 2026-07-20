@@ -9,6 +9,7 @@ export function readStoredScheduleView(): ScheduleViewMode {
 
     try {
         const raw = window.localStorage.getItem(SCHEDULE_VIEW_STORAGE_KEY);
+
         if (raw === 'table' || raw === 'calendar') {
             return raw;
         }

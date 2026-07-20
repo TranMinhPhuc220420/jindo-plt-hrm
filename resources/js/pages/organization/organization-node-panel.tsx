@@ -109,9 +109,7 @@ export default function OrganizationNodePanel({
                             <dt className="text-muted-foreground">
                                 {t('branch_label')}
                             </dt>
-                            <dd className="font-medium">
-                                {node.branchName}
-                            </dd>
+                            <dd className="font-medium">{node.branchName}</dd>
                         </div>
                         <div>
                             <dt className="text-muted-foreground">
@@ -129,9 +127,7 @@ export default function OrganizationNodePanel({
                             <dt className="text-muted-foreground">
                                 {t('branch_label')}
                             </dt>
-                            <dd className="font-medium">
-                                {node.branchName}
-                            </dd>
+                            <dd className="font-medium">{node.branchName}</dd>
                         </div>
                         <div>
                             <dt className="text-muted-foreground">

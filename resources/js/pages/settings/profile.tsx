@@ -50,7 +50,9 @@ export default function Profile({
                     {({ processing, errors }) => (
                         <>
                             <div className="grid gap-2">
-                                <Label htmlFor="name">{t('name', { ns: 'common' })}</Label>
+                                <Label htmlFor="name">
+                                    {t('name', { ns: 'common' })}
+                                </Label>
 
                                 <Input
                                     id="name"
@@ -59,9 +61,12 @@ export default function Profile({
                                     name="name"
                                     required
                                     autoComplete="name"
-                                    placeholder={t('register.name_placeholder', {
-                                        ns: 'auth',
-                                    })}
+                                    placeholder={t(
+                                        'register.name_placeholder',
+                                        {
+                                            ns: 'auth',
+                                        },
+                                    )}
                                 />
 
                                 <InputError
@@ -71,7 +76,9 @@ export default function Profile({
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">{t('email_address', { ns: 'common' })}</Label>
+                                <Label htmlFor="email">
+                                    {t('email_address', { ns: 'common' })}
+                                </Label>
 
                                 <Input
                                     id="email"
@@ -81,7 +88,9 @@ export default function Profile({
                                     name="email"
                                     required
                                     autoComplete="username"
-                                    placeholder={t('email_address', { ns: 'common' })}
+                                    placeholder={t('email_address', {
+                                        ns: 'common',
+                                    })}
                                 />
 
                                 <InputError

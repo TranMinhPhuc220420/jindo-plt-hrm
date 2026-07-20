@@ -68,11 +68,15 @@ export default function PasskeyItem({ passkey, onDelete }: Props) {
                         className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                     >
                         <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">{t('passkeys.remove_sr')}</span>
+                        <span className="sr-only">
+                            {t('passkeys.remove_sr')}
+                        </span>
                     </Button>
                 </DialogTrigger>
                 <DialogContent>
-                    <DialogTitle>{t('passkeys.confirm_remove_title')}</DialogTitle>
+                    <DialogTitle>
+                        {t('passkeys.confirm_remove_title')}
+                    </DialogTitle>
                     <DialogDescription>
                         {t('passkeys.confirm_remove_body', {
                             name: passkey.name,

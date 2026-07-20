@@ -2,10 +2,7 @@ import { Head } from '@inertiajs/react';
 import { CalendarOff, Users, Wallet, Bell } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-    ErrorState,
-    LoadingState,
-} from '@/components/shared/async-state';
+import { ErrorState, LoadingState } from '@/components/shared/async-state';
 import { ApiError } from '@/lib/api/errors';
 import * as dashboardApi from '@/lib/api/modules/dashboard';
 import type { DashboardSummary } from '@/lib/api/modules/dashboard';
@@ -43,8 +40,10 @@ export default function Dashboard() {
         (async () => {
             setLoading(true);
             setError(null);
+
             try {
                 const data = await dashboardApi.getSummary();
+
                 if (active) {
                     setSummary(data);
                 }

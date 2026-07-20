@@ -5,18 +5,17 @@ import {
     useEffect,
     useMemo,
     useState,
-    type ReactNode,
 } from 'react';
-import * as authApi from '@/lib/api/modules/auth';
+import type { ReactNode } from 'react';
 import { apiGet, setUnauthorizedHandler } from '@/lib/api/client';
+import * as authApi from '@/lib/api/modules/auth';
 import type { AuthPayload, AuthUser } from '@/lib/api/types';
 import {
     AuthContext,
     canPermission,
     emptyAuthSession,
-    type AuthContextValue,
-    type AuthSession,
 } from '@/lib/auth/auth-context';
+import type { AuthContextValue, AuthSession } from '@/lib/auth/auth-context';
 import { applyLocale, DEFAULT_LOCALE } from '@/lib/i18n';
 
 type Props = {
@@ -79,6 +78,7 @@ export function AuthProvider({ children }: Props) {
             setSession(me);
         } catch {
             clearSession();
+
             throw new Error('Failed to load /api/me');
         }
     }, [clearSession, setSession]);

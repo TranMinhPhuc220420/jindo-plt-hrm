@@ -31,8 +31,12 @@ export async function updateLocale(
     return response.data;
 }
 
-export async function forgotPassword(email: string): Promise<string | undefined> {
-    const response = await apiPost<null>('/api/auth/forgot-password', { email });
+export async function forgotPassword(
+    email: string,
+): Promise<string | undefined> {
+    const response = await apiPost<null>('/api/auth/forgot-password', {
+        email,
+    });
 
     return response.message;
 }

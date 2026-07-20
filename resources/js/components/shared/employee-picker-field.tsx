@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type MouseEvent } from 'react';
-import { useTranslation } from 'react-i18next';
 import { XIcon } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import type { MouseEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { EmployeePickerDialog } from '@/components/shared/employee-picker-dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -45,6 +46,7 @@ export function EmployeePickerField({
     useEffect(() => {
         if (value === null) {
             setSelected(null);
+
             return;
         }
 
@@ -58,6 +60,7 @@ export function EmployeePickerField({
         void (async () => {
             try {
                 const employee = await employeesApi.getEmployee(value);
+
                 if (!cancelled) {
                     setSelected(employee);
                 }

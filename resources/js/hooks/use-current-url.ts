@@ -51,7 +51,9 @@ export function useCurrentUrl(): UseCurrentUrlReturn {
             // Match the path itself or any nested child (/onboarding → /onboarding/1),
             // but not siblings that only share a string prefix (/reports ↛ /reports-x).
             const normalized =
-                path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
+                path.length > 1 && path.endsWith('/')
+                    ? path.slice(0, -1)
+                    : path;
 
             return (
                 urlToCompare === normalized ||

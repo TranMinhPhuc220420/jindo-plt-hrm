@@ -47,7 +47,9 @@ export default function OrganizationCompanyDialog({
                 </DialogHeader>
                 <form onSubmit={onSubmit} className="grid gap-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="company-name">{t('company_name')}</Label>
+                        <Label htmlFor="company-name">
+                            {t('company_name')}
+                        </Label>
                         <Input
                             id="company-name"
                             value={name}

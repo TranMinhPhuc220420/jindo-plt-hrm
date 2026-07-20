@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -74,6 +75,7 @@ export default function PerformanceIndexPage() {
 
     function handleCreateOpenChange(open: boolean) {
         setCreateOpen(open);
+
         if (!open) {
             resetCreateForm();
         }
@@ -94,7 +96,9 @@ export default function PerformanceIndexPage() {
             handleCreateOpenChange(false);
             await load();
         } catch (err) {
-            toast.error(err instanceof ApiError ? err.message : t('toast_error'));
+            toast.error(
+                err instanceof ApiError ? err.message : t('toast_error'),
+            );
         } finally {
             setBusy(false);
         }
@@ -117,7 +121,9 @@ export default function PerformanceIndexPage() {
                 <DialogContent className="sm:max-w-xl">
                     <DialogHeader>
                         <DialogTitle>{t('create_title')}</DialogTitle>
-                        <DialogDescription>{t('description')}</DialogDescription>
+                        <DialogDescription>
+                            {t('description')}
+                        </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleCreate} className="grid gap-4">
                         <div className="grid gap-1.5">
@@ -140,7 +146,7 @@ export default function PerformanceIndexPage() {
                             </Label>
                             <select
                                 id="cycle_framework"
-                                className="border-input bg-background h-9 rounded-md border px-3 text-sm"
+                                className="h-9 rounded-md border border-input bg-background px-3 text-sm"
                                 value={form.framework}
                                 onChange={(e) =>
                                     setForm((prev) => ({
@@ -200,7 +206,7 @@ export default function PerformanceIndexPage() {
             ) : (
                 <div className="overflow-x-auto rounded-lg border border-border">
                     <table className="w-full min-w-[640px] text-left text-sm">
-                        <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                        <thead className="bg-muted/50 text-xs text-muted-foreground uppercase">
                             <tr>
                                 <th className="px-3 py-2 font-medium">
                                     {t('col_name')}

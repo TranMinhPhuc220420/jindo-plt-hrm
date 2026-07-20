@@ -1,5 +1,5 @@
-import { format } from 'date-fns';
 import { Link } from '@inertiajs/react';
+import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AttendanceStatusBadge } from '@/components/attendance/attendance-status-badge';
@@ -25,6 +25,7 @@ function punchTimeLabel(value: string | null | undefined): string {
     // API may return ISO datetime; extract HH:mm for display.
     try {
         const date = new Date(value);
+
         if (!Number.isNaN(date.getTime())) {
             return format(date, 'HH:mm');
         }
@@ -48,10 +49,12 @@ export function TodayStatusCard({
 
     useEffect(() => {
         const id = window.setInterval(() => setNow(new Date()), 30_000);
+
         return () => window.clearInterval(id);
     }, []);
 
-    let stateKey: 'state_no_employee' | 'state_not_in' | 'state_working' | 'state_done' =
+    let stateKey:
+        'state_no_employee' | 'state_not_in' | 'state_working' | 'state_done' =
         'state_not_in';
 
     if (!employeeId) {
@@ -72,14 +75,16 @@ export function TodayStatusCard({
                     <p className="text-2xl font-semibold capitalize sm:text-3xl">
                         {format(now, 'EEEE, d MMMM yyyy', { locale })}
                     </p>
-                    <p className="tabular-nums text-muted-foreground">
+                    <p className="text-muted-foreground tabular-nums">
                         {format(now, 'HH:mm')}
                     </p>
-                    <p className="text-sm font-medium">{t(`index.${stateKey}`)}</p>
+                    <p className="text-sm font-medium">
+                        {t(`index.${stateKey}`)}
+                    </p>
 
                     {today ? (
                         <div className="flex flex-wrap items-center gap-2 pt-1 text-sm">
-                            <span className="tabular-nums text-muted-foreground">
+                            <span className="text-muted-foreground tabular-nums">
                                 {punchTimeLabel(today.check_in_at)}
                                 {' → '}
                                 {today.check_out_at

@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -82,6 +83,7 @@ export default function LeaveHolidaysPage() {
 
     function handleCreateOpenChange(open: boolean) {
         setCreateOpen(open);
+
         if (!open) {
             resetHolidayForm();
         }
@@ -214,7 +216,9 @@ export default function LeaveHolidaysPage() {
             </Dialog>
 
             <section className="mb-8 max-w-lg rounded-lg border border-border p-4">
-                <h2 className="mb-3 font-medium">{t('holidays.weekend_title')}</h2>
+                <h2 className="mb-3 font-medium">
+                    {t('holidays.weekend_title')}
+                </h2>
                 <div className="mb-3 flex flex-wrap gap-2">
                     {WEEKDAY_KEYS.map((key, day) => (
                         <Button
@@ -250,7 +254,7 @@ export default function LeaveHolidaysPage() {
             ) : (
                 <div className="overflow-x-auto rounded-lg border border-border">
                     <table className="min-w-full text-left text-sm">
-                        <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                        <thead className="bg-muted/50 text-xs text-muted-foreground uppercase">
                             <tr>
                                 <th className="px-3 py-2 font-medium">
                                     {t('holidays.date')}

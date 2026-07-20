@@ -29,6 +29,7 @@ function todayIso(): string {
 
 function defaultMonthRange(): { from: string; to: string } {
     const now = new Date();
+
     return {
         from: formatDateString(startOfMonth(now)),
         to: formatDateString(endOfMonth(now)),
@@ -111,10 +112,12 @@ export default function AttendanceIndexPage() {
             setRecords(result.data);
 
             const counts: Record<number, number> = {};
+
             for (const row of pending.data) {
                 const key = row.attendance_record_id;
                 counts[key] = (counts[key] ?? 0) + 1;
             }
+
             setPendingCorrectionCounts(counts);
         } catch (err) {
             setError(
@@ -247,7 +250,9 @@ export default function AttendanceIndexPage() {
                 }}
             >
                 <div className="space-y-1">
-                    <Label htmlFor="attendance_range">{t('index.date_range')}</Label>
+                    <Label htmlFor="attendance_range">
+                        {t('index.date_range')}
+                    </Label>
                     <DateRangePicker
                         id="attendance_range"
                         from={dateFrom}

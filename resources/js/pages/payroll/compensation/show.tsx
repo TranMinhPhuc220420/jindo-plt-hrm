@@ -1,12 +1,10 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
-import {
-    ErrorState,
-    LoadingState,
-} from '@/components/shared/async-state';
+import { ErrorState, LoadingState } from '@/components/shared/async-state';
 import {
     CurrencyInput,
     CurrencySelect,
@@ -20,11 +18,8 @@ import * as employeeApi from '@/lib/api/modules/employees';
 import type { Employee } from '@/lib/api/modules/employees';
 import * as payrollApi from '@/lib/api/modules/payroll';
 import type { CompensationComponent } from '@/lib/api/modules/payroll';
-import {
-    normalizeCurrency,
-    parseMoneyInput,
-    type AppCurrency,
-} from '@/lib/currency';
+import { normalizeCurrency, parseMoneyInput } from '@/lib/currency';
+import type { AppCurrency } from '@/lib/currency';
 
 type CompRow = {
     code: string;
@@ -99,6 +94,7 @@ export default function PayrollCompensationShowPage({ id }: Props) {
             const code = salary
                 ? normalizeCurrency(salary.currency)
                 : ('VND' as AppCurrency);
+
             if (salary) {
                 setCurrency(code);
                 setAmount(
@@ -340,9 +336,8 @@ export default function PayrollCompensationShowPage({ id }: Props) {
                                                 raw,
                                                 next,
                                             );
-                                            return n === null
-                                                ? ''
-                                                : String(n);
+
+                                            return n === null ? '' : String(n);
                                         };
                                         setAmount(remap(amount));
                                         setAllowances((rows) =>

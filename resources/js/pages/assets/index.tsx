@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -51,7 +52,9 @@ export default function AssetsIndexPage() {
             });
             setAssets(result.data);
         } catch (err) {
-            setError(err instanceof ApiError ? err.message : t('index.error_load'));
+            setError(
+                err instanceof ApiError ? err.message : t('index.error_load'),
+            );
         } finally {
             setLoading(false);
         }
@@ -67,6 +70,7 @@ export default function AssetsIndexPage() {
 
     function handleCreateOpenChange(open: boolean) {
         setCreateOpen(open);
+
         if (!open) {
             resetCreateForm();
         }
@@ -87,7 +91,9 @@ export default function AssetsIndexPage() {
             handleCreateOpenChange(false);
             await load();
         } catch (err) {
-            toast.error(err instanceof ApiError ? err.message : t('index.toast_error'));
+            toast.error(
+                err instanceof ApiError ? err.message : t('index.toast_error'),
+            );
         } finally {
             setBusy(false);
         }
@@ -117,7 +123,9 @@ export default function AssetsIndexPage() {
                     <form onSubmit={handleCreate} className="grid gap-4">
                         <div className="grid gap-3 sm:grid-cols-2">
                             <div className="grid gap-2">
-                                <Label htmlFor="asset-code">{t('index.code')}</Label>
+                                <Label htmlFor="asset-code">
+                                    {t('index.code')}
+                                </Label>
                                 <Input
                                     id="asset-code"
                                     value={form.code}
@@ -131,7 +139,9 @@ export default function AssetsIndexPage() {
                                 />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="asset-name">{t('index.name')}</Label>
+                                <Label htmlFor="asset-name">
+                                    {t('index.name')}
+                                </Label>
                                 <Input
                                     id="asset-name"
                                     value={form.name}
@@ -162,7 +172,9 @@ export default function AssetsIndexPage() {
                                 />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="asset-serial">{t('index.serial')}</Label>
+                                <Label htmlFor="asset-serial">
+                                    {t('index.serial')}
+                                </Label>
                                 <Input
                                     id="asset-serial"
                                     value={form.serial}
@@ -190,7 +202,9 @@ export default function AssetsIndexPage() {
             </Dialog>
 
             <div className="mb-4 grid max-w-xs gap-1">
-                <Label htmlFor="filter_status">{t('index.filter_status')}</Label>
+                <Label htmlFor="filter_status">
+                    {t('index.filter_status')}
+                </Label>
                 <select
                     id="filter_status"
                     className="h-9 rounded-md border border-input bg-background px-3 text-sm"
@@ -199,7 +213,13 @@ export default function AssetsIndexPage() {
                 >
                     <option value="">{t('index.all')}</option>
                     {(
-                        ['available', 'assigned', 'maintenance', 'retired', 'lost'] as const
+                        [
+                            'available',
+                            'assigned',
+                            'maintenance',
+                            'retired',
+                            'lost',
+                        ] as const
                     ).map((status) => (
                         <option key={status} value={status}>
                             {t(`status.${status}`)}
@@ -217,7 +237,7 @@ export default function AssetsIndexPage() {
             ) : (
                 <div className="overflow-x-auto rounded-lg border border-border">
                     <table className="min-w-full text-left text-sm">
-                        <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                        <thead className="bg-muted/50 text-xs text-muted-foreground uppercase">
                             <tr>
                                 <th className="px-3 py-2 font-medium">
                                     {t('index.col_code')}
@@ -251,7 +271,11 @@ export default function AssetsIndexPage() {
                                         })}
                                     </td>
                                     <td className="px-3 py-3 text-right">
-                                        <Button variant="outline" size="sm" asChild>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            asChild
+                                        >
                                             <Link href={`/assets/${asset.id}`}>
                                                 {t('index.open')}
                                             </Link>

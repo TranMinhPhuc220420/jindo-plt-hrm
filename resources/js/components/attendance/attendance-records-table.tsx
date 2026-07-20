@@ -1,5 +1,5 @@
-import { format, isSameDay, isValid, parse } from 'date-fns';
 import { Link } from '@inertiajs/react';
+import { format, isSameDay, isValid, parse } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { AttendanceStatusBadge } from '@/components/attendance/attendance-status-badge';
 import { formatDuration } from '@/components/attendance/format-minutes';
@@ -17,6 +17,7 @@ type Props = {
 
 function parseYmd(value: string) {
     const parsed = parse(value, 'yyyy-MM-dd', new Date());
+
     return isValid(parsed) ? parsed : undefined;
 }
 
@@ -26,6 +27,7 @@ function punchTime(value: string | null): string {
     }
 
     const date = new Date(value);
+
     if (Number.isNaN(date.getTime())) {
         return value;
     }
@@ -65,7 +67,8 @@ export function AttendanceRecordsTable({
                         const dateLabel = date
                             ? format(date, 'EEE, d MMM yyyy', { locale })
                             : row.work_date;
-                        const pendingCount = pendingCorrectionCounts[row.id] ?? 0;
+                        const pendingCount =
+                            pendingCorrectionCounts[row.id] ?? 0;
 
                         return (
                             <tr
@@ -77,7 +80,9 @@ export function AttendanceRecordsTable({
                                 )}
                             >
                                 <td className="px-3 py-2">
-                                    <span className="capitalize">{dateLabel}</span>
+                                    <span className="capitalize">
+                                        {dateLabel}
+                                    </span>
                                 </td>
                                 <td className="px-3 py-2">
                                     {row.employee ? (
@@ -111,7 +116,9 @@ export function AttendanceRecordsTable({
                                     {formatDuration(row.overtime_minutes, t)}
                                 </td>
                                 <td className="px-3 py-2">
-                                    <AttendanceStatusBadge status={row.status} />
+                                    <AttendanceStatusBadge
+                                        status={row.status}
+                                    />
                                 </td>
                                 <td className="px-3 py-2">
                                     <div className="flex flex-wrap items-center gap-1">
@@ -121,7 +128,9 @@ export function AttendanceRecordsTable({
                                                     type="button"
                                                     size="sm"
                                                     variant="ghost"
-                                                    onClick={() => onApprove(row.id)}
+                                                    onClick={() =>
+                                                        onApprove(row.id)
+                                                    }
                                                 >
                                                     {t('index.approve')}
                                                 </Button>

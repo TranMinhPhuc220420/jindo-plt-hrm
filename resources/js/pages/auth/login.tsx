@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
-import { useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
@@ -17,12 +18,12 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { OTP_MAX_LENGTH } from '@/hooks/use-two-factor-auth';
 import { ApiError } from '@/lib/api/errors';
-import i18n from '@/lib/i18n';
 import {
     challengeTwoFactor,
     login as loginRequest,
 } from '@/lib/api/modules/auth';
 import { useAuth } from '@/lib/auth/auth-context';
+import i18n from '@/lib/i18n';
 import { register } from '@/routes';
 import { request } from '@/routes/password';
 

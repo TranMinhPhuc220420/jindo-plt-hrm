@@ -68,17 +68,23 @@ export async function listCases(
     params: { status?: string; employee_id?: number; per_page?: number } = {},
 ) {
     const query = new URLSearchParams();
+
     if (params.status) {
         query.set('status', params.status);
     }
+
     if (params.employee_id) {
         query.set('employee_id', String(params.employee_id));
     }
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
-    const res = await apiGet<OnboardingCase[]>(`/api/onboarding-cases${suffix}`);
+    const res = await apiGet<OnboardingCase[]>(
+        `/api/onboarding-cases${suffix}`,
+    );
 
     return {
         data: res.data ?? [],
@@ -137,9 +143,11 @@ export async function reopenTask(taskId: number) {
 
 export async function listTemplates(params: { per_page?: number } = {}) {
     const query = new URLSearchParams();
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<OnboardingTemplate[]>(
         `/api/onboarding-templates${suffix}`,

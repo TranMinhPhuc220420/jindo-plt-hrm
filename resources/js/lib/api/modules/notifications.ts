@@ -22,15 +22,19 @@ export async function listNotifications(
     params: { unread_only?: boolean; type?: string; per_page?: number } = {},
 ) {
     const query = new URLSearchParams();
+
     if (params.unread_only) {
         query.set('unread_only', '1');
     }
+
     if (params.type) {
         query.set('type', params.type);
     }
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<Notification[]>(`/api/notifications${suffix}`);
 

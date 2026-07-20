@@ -48,13 +48,23 @@ export function ScheduleToolbar({
                 className="w-fit"
                 aria-label={t('my_schedule.title')}
             >
-                <ToggleGroupItem value="calendar" aria-label={t('my_schedule.view_calendar')}>
+                <ToggleGroupItem
+                    value="calendar"
+                    aria-label={t('my_schedule.view_calendar')}
+                >
                     <CalendarDays className="size-4" />
-                    <span className="hidden sm:inline">{t('my_schedule.view_calendar')}</span>
+                    <span className="hidden sm:inline">
+                        {t('my_schedule.view_calendar')}
+                    </span>
                 </ToggleGroupItem>
-                <ToggleGroupItem value="table" aria-label={t('my_schedule.view_table')}>
+                <ToggleGroupItem
+                    value="table"
+                    aria-label={t('my_schedule.view_table')}
+                >
                     <List className="size-4" />
-                    <span className="hidden sm:inline">{t('my_schedule.view_table')}</span>
+                    <span className="hidden sm:inline">
+                        {t('my_schedule.view_table')}
+                    </span>
                 </ToggleGroupItem>
             </ToggleGroup>
 
@@ -81,7 +91,12 @@ export function ScheduleToolbar({
                     >
                         <ChevronRight className="size-4" />
                     </Button>
-                    <Button type="button" variant="secondary" size="sm" onClick={onGoToday}>
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={onGoToday}
+                    >
                         {t('my_schedule.today')}
                     </Button>
                 </div>

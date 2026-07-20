@@ -43,7 +43,10 @@ export async function createRole(payload: {
     return res.data;
 }
 
-export async function syncRolePermissions(roleId: number, permissions: string[]) {
+export async function syncRolePermissions(
+    roleId: number,
+    permissions: string[],
+) {
     const res = await apiPut<Role>(`/api/roles/${roleId}/permissions`, {
         permissions,
     });

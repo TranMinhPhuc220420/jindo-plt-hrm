@@ -1,12 +1,10 @@
 import { ChevronDown } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
-import {
-    ErrorState,
-    LoadingState,
-} from '@/components/shared/async-state';
+import { ErrorState, LoadingState } from '@/components/shared/async-state';
 import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,21 +17,20 @@ import { ApiError } from '@/lib/api/errors';
 import * as orgApi from '@/lib/api/modules/organization';
 import type { OrganizationTree } from '@/lib/api/modules/organization';
 import { useAuth } from '@/lib/auth/auth-context';
+import { emptyEntityDialog, resolveOrgNode } from './org-types';
+import type {
+    DeleteDialogState,
+    EntityDialogState,
+    OrgEntityKind,
+    OrgSelection,
+    ResolvedOrgNode,
+} from './org-types';
 import OrganizationCompanyDialog from './organization-company-dialog';
 import OrganizationDeleteDialog from './organization-delete-dialog';
 import OrganizationEntityDialog from './organization-entity-dialog';
 import OrganizationNodePanel from './organization-node-panel';
 import OrganizationPositionsSection from './organization-positions-section';
 import OrganizationTreeView from './organization-tree';
-import {
-    emptyEntityDialog,
-    resolveOrgNode,
-    type DeleteDialogState,
-    type EntityDialogState,
-    type OrgEntityKind,
-    type OrgSelection,
-    type ResolvedOrgNode,
-} from './org-types';
 
 export default function OrganizationPage() {
     const { t } = useTranslation(['organization', 'common']);
@@ -53,9 +50,8 @@ export default function OrganizationPage() {
     const [companyFormName, setCompanyFormName] = useState('');
     const [companyFormEmail, setCompanyFormEmail] = useState('');
 
-    const [entityDialog, setEntityDialog] = useState<EntityDialogState>(
-        emptyEntityDialog(),
-    );
+    const [entityDialog, setEntityDialog] =
+        useState<EntityDialogState>(emptyEntityDialog());
     const [deleteDialog, setDeleteDialog] = useState<DeleteDialogState | null>(
         null,
     );
@@ -96,9 +92,7 @@ export default function OrganizationPage() {
                     : null;
             });
         } catch (err) {
-            setError(
-                err instanceof ApiError ? err.message : t('error_load'),
-            );
+            setError(err instanceof ApiError ? err.message : t('error_load'));
         } finally {
             setLoading(false);
         }
@@ -126,6 +120,7 @@ export default function OrganizationPage() {
                     ? err.message
                     : t('request_failed', { ns: 'common' }),
             );
+
             throw err;
         } finally {
             setBusy(false);
@@ -256,6 +251,7 @@ export default function OrganizationPage() {
                     }, t('toast_branch_created'));
                 } else if (dialog.kind === 'department') {
                     const branchId = dialog.branchId;
+
                     if (branchId === '') {
                         toast.error(t('error_select_branch'));
 
@@ -271,6 +267,7 @@ export default function OrganizationPage() {
                     }, t('toast_department_created'));
                 } else if (dialog.kind === 'team') {
                     const departmentId = dialog.departmentId;
+
                     if (departmentId === '') {
                         toast.error(t('error_select_department'));
 
@@ -398,8 +395,8 @@ export default function OrganizationPage() {
                                             branchId:
                                                 selectedNode?.kind === 'branch'
                                                     ? selectedNode.id
-                                                    : selectedNode?.branchId ??
-                                                      '',
+                                                    : (selectedNode?.branchId ??
+                                                      ''),
                                         })
                                     }
                                 >
@@ -412,17 +409,15 @@ export default function OrganizationPage() {
                                                 selectedNode?.kind ===
                                                 'department'
                                                     ? selectedNode.id
-                                                    : selectedNode?.departmentId ??
-                                                      '',
+                                                    : (selectedNode?.departmentId ??
+                                                      ''),
                                         })
                                     }
                                 >
                                     {t('add_team')}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                    onClick={() =>
-                                        openCreateDialog('position')
-                                    }
+                                    onClick={() => openCreateDialog('position')}
                                 >
                                     {t('add_position')}
                                 </DropdownMenuItem>
@@ -464,9 +459,8 @@ export default function OrganizationPage() {
 
                                     if (
                                         typeof window !== 'undefined' &&
-                                        window.matchMedia(
-                                            '(max-width: 767px)',
-                                        ).matches
+                                        window.matchMedia('(max-width: 767px)')
+                                            .matches
                                     ) {
                                         requestAnimationFrame(() => {
                                             document

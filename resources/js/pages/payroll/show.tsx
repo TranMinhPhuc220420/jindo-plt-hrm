@@ -1,5 +1,6 @@
 import { Link, router } from '@inertiajs/react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -26,7 +27,8 @@ import { ApiError } from '@/lib/api/errors';
 import * as payrollApi from '@/lib/api/modules/payroll';
 import type { PayrollItem, PayrollRun } from '@/lib/api/modules/payroll';
 import { loadCompanyCurrency } from '@/lib/company-currency';
-import { formatCurrency, type AppCurrency } from '@/lib/currency';
+import { formatCurrency } from '@/lib/currency';
+import type { AppCurrency } from '@/lib/currency';
 
 type Props = {
     id: number;
@@ -88,6 +90,7 @@ export default function PayrollShowPage({ id }: Props) {
 
     function handleEditOpenChange(open: boolean) {
         setEditOpen(open);
+
         if (!open && run) {
             setEditForm({
                 name: run.name,
@@ -167,7 +170,11 @@ export default function PayrollShowPage({ id }: Props) {
         <AdminPageShell
             title={run?.name ?? t('show.title')}
             description={t('show.description')}
-            any={['can_view_payroll_history', 'can_run_payroll', 'can_approve_payroll']}
+            any={[
+                'can_view_payroll_history',
+                'can_run_payroll',
+                'can_approve_payroll',
+            ]}
         >
             <div className="mb-4">
                 <Button variant="outline" asChild>
@@ -183,13 +190,17 @@ export default function PayrollShowPage({ id }: Props) {
                 <div className="space-y-8">
                     <div className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
                         <div>
-                            <p className="text-muted-foreground">{t('show.period')}</p>
+                            <p className="text-muted-foreground">
+                                {t('show.period')}
+                            </p>
                             <p>
                                 {run.period_start} → {run.period_end}
                             </p>
                         </div>
                         <div>
-                            <p className="text-muted-foreground">{t('show.status')}</p>
+                            <p className="text-muted-foreground">
+                                {t('show.status')}
+                            </p>
                             <p>
                                 {t(`status.${run.status}`, {
                                     defaultValue: run.status,
@@ -197,7 +208,9 @@ export default function PayrollShowPage({ id }: Props) {
                             </p>
                         </div>
                         <div>
-                            <p className="text-muted-foreground">{t('show.gross')}</p>
+                            <p className="text-muted-foreground">
+                                {t('show.gross')}
+                            </p>
                             <p className="tabular-nums">
                                 {formatCurrency(
                                     run.total_gross,
@@ -206,12 +219,11 @@ export default function PayrollShowPage({ id }: Props) {
                             </p>
                         </div>
                         <div>
-                            <p className="text-muted-foreground">{t('show.net')}</p>
+                            <p className="text-muted-foreground">
+                                {t('show.net')}
+                            </p>
                             <p className="tabular-nums">
-                                {formatCurrency(
-                                    run.total_net,
-                                    companyCurrency,
-                                )}
+                                {formatCurrency(run.total_net, companyCurrency)}
                             </p>
                         </div>
                     </div>
@@ -285,12 +297,17 @@ export default function PayrollShowPage({ id }: Props) {
                     <Dialog open={editOpen} onOpenChange={handleEditOpenChange}>
                         <DialogContent className="sm:max-w-xl">
                             <DialogHeader>
-                                <DialogTitle>{t('show.edit_title')}</DialogTitle>
+                                <DialogTitle>
+                                    {t('show.edit_title')}
+                                </DialogTitle>
                                 <DialogDescription>
                                     {t('show.edit_description')}
                                 </DialogDescription>
                             </DialogHeader>
-                            <form onSubmit={handleUpdate} className="grid gap-4">
+                            <form
+                                onSubmit={handleUpdate}
+                                className="grid gap-4"
+                            >
                                 <div className="grid gap-2">
                                     <Label htmlFor="payroll-edit-name">
                                         {t('index.name')}
@@ -330,7 +347,10 @@ export default function PayrollShowPage({ id }: Props) {
                                 </div>
                                 <DialogFooter>
                                     <DialogClose asChild>
-                                        <Button type="button" variant="secondary">
+                                        <Button
+                                            type="button"
+                                            variant="secondary"
+                                        >
                                             {t('cancel', { ns: 'common' })}
                                         </Button>
                                     </DialogClose>
@@ -373,8 +393,8 @@ export default function PayrollShowPage({ id }: Props) {
                                                 <td className="py-3 pr-4">
                                                     {item.employee_code
                                                         ? `${item.employee_code} — ${item.employee_name}`
-                                                        : item.employee_name ??
-                                                          `#${item.employee_id}`}
+                                                        : (item.employee_name ??
+                                                          `#${item.employee_id}`)}
                                                 </td>
                                                 <td className="py-3 pr-4 tabular-nums">
                                                     {formatCurrency(

@@ -1,6 +1,7 @@
-import { format, isValid, parse } from 'date-fns';
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { format, isValid, parse } from 'date-fns';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { AttendanceStatusBadge } from '@/components/attendance/attendance-status-badge';
@@ -29,11 +30,7 @@ import type {
     AttendanceRecord,
 } from '@/lib/api/modules/attendance';
 import { useAuth } from '@/lib/auth/auth-context';
-import {
-    dateFnsLocale,
-    formatPunchTime,
-    toApiDateTime,
-} from '@/lib/datetime';
+import { dateFnsLocale, formatPunchTime, toApiDateTime } from '@/lib/datetime';
 
 function readRecordIdFromQuery(): string {
     if (typeof window === 'undefined') {
@@ -41,6 +38,7 @@ function readRecordIdFromQuery(): string {
     }
 
     const value = new URLSearchParams(window.location.search).get('record_id');
+
     return value && /^\d+$/.test(value) ? value : '';
 }
 
@@ -223,7 +221,9 @@ export default function AttendanceCorrectionsPage() {
                         </div>
                     </div>
                     <div className="space-y-1">
-                        <Label htmlFor="reason">{t('corrections.reason')}</Label>
+                        <Label htmlFor="reason">
+                            {t('corrections.reason')}
+                        </Label>
                         <Input
                             id="reason"
                             value={reason}
@@ -233,7 +233,9 @@ export default function AttendanceCorrectionsPage() {
                     </div>
                     <Button
                         type="submit"
-                        disabled={submitting || !recordId || records.length === 0}
+                        disabled={
+                            submitting || !recordId || records.length === 0
+                        }
                     >
                         {t('corrections.submit')}
                     </Button>
@@ -261,6 +263,7 @@ export default function AttendanceCorrectionsPage() {
                                       'yyyy-MM-dd',
                                       new Date(),
                                   );
+
                                   return isValid(parsed)
                                       ? format(parsed, 'EEE, d MMM yyyy', {
                                             locale,
@@ -285,14 +288,14 @@ export default function AttendanceCorrectionsPage() {
                                             <span className="font-medium">
                                                 {employeeLabel}
                                             </span>
-                                            <span className="capitalize text-muted-foreground">
+                                            <span className="text-muted-foreground capitalize">
                                                 {dateLabel}
                                             </span>
                                             <AttendanceStatusBadge
                                                 status={row.status}
                                             />
                                         </div>
-                                        <p className="tabular-nums text-muted-foreground">
+                                        <p className="text-muted-foreground tabular-nums">
                                             {t('corrections.col_proposed')}:{' '}
                                             {formatPunchTime(
                                                 row.proposed_check_in_at,
@@ -321,6 +324,7 @@ export default function AttendanceCorrectionsPage() {
                                                                         'corrections.toast_approved',
                                                                     ),
                                                                 );
+
                                                                 return load();
                                                             })
                                                             .catch((err) =>
@@ -352,6 +356,7 @@ export default function AttendanceCorrectionsPage() {
                                                                         'corrections.toast_rejected',
                                                                     ),
                                                                 );
+
                                                                 return load();
                                                             })
                                                             .catch((err) =>

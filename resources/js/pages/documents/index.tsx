@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -74,7 +75,9 @@ export default function DocumentsIndexPage() {
             });
             setDocuments(result.data);
         } catch (err) {
-            setError(err instanceof ApiError ? err.message : t('index.error_load'));
+            setError(
+                err instanceof ApiError ? err.message : t('index.error_load'),
+            );
         } finally {
             setLoading(false);
         }
@@ -87,6 +90,7 @@ export default function DocumentsIndexPage() {
     function resetUploadForm() {
         setFile(null);
         setForm(emptyUploadForm());
+
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -94,6 +98,7 @@ export default function DocumentsIndexPage() {
 
     function handleUploadOpenChange(open: boolean) {
         setUploadOpen(open);
+
         if (!open) {
             resetUploadForm();
         }
@@ -104,6 +109,7 @@ export default function DocumentsIndexPage() {
 
         if (!file) {
             toast.error(t('index.file_required'));
+
             return;
         }
 
@@ -114,7 +120,7 @@ export default function DocumentsIndexPage() {
                 form.ownerType === 'company'
                     ? undefined
                     : form.ownerType === 'employee'
-                      ? form.ownerId ?? undefined
+                      ? (form.ownerId ?? undefined)
                       : Number(form.candidateOwnerId) || undefined;
 
             await documentsApi.uploadDocument({
@@ -128,7 +134,9 @@ export default function DocumentsIndexPage() {
             handleUploadOpenChange(false);
             await load();
         } catch (err) {
-            toast.error(err instanceof ApiError ? err.message : t('index.toast_error'));
+            toast.error(
+                err instanceof ApiError ? err.message : t('index.toast_error'),
+            );
         } finally {
             setBusy(false);
         }
@@ -138,18 +146,23 @@ export default function DocumentsIndexPage() {
         try {
             await documentsApi.downloadDocument(doc);
         } catch (err) {
-            toast.error(err instanceof ApiError ? err.message : t('index.toast_error'));
+            toast.error(
+                err instanceof ApiError ? err.message : t('index.toast_error'),
+            );
         }
     }
 
     async function handleDelete(doc: Document) {
         setBusy(true);
+
         try {
             await documentsApi.deleteDocument(doc.id);
             toast.success(t('index.toast_deleted'));
             await load();
         } catch (err) {
-            toast.error(err instanceof ApiError ? err.message : t('index.toast_error'));
+            toast.error(
+                err instanceof ApiError ? err.message : t('index.toast_error'),
+            );
         } finally {
             setBusy(false);
         }
@@ -193,13 +206,17 @@ export default function DocumentsIndexPage() {
                                 id="file"
                                 ref={fileInputRef}
                                 type="file"
-                                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                                onChange={(e) =>
+                                    setFile(e.target.files?.[0] ?? null)
+                                }
                                 required
                             />
                         </div>
                         <div className="grid gap-3 sm:grid-cols-2">
                             <div className="grid gap-2">
-                                <Label htmlFor="owner_type">{t('index.owner_type')}</Label>
+                                <Label htmlFor="owner_type">
+                                    {t('index.owner_type')}
+                                </Label>
                                 <select
                                     id="owner_type"
                                     className="h-9 rounded-md border border-input bg-background px-3 text-sm"
@@ -236,7 +253,9 @@ export default function DocumentsIndexPage() {
                                 />
                             ) : form.ownerType === 'candidate' ? (
                                 <div className="grid gap-2">
-                                    <Label htmlFor="owner_id">{t('index.owner_id')}</Label>
+                                    <Label htmlFor="owner_id">
+                                        {t('index.owner_id')}
+                                    </Label>
                                     <Input
                                         id="owner_id"
                                         type="number"
@@ -244,7 +263,8 @@ export default function DocumentsIndexPage() {
                                         onChange={(e) =>
                                             setForm((prev) => ({
                                                 ...prev,
-                                                candidateOwnerId: e.target.value,
+                                                candidateOwnerId:
+                                                    e.target.value,
                                             }))
                                         }
                                         required
@@ -254,7 +274,9 @@ export default function DocumentsIndexPage() {
                         </div>
                         <div className="grid gap-3 sm:grid-cols-2">
                             <div className="grid gap-2">
-                                <Label htmlFor="category">{t('index.category')}</Label>
+                                <Label htmlFor="category">
+                                    {t('index.category')}
+                                </Label>
                                 <select
                                     id="category"
                                     className="h-9 rounded-md border border-input bg-background px-3 text-sm"
@@ -275,7 +297,9 @@ export default function DocumentsIndexPage() {
                                 </select>
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="title">{t('index.doc_title')}</Label>
+                                <Label htmlFor="title">
+                                    {t('index.doc_title')}
+                                </Label>
                                 <Input
                                     id="title"
                                     value={form.title}
@@ -313,13 +337,17 @@ export default function DocumentsIndexPage() {
 
             <div className="mb-4 flex flex-wrap gap-3">
                 <div className="grid gap-1">
-                    <Label htmlFor="filter_owner">{t('index.filter_owner')}</Label>
+                    <Label htmlFor="filter_owner">
+                        {t('index.filter_owner')}
+                    </Label>
                     <select
                         id="filter_owner"
                         className="h-9 rounded-md border border-input bg-background px-3 text-sm"
                         value={filterOwner}
                         onChange={(e) =>
-                            setFilterOwner(e.target.value as '' | DocumentOwnerType)
+                            setFilterOwner(
+                                e.target.value as '' | DocumentOwnerType,
+                            )
                         }
                     >
                         <option value="">{t('index.all')}</option>
@@ -331,7 +359,9 @@ export default function DocumentsIndexPage() {
                     </select>
                 </div>
                 <div className="grid gap-1">
-                    <Label htmlFor="filter_category">{t('index.filter_category')}</Label>
+                    <Label htmlFor="filter_category">
+                        {t('index.filter_category')}
+                    </Label>
                     <select
                         id="filter_category"
                         className="h-9 rounded-md border border-input bg-background px-3 text-sm"
@@ -357,7 +387,7 @@ export default function DocumentsIndexPage() {
             ) : (
                 <div className="overflow-x-auto rounded-lg border border-border">
                     <table className="min-w-full text-left text-sm">
-                        <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                        <thead className="bg-muted/50 text-xs text-muted-foreground uppercase">
                             <tr>
                                 <th className="px-3 py-2 font-medium">
                                     {t('index.col_title')}
@@ -385,20 +415,26 @@ export default function DocumentsIndexPage() {
                                         {t(`owner_type.${doc.owner_type}`, {
                                             defaultValue: doc.owner_type,
                                         })}
-                                        {doc.owner_id ? ` #${doc.owner_id}` : ''}
+                                        {doc.owner_id
+                                            ? ` #${doc.owner_id}`
+                                            : ''}
                                     </td>
                                     <td className="px-3 py-3">
                                         {t(`category.${doc.category}`, {
                                             defaultValue: doc.category,
                                         })}
                                     </td>
-                                    <td className="px-3 py-3">{doc.original_name}</td>
+                                    <td className="px-3 py-3">
+                                        {doc.original_name}
+                                    </td>
                                     <td className="px-3 py-3">
                                         <div className="flex justify-end gap-2">
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={() => void handleDownload(doc)}
+                                                onClick={() =>
+                                                    void handleDownload(doc)
+                                                }
                                             >
                                                 {t('index.download')}
                                             </Button>
@@ -413,7 +449,9 @@ export default function DocumentsIndexPage() {
                                                     variant="ghost"
                                                     size="sm"
                                                     disabled={busy}
-                                                    onClick={() => void handleDelete(doc)}
+                                                    onClick={() =>
+                                                        void handleDelete(doc)
+                                                    }
                                                 >
                                                     {t('index.delete')}
                                                 </Button>

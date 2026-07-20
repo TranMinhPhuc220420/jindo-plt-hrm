@@ -13,8 +13,8 @@ import { ScheduleToolbar } from '@/components/my-schedule/schedule-toolbar';
 import {
     readStoredScheduleView,
     storeScheduleView,
-    type ScheduleViewMode,
 } from '@/components/my-schedule/schedule-view';
+import type { ScheduleViewMode } from '@/components/my-schedule/schedule-view';
 import {
     EmptyState,
     ErrorState,
@@ -147,9 +147,7 @@ export function WorkingSchedulePreview({
             ) : view === 'calendar' ? (
                 <ScheduleMonthCalendar month={visibleMonth} days={days} />
             ) : days.length === 0 ? (
-                <EmptyState
-                    message={emptyMessage ?? t('my_schedule.empty')}
-                />
+                <EmptyState message={emptyMessage ?? t('my_schedule.empty')} />
             ) : (
                 <ScheduleTable days={days} />
             )}

@@ -2,11 +2,7 @@ import { apiGet, apiPatch, apiPost } from '../client';
 import type { PaginationMeta } from '../types';
 
 export type AssetStatus =
-    | 'available'
-    | 'assigned'
-    | 'maintenance'
-    | 'retired'
-    | 'lost';
+    'available' | 'assigned' | 'maintenance' | 'retired' | 'lost';
 
 export type Asset = {
     id: number;
@@ -61,21 +57,31 @@ export type AssetDamageReport = {
 };
 
 export async function listAssets(
-    params: { status?: string; category?: string; search?: string; per_page?: number } = {},
+    params: {
+        status?: string;
+        category?: string;
+        search?: string;
+        per_page?: number;
+    } = {},
 ) {
     const query = new URLSearchParams();
+
     if (params.status) {
         query.set('status', params.status);
     }
+
     if (params.category) {
         query.set('category', params.category);
     }
+
     if (params.search) {
         query.set('search', params.search);
     }
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<Asset[]>(`/api/assets${suffix}`);
 
@@ -130,7 +136,10 @@ export async function assignAsset(
     id: number,
     payload: { employee_id: number; assigned_at?: string; note?: string },
 ) {
-    const res = await apiPost<AssetAssignment>(`/api/assets/${id}/assign`, payload);
+    const res = await apiPost<AssetAssignment>(
+        `/api/assets/${id}/assign`,
+        payload,
+    );
 
     return res.data;
 }
@@ -139,13 +148,18 @@ export async function returnAsset(
     id: number,
     payload: { returned_at?: string; condition?: string; note?: string } = {},
 ) {
-    const res = await apiPost<AssetAssignment>(`/api/assets/${id}/return`, payload);
+    const res = await apiPost<AssetAssignment>(
+        `/api/assets/${id}/return`,
+        payload,
+    );
 
     return res.data;
 }
 
 export async function listMaintenances(id: number) {
-    const res = await apiGet<AssetMaintenance[]>(`/api/assets/${id}/maintenances`);
+    const res = await apiGet<AssetMaintenance[]>(
+        `/api/assets/${id}/maintenances`,
+    );
 
     return res.data ?? [];
 }
@@ -171,7 +185,11 @@ export async function createMaintenance(
 
 export async function reportDamage(
     id: number,
-    payload: { description: string; reported_at?: string; document_ids?: number[] },
+    payload: {
+        description: string;
+        reported_at?: string;
+        document_ids?: number[];
+    },
 ) {
     const res = await apiPost<AssetDamageReport>(
         `/api/assets/${id}/damage-reports`,
@@ -182,23 +200,35 @@ export async function reportDamage(
 }
 
 export async function listAssignments(
-    params: { asset_id?: number; employee_id?: number; status?: string; per_page?: number } = {},
+    params: {
+        asset_id?: number;
+        employee_id?: number;
+        status?: string;
+        per_page?: number;
+    } = {},
 ) {
     const query = new URLSearchParams();
+
     if (params.asset_id) {
         query.set('asset_id', String(params.asset_id));
     }
+
     if (params.employee_id) {
         query.set('employee_id', String(params.employee_id));
     }
+
     if (params.status) {
         query.set('status', params.status);
     }
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
-    const res = await apiGet<AssetAssignment[]>(`/api/asset-assignments${suffix}`);
+    const res = await apiGet<AssetAssignment[]>(
+        `/api/asset-assignments${suffix}`,
+    );
 
     return {
         data: res.data ?? [],

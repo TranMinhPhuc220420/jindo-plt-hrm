@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { CalendarIcon } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
 import type { Matcher } from 'react-day-picker';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -51,6 +51,7 @@ export function DatePicker({
     const locale = dateFnsLocale(i18n.language);
 
     const disabledMatchers: Matcher[] = [];
+
     if (min || max) {
         disabledMatchers.push((date) => {
             return isDateBeforeMin(date, min) || isDateAfterMax(date, max);
@@ -69,7 +70,7 @@ export function DatePicker({
                     aria-invalid={ariaInvalid}
                     data-empty={!value}
                     className={cn(
-                        'border-input h-9 w-full justify-start gap-2 px-3 text-left font-normal shadow-xs',
+                        'h-9 w-full justify-start gap-2 border-input px-3 text-left font-normal shadow-xs',
                         'data-[empty=true]:text-muted-foreground',
                         className,
                     )}
@@ -88,7 +89,9 @@ export function DatePicker({
                     locale={locale}
                     selected={selected}
                     defaultMonth={selected}
-                    disabled={disabledMatchers.length ? disabledMatchers : undefined}
+                    disabled={
+                        disabledMatchers.length ? disabledMatchers : undefined
+                    }
                     onSelect={(date) => {
                         onChange(formatDateString(date));
                         setOpen(false);

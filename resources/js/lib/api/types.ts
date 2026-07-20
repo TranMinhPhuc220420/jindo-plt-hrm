@@ -36,7 +36,9 @@ export type AuthPayload = {
     company_locale: string;
 };
 
-export type LoginPayload = AuthPayload | {
-    two_factor_required: true;
-    challenge_token: string;
-};
+export type LoginPayload =
+    | AuthPayload
+    | {
+          two_factor_required: true;
+          challenge_token: string;
+      };

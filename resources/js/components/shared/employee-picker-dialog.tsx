@@ -84,16 +84,19 @@ export function EmployeePickerDialog({
         void (async () => {
             try {
                 const tree = await organizationApi.getOrganizationTree();
+
                 if (cancelled) {
                     return;
                 }
 
                 const options: DepartmentOption[] = [];
+
                 for (const branch of tree.branches) {
                     for (const dept of branch.departments) {
                         options.push({ id: dept.id, name: dept.name });
                     }
                 }
+
                 options.sort((a, b) => a.name.localeCompare(b.name));
                 setDepartments(options);
             } catch {
@@ -184,9 +187,7 @@ export function EmployeePickerDialog({
                             <option value="probation">
                                 {t('status_probation')}
                             </option>
-                            <option value="active">
-                                {t('status_active')}
-                            </option>
+                            <option value="active">{t('status_active')}</option>
                             <option value="suspended">
                                 {t('status_suspended')}
                             </option>
@@ -236,9 +237,7 @@ export function EmployeePickerDialog({
                         </div>
                     ) : employees.length === 0 ? (
                         <div className="p-4">
-                            <EmptyState
-                                message={t('employee_picker.empty')}
-                            />
+                            <EmptyState message={t('employee_picker.empty')} />
                         </div>
                     ) : (
                         <table className="w-full text-left text-sm">
@@ -260,8 +259,7 @@ export function EmployeePickerDialog({
                             </thead>
                             <tbody>
                                 {employees.map((employee) => {
-                                    const selected =
-                                        selectedId === employee.id;
+                                    const selected = selectedId === employee.id;
 
                                     return (
                                         <tr

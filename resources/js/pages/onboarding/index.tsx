@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -51,7 +52,9 @@ export default function OnboardingIndexPage() {
                 setTemplates([]);
             }
         } catch (err) {
-            setError(err instanceof ApiError ? err.message : t('index.error_load'));
+            setError(
+                err instanceof ApiError ? err.message : t('index.error_load'),
+            );
         } finally {
             setLoading(false);
         }
@@ -80,7 +83,9 @@ export default function OnboardingIndexPage() {
             setTemplateId('');
             await load();
         } catch (err) {
-            toast.error(err instanceof ApiError ? err.message : t('index.toast_error'));
+            toast.error(
+                err instanceof ApiError ? err.message : t('index.toast_error'),
+            );
         } finally {
             setBusy(false);
         }
@@ -97,7 +102,9 @@ export default function OnboardingIndexPage() {
                     onSubmit={handleStart}
                     className="mb-8 grid max-w-xl gap-3 border-b border-border pb-8"
                 >
-                    <h2 className="text-sm font-medium">{t('index.start_title')}</h2>
+                    <h2 className="text-sm font-medium">
+                        {t('index.start_title')}
+                    </h2>
                     <div className="grid gap-2 sm:grid-cols-2">
                         <EmployeePickerField
                             id="employee_id"
@@ -107,23 +114,36 @@ export default function OnboardingIndexPage() {
                             required
                         />
                         <div className="grid gap-2">
-                            <Label htmlFor="template_id">{t('index.template')}</Label>
+                            <Label htmlFor="template_id">
+                                {t('index.template')}
+                            </Label>
                             <select
                                 id="template_id"
                                 className="h-9 rounded-md border border-input bg-background px-3 text-sm"
                                 value={templateId}
                                 onChange={(e) => setTemplateId(e.target.value)}
                             >
-                                <option value="">{t('index.default_template')}</option>
+                                <option value="">
+                                    {t('index.default_template')}
+                                </option>
                                 {templates.map((template) => (
-                                    <option key={template.id} value={template.id}>
-                                        {onboardingTemplateLabel(t, template.name)}
+                                    <option
+                                        key={template.id}
+                                        value={template.id}
+                                    >
+                                        {onboardingTemplateLabel(
+                                            t,
+                                            template.name,
+                                        )}
                                     </option>
                                 ))}
                             </select>
                         </div>
                     </div>
-                    <Button type="submit" disabled={busy || employeeId === null}>
+                    <Button
+                        type="submit"
+                        disabled={busy || employeeId === null}
+                    >
                         {t('index.start')}
                     </Button>
                 </form>
@@ -140,27 +160,47 @@ export default function OnboardingIndexPage() {
                     <table className="w-full text-left text-sm">
                         <thead>
                             <tr className="border-b border-border text-muted-foreground">
-                                <th className="py-2 pr-4 font-medium">{t('index.col_employee')}</th>
-                                <th className="py-2 pr-4 font-medium">{t('index.col_status')}</th>
-                                <th className="py-2 pr-4 font-medium">{t('index.col_progress')}</th>
+                                <th className="py-2 pr-4 font-medium">
+                                    {t('index.col_employee')}
+                                </th>
+                                <th className="py-2 pr-4 font-medium">
+                                    {t('index.col_status')}
+                                </th>
+                                <th className="py-2 pr-4 font-medium">
+                                    {t('index.col_progress')}
+                                </th>
                                 <th className="py-2 font-medium" />
                             </tr>
                         </thead>
                         <tbody>
                             {cases.map((item) => (
-                                <tr key={item.id} className="border-b border-border/60">
-                                    <td className="py-3 pr-4">#{item.employee_id}</td>
+                                <tr
+                                    key={item.id}
+                                    className="border-b border-border/60"
+                                >
+                                    <td className="py-3 pr-4">
+                                        #{item.employee_id}
+                                    </td>
                                     <td className="py-3 pr-4">
                                         {t(`status.${item.status}`, {
                                             defaultValue: item.status,
                                         })}
                                     </td>
                                     <td className="py-3 pr-4">
-                                        {onboardingProgressLabel(t, item.progress)}
+                                        {onboardingProgressLabel(
+                                            t,
+                                            item.progress,
+                                        )}
                                     </td>
                                     <td className="py-3">
-                                        <Button variant="outline" size="sm" asChild>
-                                            <Link href={`/onboarding/${item.id}`}>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            asChild
+                                        >
+                                            <Link
+                                                href={`/onboarding/${item.id}`}
+                                            >
                                                 {t('index.open')}
                                             </Link>
                                         </Button>

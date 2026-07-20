@@ -52,9 +52,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                     'bg-muted': isCurrentOrParentUrl(item.href),
                                 })}
                             >
-                                <Link href={item.href}>
-                                    {item.title}
-                                </Link>
+                                <Link href={item.href}>{item.title}</Link>
                             </Button>
                         ))}
                     </nav>

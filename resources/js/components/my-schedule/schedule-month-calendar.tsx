@@ -16,11 +16,11 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { dateFnsLocale } from '@/lib/datetime';
 import type {
     WorkingCalendarDay,
     WorkingCalendarLeave,
 } from '@/lib/api/modules/shifts';
+import { dateFnsLocale } from '@/lib/datetime';
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -28,7 +28,9 @@ type Props = {
     days: WorkingCalendarDay[];
 };
 
-function indexByDate(days: WorkingCalendarDay[]): Map<string, WorkingCalendarDay> {
+function indexByDate(
+    days: WorkingCalendarDay[],
+): Map<string, WorkingCalendarDay> {
     return new Map(days.map((day) => [day.date, day]));
 }
 
@@ -39,9 +41,11 @@ function leaveLabel(
     if (leave.coverage === 'am') {
         return t('my_schedule.leave_am');
     }
+
     if (leave.coverage === 'pm') {
         return t('my_schedule.leave_pm');
     }
+
     if (leave.coverage === 'hours') {
         return t('my_schedule.leave_hours');
     }
@@ -58,7 +62,10 @@ export function ScheduleMonthCalendar({ month, days }: Props) {
     const byDate = useMemo(() => indexByDate(days), [days]);
 
     const gridDays = useMemo(() => {
-        const start = startOfWeek(startOfMonth(month), { weekStartsOn, locale });
+        const start = startOfWeek(startOfMonth(month), {
+            weekStartsOn,
+            locale,
+        });
         const end = endOfWeek(endOfMonth(month), { weekStartsOn, locale });
 
         return eachDayOfInterval({ start, end });
@@ -144,15 +151,19 @@ export function ScheduleMonthCalendar({ month, days }: Props) {
                                                         : 'bg-primary/10',
                                                 )}
                                             >
-                                                <p className="truncate text-xs font-medium leading-tight">
+                                                <p className="truncate text-xs leading-tight font-medium">
                                                     {entry.shift_name}
                                                 </p>
-                                                <p className="mt-0.5 tabular-nums text-[10px] text-muted-foreground sm:text-xs">
-                                                    {entry.start_time}–{entry.end_time}
+                                                <p className="mt-0.5 text-[10px] text-muted-foreground tabular-nums sm:text-xs">
+                                                    {entry.start_time}–
+                                                    {entry.end_time}
                                                 </p>
                                                 {entry.leave ? (
                                                     <p className="truncate text-[10px] font-medium text-amber-800 dark:text-amber-200">
-                                                        {leaveLabel(entry.leave, t)}
+                                                        {leaveLabel(
+                                                            entry.leave,
+                                                            t,
+                                                        )}
                                                     </p>
                                                 ) : null}
                                             </div>
@@ -167,9 +178,12 @@ export function ScheduleMonthCalendar({ month, days }: Props) {
                                 const cellClass = cn(
                                     'flex min-h-[5.5rem] w-full flex-col border-b p-1.5 text-left sm:min-h-[6.5rem] sm:p-2',
                                     !isLastCol && 'border-r',
-                                    !inMonth && 'bg-muted/20 text-muted-foreground/60',
-                                    inMonth && entry?.is_holiday && 'bg-muted/40',
-                                    today && 'ring-inset ring-2 ring-primary',
+                                    !inMonth &&
+                                        'bg-muted/20 text-muted-foreground/60',
+                                    inMonth &&
+                                        entry?.is_holiday &&
+                                        'bg-muted/40',
+                                    today && 'ring-2 ring-primary ring-inset',
                                 );
 
                                 if (!entry || !inMonth) {
@@ -183,14 +197,23 @@ export function ScheduleMonthCalendar({ month, days }: Props) {
                                 return (
                                     <Tooltip key={key}>
                                         <TooltipTrigger asChild>
-                                            <button type="button" className={cellClass}>
+                                            <button
+                                                type="button"
+                                                className={cellClass}
+                                            >
                                                 {content}
                                             </button>
                                         </TooltipTrigger>
-                                        <TooltipContent side="top" className="max-w-xs">
-                                            <p className="font-medium">{entry.shift_name}</p>
+                                        <TooltipContent
+                                            side="top"
+                                            className="max-w-xs"
+                                        >
+                                            <p className="font-medium">
+                                                {entry.shift_name}
+                                            </p>
                                             <p className="tabular-nums opacity-90">
-                                                {entry.start_time} – {entry.end_time}
+                                                {entry.start_time} –{' '}
+                                                {entry.end_time}
                                             </p>
                                             {entry.is_holiday ? (
                                                 <p className="mt-1 opacity-90">
@@ -200,11 +223,17 @@ export function ScheduleMonthCalendar({ month, days }: Props) {
                                             {entry.leave ? (
                                                 <>
                                                     <p className="mt-1 font-medium opacity-90">
-                                                        {entry.leave.leave_type_name ||
-                                                            t('my_schedule.on_leave')}
+                                                        {entry.leave
+                                                            .leave_type_name ||
+                                                            t(
+                                                                'my_schedule.on_leave',
+                                                            )}
                                                     </p>
                                                     <p className="opacity-90">
-                                                        {leaveLabel(entry.leave, t)}
+                                                        {leaveLabel(
+                                                            entry.leave,
+                                                            t,
+                                                        )}
                                                     </p>
                                                 </>
                                             ) : null}

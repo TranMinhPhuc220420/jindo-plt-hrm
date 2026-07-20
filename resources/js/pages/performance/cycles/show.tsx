@@ -48,7 +48,10 @@ export default function PerformanceCycleShowPage({ id }: Props) {
         try {
             const [cycleData, goalsData, evalData] = await Promise.all([
                 performanceApi.getCycle(id),
-                performanceApi.listGoals({ review_cycle_id: id, per_page: 100 }),
+                performanceApi.listGoals({
+                    review_cycle_id: id,
+                    per_page: 100,
+                }),
                 performanceApi.listEvaluations({
                     review_cycle_id: id,
                     per_page: 100,
@@ -70,10 +73,13 @@ export default function PerformanceCycleShowPage({ id }: Props) {
 
     async function withBusy(fn: () => Promise<void>) {
         setBusy(true);
+
         try {
             await fn();
         } catch (err) {
-            toast.error(err instanceof ApiError ? err.message : t('toast_error'));
+            toast.error(
+                err instanceof ApiError ? err.message : t('toast_error'),
+            );
         } finally {
             setBusy(false);
         }
@@ -273,9 +279,13 @@ export default function PerformanceCycleShowPage({ id }: Props) {
                                                 {goal.employee_name ??
                                                     `#${goal.employee_id}`}{' '}
                                                 ·{' '}
-                                                {t(`goal_status.${goal.status}`, {
-                                                    defaultValue: goal.status,
-                                                })}
+                                                {t(
+                                                    `goal_status.${goal.status}`,
+                                                    {
+                                                        defaultValue:
+                                                            goal.status,
+                                                    },
+                                                )}
                                             </p>
                                         </div>
                                         <span className="text-muted-foreground">

@@ -1,11 +1,15 @@
 import type { VariantProps } from 'class-variance-authority';
 import { useTranslation } from 'react-i18next';
-import { Badge, badgeVariants } from '@/components/ui/badge';
+import type { badgeVariants } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 import type { AttendanceStatus } from '@/lib/api/modules/attendance';
 
 type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>['variant']>;
 
-const STATUS_VARIANT: Record<AttendanceStatus | 'pending' | 'approved' | 'rejected', BadgeVariant> = {
+const STATUS_VARIANT: Record<
+    AttendanceStatus | 'pending' | 'approved' | 'rejected',
+    BadgeVariant
+> = {
     open: 'outline',
     pending: 'secondary',
     approved: 'default',

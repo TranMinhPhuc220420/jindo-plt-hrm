@@ -72,7 +72,9 @@ export function NotificationBell() {
 
         try {
             const [list, count] = await Promise.all([
-                notificationsApi.listNotifications({ per_page: PANEL_PAGE_SIZE }),
+                notificationsApi.listNotifications({
+                    per_page: PANEL_PAGE_SIZE,
+                }),
                 notificationsApi.unreadCount(),
             ]);
             setItems(list.data);
@@ -115,7 +117,10 @@ export function NotificationBell() {
             setItems((prev) =>
                 prev.map((item) =>
                     item.id === id
-                        ? { ...item, read_at: item.read_at ?? new Date().toISOString() }
+                        ? {
+                              ...item,
+                              read_at: item.read_at ?? new Date().toISOString(),
+                          }
                         : item,
                 ),
             );
@@ -150,6 +155,7 @@ export function NotificationBell() {
                 open={open}
                 onOpenChange={(next) => {
                     setOpen(next);
+
                     if (next) {
                         void loadPanel();
                     }
@@ -182,7 +188,9 @@ export function NotificationBell() {
                     className="w-[min(100vw-2rem,22rem)] p-0"
                 >
                     <div className="flex items-center justify-between gap-2 px-3 py-2.5">
-                        <p className="text-sm font-semibold">{t('panel_title')}</p>
+                        <p className="text-sm font-semibold">
+                            {t('panel_title')}
+                        </p>
                         <Button
                             type="button"
                             variant="ghost"
@@ -216,7 +224,8 @@ export function NotificationBell() {
                                         ? new Date(item.created_at)
                                         : null;
                                     const relative =
-                                        created && !Number.isNaN(created.getTime())
+                                        created &&
+                                        !Number.isNaN(created.getTime())
                                             ? formatDistanceToNow(created, {
                                                   addSuffix: true,
                                                   locale,
@@ -236,8 +245,11 @@ export function NotificationBell() {
                                                 )}
                                                 onClick={() => {
                                                     if (unreadItem) {
-                                                        void handleMarkRead(item.id);
+                                                        void handleMarkRead(
+                                                            item.id,
+                                                        );
                                                     }
+
                                                     if (href) {
                                                         setOpen(false);
                                                         router.visit(href);

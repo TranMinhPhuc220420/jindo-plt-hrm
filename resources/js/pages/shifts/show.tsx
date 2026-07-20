@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -136,9 +137,7 @@ export default function ShiftShowPage({ id }: Props) {
                             })}
                             {' · '}
                             {shiftKindLabel(t, shift.kind)}
-                            {shift.is_night
-                                ? ` · ${t('create.is_night')}`
-                                : ''}
+                            {shift.is_night ? ` · ${t('create.is_night')}` : ''}
                             {shift.is_flexible
                                 ? ` · ${t('create.is_flexible')}`
                                 : ''}
@@ -199,9 +198,7 @@ export default function ShiftShowPage({ id }: Props) {
                             {t('show.section_assigned_list')}
                         </h2>
                         {assignments.length === 0 ? (
-                            <EmptyState
-                                message={t('show.empty_assignments')}
-                            />
+                            <EmptyState message={t('show.empty_assignments')} />
                         ) : (
                             <ul className="space-y-2 text-sm">
                                 {assignments.map((row) => (

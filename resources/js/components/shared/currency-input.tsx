@@ -5,8 +5,8 @@ import {
     formatMoneyInput,
     normalizeCurrency,
     toCanonicalMoneyString,
-    type AppCurrency,
 } from '@/lib/currency';
+import type { AppCurrency } from '@/lib/currency';
 import { cn } from '@/lib/utils';
 
 type CurrencyInputProps = {
@@ -33,9 +33,7 @@ export function CurrencyInput({
     'aria-invalid': ariaInvalid,
 }: CurrencyInputProps) {
     const code = normalizeCurrency(currency);
-    const [display, setDisplay] = useState(() =>
-        formatMoneyInput(value, code),
-    );
+    const [display, setDisplay] = useState(() => formatMoneyInput(value, code));
 
     useEffect(() => {
         setDisplay(formatMoneyInput(value, code));
@@ -98,7 +96,7 @@ export function CurrencySelect({
             onChange={(e) => onChange(normalizeCurrency(e.target.value))}
             className={cn(
                 'h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none',
-                'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+                'focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
                 'disabled:cursor-not-allowed disabled:opacity-50',
                 className,
             )}

@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -57,7 +58,9 @@ export default function ShiftCreatePage() {
             <form onSubmit={handleSubmit} className="grid max-w-xl gap-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1">
-                        <Label htmlFor="code">{t('code', { ns: 'common' })}</Label>
+                        <Label htmlFor="code">
+                            {t('code', { ns: 'common' })}
+                        </Label>
                         <Input
                             id="code"
                             value={code}
@@ -66,7 +69,9 @@ export default function ShiftCreatePage() {
                         />
                     </div>
                     <div className="space-y-1">
-                        <Label htmlFor="name">{t('name', { ns: 'common' })}</Label>
+                        <Label htmlFor="name">
+                            {t('name', { ns: 'common' })}
+                        </Label>
                         <Input
                             id="name"
                             value={name}
@@ -77,7 +82,9 @@ export default function ShiftCreatePage() {
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1">
-                        <Label htmlFor="start_time">{t('create.start_time')}</Label>
+                        <Label htmlFor="start_time">
+                            {t('create.start_time')}
+                        </Label>
                         <TimePicker
                             id="start_time"
                             value={startTime}
@@ -149,7 +156,9 @@ export default function ShiftCreatePage() {
                 </div>
                 <div>
                     <Button type="submit" disabled={saving}>
-                        {saving ? t('create.saving') : t('create', { ns: 'common' })}
+                        {saving
+                            ? t('create.saving')
+                            : t('create', { ns: 'common' })}
                     </Button>
                 </div>
             </form>

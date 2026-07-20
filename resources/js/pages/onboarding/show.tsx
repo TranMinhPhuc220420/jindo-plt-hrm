@@ -12,7 +12,10 @@ import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
 import { ApiError } from '@/lib/api/errors';
 import * as onboardingApi from '@/lib/api/modules/onboarding';
-import type { OnboardingCase, OnboardingTask } from '@/lib/api/modules/onboarding';
+import type {
+    OnboardingCase,
+    OnboardingTask,
+} from '@/lib/api/modules/onboarding';
 import {
     onboardingAssigneeLabel,
     onboardingProgressLabel,
@@ -25,7 +28,9 @@ type Props = {
 
 export default function OnboardingShowPage({ id }: Props) {
     const { t } = useTranslation(['onboarding', 'common']);
-    const [onboardingCase, setOnboardingCase] = useState<OnboardingCase | null>(null);
+    const [onboardingCase, setOnboardingCase] = useState<OnboardingCase | null>(
+        null,
+    );
     const [tasks, setTasks] = useState<OnboardingTask[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -40,7 +45,9 @@ export default function OnboardingShowPage({ id }: Props) {
             setOnboardingCase(caseData ?? null);
             setTasks(caseData?.tasks ?? []);
         } catch (err) {
-            setError(err instanceof ApiError ? err.message : t('show.error_load'));
+            setError(
+                err instanceof ApiError ? err.message : t('show.error_load'),
+            );
         } finally {
             setLoading(false);
         }
@@ -52,10 +59,13 @@ export default function OnboardingShowPage({ id }: Props) {
 
     async function withBusy(fn: () => Promise<void>) {
         setBusy(true);
+
         try {
             await fn();
         } catch (err) {
-            toast.error(err instanceof ApiError ? err.message : t('show.toast_error'));
+            toast.error(
+                err instanceof ApiError ? err.message : t('show.toast_error'),
+            );
         } finally {
             setBusy(false);
         }
@@ -70,6 +80,7 @@ export default function OnboardingShowPage({ id }: Props) {
                 await onboardingApi.completeTask(task.id);
                 toast.success(t('show.toast_task_done'));
             }
+
             await load();
         });
     }
@@ -82,7 +93,8 @@ export default function OnboardingShowPage({ id }: Props) {
         });
     }
 
-    const mandatoryRemaining = onboardingCase?.progress?.mandatory_remaining ?? 0;
+    const mandatoryRemaining =
+        onboardingCase?.progress?.mandatory_remaining ?? 0;
     const emptyValue = t('empty_value', { ns: 'common' });
 
     return (
@@ -105,11 +117,15 @@ export default function OnboardingShowPage({ id }: Props) {
                 <div className="space-y-8">
                     <div className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
                         <div>
-                            <p className="text-muted-foreground">{t('show.employee')}</p>
+                            <p className="text-muted-foreground">
+                                {t('show.employee')}
+                            </p>
                             <p>#{onboardingCase.employee_id}</p>
                         </div>
                         <div>
-                            <p className="text-muted-foreground">{t('show.status')}</p>
+                            <p className="text-muted-foreground">
+                                {t('show.status')}
+                            </p>
                             <p>
                                 {t(`status.${onboardingCase.status}`, {
                                     defaultValue: onboardingCase.status,
@@ -117,19 +133,30 @@ export default function OnboardingShowPage({ id }: Props) {
                             </p>
                         </div>
                         <div>
-                            <p className="text-muted-foreground">{t('show.progress')}</p>
+                            <p className="text-muted-foreground">
+                                {t('show.progress')}
+                            </p>
                             <p>
-                                {onboardingProgressLabel(t, onboardingCase.progress)}
+                                {onboardingProgressLabel(
+                                    t,
+                                    onboardingCase.progress,
+                                )}
                             </p>
                         </div>
                         <div>
-                            <p className="text-muted-foreground">{t('show.probation_ends')}</p>
-                            <p>{onboardingCase.probation_ends_on ?? emptyValue}</p>
+                            <p className="text-muted-foreground">
+                                {t('show.probation_ends')}
+                            </p>
+                            <p>
+                                {onboardingCase.probation_ends_on ?? emptyValue}
+                            </p>
                         </div>
                     </div>
 
                     <div>
-                        <h2 className="mb-3 text-sm font-medium">{t('show.tasks_title')}</h2>
+                        <h2 className="mb-3 text-sm font-medium">
+                            {t('show.tasks_title')}
+                        </h2>
                         {tasks.length === 0 ? (
                             <EmptyState message={t('show.empty_tasks')} />
                         ) : (
@@ -154,14 +181,20 @@ export default function OnboardingShowPage({ id }: Props) {
                                                     )}
                                                     {task.mandatory ? (
                                                         <span className="ml-2 text-xs text-destructive">
-                                                            {t('show.mandatory')}
+                                                            {t(
+                                                                'show.mandatory',
+                                                            )}
                                                         </span>
                                                     ) : null}
                                                 </p>
                                                 <p className="text-muted-foreground">
-                                                    {t(`task_status.${task.status}`, {
-                                                        defaultValue: task.status,
-                                                    })}
+                                                    {t(
+                                                        `task_status.${task.status}`,
+                                                        {
+                                                            defaultValue:
+                                                                task.status,
+                                                        },
+                                                    )}
                                                     {assignee
                                                         ? ` · ${t('show.assignee')}: ${assignee}`
                                                         : null}
@@ -185,11 +218,15 @@ export default function OnboardingShowPage({ id }: Props) {
                                                         onboardingCase.status !==
                                                             'in_progress'
                                                     }
-                                                    onClick={() => void handleTask(task)}
+                                                    onClick={() =>
+                                                        void handleTask(task)
+                                                    }
                                                 >
                                                     {task.status === 'done'
                                                         ? t('show.reopen')
-                                                        : t('show.complete_task')}
+                                                        : t(
+                                                              'show.complete_task',
+                                                          )}
                                                 </Button>
                                             </PermissionGate>
                                         </li>

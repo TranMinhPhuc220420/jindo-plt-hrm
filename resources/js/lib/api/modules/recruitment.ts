@@ -94,15 +94,19 @@ export async function listJobOpenings(
     params: { status?: string; search?: string; per_page?: number } = {},
 ) {
     const query = new URLSearchParams();
+
     if (params.status) {
         query.set('status', params.status);
     }
+
     if (params.search) {
         query.set('search', params.search);
     }
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<JobOpening[]>(`/api/job-openings${suffix}`);
 
@@ -141,21 +145,31 @@ export async function closeJobOpening(id: number) {
 // Candidates
 
 export async function listCandidates(
-    params: { job_opening_id?: number; stage?: string; search?: string; per_page?: number } = {},
+    params: {
+        job_opening_id?: number;
+        stage?: string;
+        search?: string;
+        per_page?: number;
+    } = {},
 ) {
     const query = new URLSearchParams();
+
     if (params.job_opening_id) {
         query.set('job_opening_id', String(params.job_opening_id));
     }
+
     if (params.stage) {
         query.set('stage', params.stage);
     }
+
     if (params.search) {
         query.set('search', params.search);
     }
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<Candidate[]>(`/api/candidates${suffix}`);
 
@@ -185,7 +199,9 @@ export async function createCandidate(payload: {
 }
 
 export async function changeCandidateStage(id: number, stage: CandidateStage) {
-    const res = await apiPost<Candidate>(`/api/candidates/${id}/stage`, { stage });
+    const res = await apiPost<Candidate>(`/api/candidates/${id}/stage`, {
+        stage,
+    });
 
     return res.data;
 }
@@ -270,7 +286,10 @@ export async function sendOffer(offerId: number) {
     return res.data;
 }
 
-export async function acceptOffer(offerId: number, payload: { accepted_at?: string } = {}) {
+export async function acceptOffer(
+    offerId: number,
+    payload: { accepted_at?: string } = {},
+) {
     const res = await apiPost<Offer>(`/api/offers/${offerId}/accept`, payload);
 
     return res.data;

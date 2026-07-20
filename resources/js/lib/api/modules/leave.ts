@@ -59,9 +59,11 @@ export type WeekendRule = {
 
 export async function listLeaveTypes(params: { per_page?: number } = {}) {
     const query = new URLSearchParams();
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<LeaveType[]>(`/api/leave-types${suffix}`);
 
@@ -86,17 +88,22 @@ export async function updateLeaveType(
     return res.data;
 }
 
-export async function listBalances(params: {
-    employee_id?: number;
-    year?: string | number;
-} = {}) {
+export async function listBalances(
+    params: {
+        employee_id?: number;
+        year?: string | number;
+    } = {},
+) {
     const query = new URLSearchParams();
+
     if (params.employee_id) {
         query.set('employee_id', String(params.employee_id));
     }
+
     if (params.year) {
         query.set('year', String(params.year));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<LeaveBalance[]>(`/api/leave-balances${suffix}`);
 
@@ -112,21 +119,27 @@ export async function adjustBalance(payload: Record<string, unknown>) {
     return res.data;
 }
 
-export async function listRequests(params: {
-    status?: string;
-    employee_id?: number;
-    per_page?: number;
-} = {}) {
+export async function listRequests(
+    params: {
+        status?: string;
+        employee_id?: number;
+        per_page?: number;
+    } = {},
+) {
     const query = new URLSearchParams();
+
     if (params.status) {
         query.set('status', params.status);
     }
+
     if (params.employee_id) {
         query.set('employee_id', String(params.employee_id));
     }
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<LeaveRequest[]>(`/api/leave-requests${suffix}`);
 

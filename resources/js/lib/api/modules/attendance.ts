@@ -2,11 +2,7 @@ import { apiGet, apiPost } from '../client';
 import type { PaginationMeta } from '../types';
 
 export type AttendanceStatus =
-    | 'open'
-    | 'pending'
-    | 'approved'
-    | 'rejected'
-    | 'locked';
+    'open' | 'pending' | 'approved' | 'rejected' | 'locked';
 
 export type AttendanceRecord = {
     id: number;
@@ -67,13 +63,15 @@ export async function checkOut(payload: Record<string, unknown> = {}) {
     return res.data;
 }
 
-export async function listRecords(params: {
-    employee_id?: number;
-    date_from?: string;
-    date_to?: string;
-    status?: string;
-    per_page?: number;
-} = {}) {
+export async function listRecords(
+    params: {
+        employee_id?: number;
+        date_from?: string;
+        date_to?: string;
+        status?: string;
+        per_page?: number;
+    } = {},
+) {
     const query = new URLSearchParams();
 
     if (params.employee_id) {
@@ -115,10 +113,12 @@ export async function approveRecord(id: number) {
     return res.data;
 }
 
-export async function listCorrections(params: {
-    status?: string;
-    per_page?: number;
-} = {}) {
+export async function listCorrections(
+    params: {
+        status?: string;
+        per_page?: number;
+    } = {},
+) {
     const query = new URLSearchParams();
 
     if (params.status) {

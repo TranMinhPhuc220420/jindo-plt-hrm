@@ -79,7 +79,9 @@ export function AppSidebar() {
         },
         {
             title: t('payroll'),
-            href: can('can_view_payroll_history') ? '/payroll' : '/payroll/payslips',
+            href: can('can_view_payroll_history')
+                ? '/payroll'
+                : '/payroll/payslips',
             icon: Wallet,
             permission: 'can_view_payroll_history',
         },
@@ -177,7 +179,11 @@ export function AppSidebar() {
         }
 
         if (item.permission === 'can_view_candidates') {
-            return can('can_view_candidates') || can('can_manage_candidates') || can('can_manage_job_positions');
+            return (
+                can('can_view_candidates') ||
+                can('can_manage_candidates') ||
+                can('can_manage_job_positions')
+            );
         }
 
         if (item.permission === 'can_view_onboarding') {

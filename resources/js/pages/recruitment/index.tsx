@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -54,7 +55,9 @@ export default function RecruitmentIndexPage() {
             setOpenings(openingsResult.data);
             setCandidates(candidatesResult.data);
         } catch (err) {
-            setError(err instanceof ApiError ? err.message : t('index.error_load'));
+            setError(
+                err instanceof ApiError ? err.message : t('index.error_load'),
+            );
         } finally {
             setLoading(false);
         }
@@ -66,6 +69,7 @@ export default function RecruitmentIndexPage() {
 
     function handleOpeningOpenChange(open: boolean) {
         setOpeningOpen(open);
+
         if (!open) {
             setJobTitle('');
             setJobHeadcount('');
@@ -74,6 +78,7 @@ export default function RecruitmentIndexPage() {
 
     function handleCandidateOpenChange(open: boolean) {
         setCandidateOpen(open);
+
         if (!open) {
             setCandidateName('');
             setCandidateEmail('');
@@ -94,7 +99,9 @@ export default function RecruitmentIndexPage() {
             handleOpeningOpenChange(false);
             await load();
         } catch (err) {
-            toast.error(err instanceof ApiError ? err.message : t('index.toast_error'));
+            toast.error(
+                err instanceof ApiError ? err.message : t('index.toast_error'),
+            );
         } finally {
             setBusy(false);
         }
@@ -114,7 +121,9 @@ export default function RecruitmentIndexPage() {
             handleCandidateOpenChange(false);
             await load();
         } catch (err) {
-            toast.error(err instanceof ApiError ? err.message : t('index.toast_error'));
+            toast.error(
+                err instanceof ApiError ? err.message : t('index.toast_error'),
+            );
         } finally {
             setBusy(false);
         }
@@ -124,7 +133,11 @@ export default function RecruitmentIndexPage() {
         <AdminPageShell
             title={t('index.title')}
             description={t('index.description')}
-            any={['can_view_candidates', 'can_manage_candidates', 'can_manage_job_positions']}
+            any={[
+                'can_view_candidates',
+                'can_manage_candidates',
+                'can_manage_job_positions',
+            ]}
             actions={
                 <div className="flex flex-wrap items-center justify-end gap-2">
                     <PermissionGate permission="can_manage_job_positions">
@@ -164,7 +177,9 @@ export default function RecruitmentIndexPage() {
                                 <Input
                                     id="job_title"
                                     value={jobTitle}
-                                    onChange={(e) => setJobTitle(e.target.value)}
+                                    onChange={(e) =>
+                                        setJobTitle(e.target.value)
+                                    }
                                     required
                                 />
                             </div>
@@ -177,7 +192,9 @@ export default function RecruitmentIndexPage() {
                                     type="number"
                                     min={1}
                                     value={jobHeadcount}
-                                    onChange={(e) => setJobHeadcount(e.target.value)}
+                                    onChange={(e) =>
+                                        setJobHeadcount(e.target.value)
+                                    }
                                 />
                             </div>
                         </div>
@@ -195,7 +212,10 @@ export default function RecruitmentIndexPage() {
                 </DialogContent>
             </Dialog>
 
-            <Dialog open={candidateOpen} onOpenChange={handleCandidateOpenChange}>
+            <Dialog
+                open={candidateOpen}
+                onOpenChange={handleCandidateOpenChange}
+            >
                 <DialogContent className="sm:max-w-xl">
                     <DialogHeader>
                         <DialogTitle>{t('index.create_candidate')}</DialogTitle>
@@ -203,7 +223,10 @@ export default function RecruitmentIndexPage() {
                             {t('index.candidates_title')}
                         </DialogDescription>
                     </DialogHeader>
-                    <form onSubmit={handleCreateCandidate} className="grid gap-4">
+                    <form
+                        onSubmit={handleCreateCandidate}
+                        className="grid gap-4"
+                    >
                         <div className="grid gap-3 sm:grid-cols-2">
                             <div className="grid gap-2">
                                 <Label htmlFor="candidate_name">
@@ -212,7 +235,9 @@ export default function RecruitmentIndexPage() {
                                 <Input
                                     id="candidate_name"
                                     value={candidateName}
-                                    onChange={(e) => setCandidateName(e.target.value)}
+                                    onChange={(e) =>
+                                        setCandidateName(e.target.value)
+                                    }
                                     required
                                 />
                             </div>
@@ -224,14 +249,19 @@ export default function RecruitmentIndexPage() {
                                     id="candidate_job"
                                     className="h-9 rounded-md border border-input bg-background px-3 text-sm"
                                     value={candidateJobId}
-                                    onChange={(e) => setCandidateJobId(e.target.value)}
+                                    onChange={(e) =>
+                                        setCandidateJobId(e.target.value)
+                                    }
                                     required
                                 >
                                     <option value="">
                                         {t('index.select_job')}
                                     </option>
                                     {openings.map((opening) => (
-                                        <option key={opening.id} value={opening.id}>
+                                        <option
+                                            key={opening.id}
+                                            value={opening.id}
+                                        >
                                             {opening.title}
                                         </option>
                                     ))}
@@ -246,7 +276,9 @@ export default function RecruitmentIndexPage() {
                                 id="candidate_email"
                                 type="email"
                                 value={candidateEmail}
-                                onChange={(e) => setCandidateEmail(e.target.value)}
+                                onChange={(e) =>
+                                    setCandidateEmail(e.target.value)
+                                }
                             />
                         </div>
                         <DialogFooter>
@@ -270,14 +302,16 @@ export default function RecruitmentIndexPage() {
             ) : (
                 <div className="space-y-10">
                     <section className="space-y-4">
-                        <h2 className="text-sm font-medium">{t('index.openings_title')}</h2>
+                        <h2 className="text-sm font-medium">
+                            {t('index.openings_title')}
+                        </h2>
 
                         {openings.length === 0 ? (
                             <EmptyState message={t('index.empty_openings')} />
                         ) : (
                             <div className="overflow-x-auto rounded-lg border border-border">
                                 <table className="min-w-full text-left text-sm">
-                                    <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                    <thead className="bg-muted/50 text-xs text-muted-foreground uppercase">
                                         <tr>
                                             <th className="px-3 py-2 font-medium">
                                                 {t('index.col_title')}
@@ -296,14 +330,20 @@ export default function RecruitmentIndexPage() {
                                                 key={opening.id}
                                                 className="border-t border-border/60"
                                             >
-                                                <td className="px-3 py-3">{opening.title}</td>
+                                                <td className="px-3 py-3">
+                                                    {opening.title}
+                                                </td>
                                                 <td className="px-3 py-3">
                                                     {opening.headcount ?? '—'}
                                                 </td>
                                                 <td className="px-3 py-3">
-                                                    {t(`job_status.${opening.status}`, {
-                                                        defaultValue: opening.status,
-                                                    })}
+                                                    {t(
+                                                        `job_status.${opening.status}`,
+                                                        {
+                                                            defaultValue:
+                                                                opening.status,
+                                                        },
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}
@@ -314,14 +354,16 @@ export default function RecruitmentIndexPage() {
                     </section>
 
                     <section className="space-y-4">
-                        <h2 className="text-sm font-medium">{t('index.candidates_title')}</h2>
+                        <h2 className="text-sm font-medium">
+                            {t('index.candidates_title')}
+                        </h2>
 
                         {candidates.length === 0 ? (
                             <EmptyState message={t('index.empty_candidates')} />
                         ) : (
                             <div className="overflow-x-auto rounded-lg border border-border">
                                 <table className="min-w-full text-left text-sm">
-                                    <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                    <thead className="bg-muted/50 text-xs text-muted-foreground uppercase">
                                         <tr>
                                             <th className="px-3 py-2 font-medium">
                                                 {t('index.col_name')}
@@ -342,9 +384,13 @@ export default function RecruitmentIndexPage() {
                                                     {candidate.full_name}
                                                 </td>
                                                 <td className="px-3 py-3">
-                                                    {t(`stage.${candidate.stage}`, {
-                                                        defaultValue: candidate.stage,
-                                                    })}
+                                                    {t(
+                                                        `stage.${candidate.stage}`,
+                                                        {
+                                                            defaultValue:
+                                                                candidate.stage,
+                                                        },
+                                                    )}
                                                 </td>
                                                 <td className="px-3 py-3 text-right">
                                                     <Button

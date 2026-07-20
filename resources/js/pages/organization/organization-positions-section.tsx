@@ -44,7 +44,7 @@ export default function OrganizationPositionsSection({
             ) : (
                 <div className="overflow-x-auto rounded-lg border border-border">
                     <table className="min-w-full text-left text-sm">
-                        <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                        <thead className="bg-muted/50 text-xs text-muted-foreground uppercase">
                             <tr>
                                 <th className="px-3 py-2 font-medium">
                                     {t('name', { ns: 'common' })}

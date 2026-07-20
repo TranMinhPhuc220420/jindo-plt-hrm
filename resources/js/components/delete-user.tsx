@@ -31,7 +31,9 @@ export default function DeleteUser() {
             <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
                 <div className="relative space-y-0.5 text-red-600 dark:text-red-100">
                     <p className="font-medium">{t('delete_account.warning')}</p>
-                    <p className="text-sm">{t('delete_account.warning_body')}</p>
+                    <p className="text-sm">
+                        {t('delete_account.warning_body')}
+                    </p>
                 </div>
 
                 <Dialog>

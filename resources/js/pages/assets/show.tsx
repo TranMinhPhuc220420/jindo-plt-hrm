@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -53,7 +54,9 @@ export default function AssetShowPage({ id }: Props) {
                 setMaintenances([]);
             }
         } catch (err) {
-            setError(err instanceof ApiError ? err.message : t('show.error_load'));
+            setError(
+                err instanceof ApiError ? err.message : t('show.error_load'),
+            );
         } finally {
             setLoading(false);
         }
@@ -65,10 +68,13 @@ export default function AssetShowPage({ id }: Props) {
 
     async function withBusy(fn: () => Promise<void>) {
         setBusy(true);
+
         try {
             await fn();
         } catch (err) {
-            toast.error(err instanceof ApiError ? err.message : t('show.toast_error'));
+            toast.error(
+                err instanceof ApiError ? err.message : t('show.toast_error'),
+            );
         } finally {
             setBusy(false);
         }
@@ -107,7 +113,9 @@ export default function AssetShowPage({ id }: Props) {
     async function handleDamage(event: FormEvent) {
         event.preventDefault();
         await withBusy(async () => {
-            await assetsApi.reportDamage(id, { description: damageDescription });
+            await assetsApi.reportDamage(id, {
+                description: damageDescription,
+            });
             toast.success(t('show.toast_damage'));
             setDamageDescription('');
         });
@@ -147,15 +155,21 @@ export default function AssetShowPage({ id }: Props) {
                 <div className="space-y-8">
                     <div className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
                         <div>
-                            <p className="text-muted-foreground">{t('show.code')}</p>
+                            <p className="text-muted-foreground">
+                                {t('show.code')}
+                            </p>
                             <p>{asset.code}</p>
                         </div>
                         <div>
-                            <p className="text-muted-foreground">{t('show.category')}</p>
+                            <p className="text-muted-foreground">
+                                {t('show.category')}
+                            </p>
                             <p>{asset.category ?? '—'}</p>
                         </div>
                         <div>
-                            <p className="text-muted-foreground">{t('show.status')}</p>
+                            <p className="text-muted-foreground">
+                                {t('show.status')}
+                            </p>
                             <p>
                                 {t(`status.${asset.status}`, {
                                     defaultValue: asset.status,
@@ -163,7 +177,9 @@ export default function AssetShowPage({ id }: Props) {
                             </p>
                         </div>
                         <div>
-                            <p className="text-muted-foreground">{t('show.serial')}</p>
+                            <p className="text-muted-foreground">
+                                {t('show.serial')}
+                            </p>
                             <p>{asset.serial_number ?? '—'}</p>
                         </div>
                     </div>
@@ -173,7 +189,9 @@ export default function AssetShowPage({ id }: Props) {
                             onSubmit={handleAssign}
                             className="grid max-w-xl gap-3 border-t border-border pt-6"
                         >
-                            <h2 className="text-sm font-medium">{t('show.assign_title')}</h2>
+                            <h2 className="text-sm font-medium">
+                                {t('show.assign_title')}
+                            </h2>
                             <div className="grid gap-2 sm:grid-cols-2">
                                 <EmployeePickerField
                                     id="assign_employee"
@@ -183,11 +201,15 @@ export default function AssetShowPage({ id }: Props) {
                                     required
                                 />
                                 <div className="grid gap-2">
-                                    <Label htmlFor="assign_note">{t('show.note')}</Label>
+                                    <Label htmlFor="assign_note">
+                                        {t('show.note')}
+                                    </Label>
                                     <Input
                                         id="assign_note"
                                         value={assignNote}
-                                        onChange={(e) => setAssignNote(e.target.value)}
+                                        onChange={(e) =>
+                                            setAssignNote(e.target.value)
+                                        }
                                     />
                                 </div>
                             </div>
@@ -206,7 +228,9 @@ export default function AssetShowPage({ id }: Props) {
 
                     <PermissionGate permission="can_return_asset">
                         <div className="grid max-w-xl gap-3 border-t border-border pt-6">
-                            <h2 className="text-sm font-medium">{t('show.return_title')}</h2>
+                            <h2 className="text-sm font-medium">
+                                {t('show.return_title')}
+                            </h2>
                             <div className="grid gap-2">
                                 <Label htmlFor="return_condition">
                                     {t('show.condition')}
@@ -214,7 +238,9 @@ export default function AssetShowPage({ id }: Props) {
                                 <Input
                                     id="return_condition"
                                     value={returnCondition}
-                                    onChange={(e) => setReturnCondition(e.target.value)}
+                                    onChange={(e) =>
+                                        setReturnCondition(e.target.value)
+                                    }
                                 />
                             </div>
                             <Button
@@ -232,7 +258,9 @@ export default function AssetShowPage({ id }: Props) {
                             onSubmit={handleDamage}
                             className="grid max-w-xl gap-3 border-t border-border pt-6"
                         >
-                            <h2 className="text-sm font-medium">{t('show.damage_title')}</h2>
+                            <h2 className="text-sm font-medium">
+                                {t('show.damage_title')}
+                            </h2>
                             <div className="grid gap-2">
                                 <Label htmlFor="damage_description">
                                     {t('show.description_label')}
@@ -240,11 +268,17 @@ export default function AssetShowPage({ id }: Props) {
                                 <Input
                                     id="damage_description"
                                     value={damageDescription}
-                                    onChange={(e) => setDamageDescription(e.target.value)}
+                                    onChange={(e) =>
+                                        setDamageDescription(e.target.value)
+                                    }
                                     required
                                 />
                             </div>
-                            <Button type="submit" variant="outline" disabled={busy}>
+                            <Button
+                                type="submit"
+                                variant="outline"
+                                disabled={busy}
+                            >
                                 {t('show.report_damage')}
                             </Button>
                         </form>
@@ -266,17 +300,23 @@ export default function AssetShowPage({ id }: Props) {
                                     <Input
                                         id="maint_description"
                                         value={maintDescription}
-                                        onChange={(e) => setMaintDescription(e.target.value)}
+                                        onChange={(e) =>
+                                            setMaintDescription(e.target.value)
+                                        }
                                         required
                                     />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="maint_cost">{t('show.cost')}</Label>
+                                    <Label htmlFor="maint_cost">
+                                        {t('show.cost')}
+                                    </Label>
                                     <Input
                                         id="maint_cost"
                                         type="number"
                                         value={maintCost}
-                                        onChange={(e) => setMaintCost(e.target.value)}
+                                        onChange={(e) =>
+                                            setMaintCost(e.target.value)
+                                        }
                                     />
                                 </div>
                             </div>
@@ -314,9 +354,15 @@ export default function AssetShowPage({ id }: Props) {
                                                 key={m.id}
                                                 className="border-b border-border/60"
                                             >
-                                                <td className="py-3 pr-4">{m.description}</td>
-                                                <td className="py-3 pr-4">{m.status}</td>
-                                                <td className="py-3">{m.cost ?? '—'}</td>
+                                                <td className="py-3 pr-4">
+                                                    {m.description}
+                                                </td>
+                                                <td className="py-3 pr-4">
+                                                    {m.status}
+                                                </td>
+                                                <td className="py-3">
+                                                    {m.cost ?? '—'}
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>

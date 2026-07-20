@@ -83,8 +83,7 @@ export function parsePayslipComponents(
         }
 
         const fields = row as Record<string, unknown>;
-        const type =
-            asOptionalString(fields.type)?.toLowerCase() ?? 'other';
+        const type = asOptionalString(fields.type)?.toLowerCase() ?? 'other';
         const code = asOptionalString(fields.code);
         const label =
             asOptionalString(fields.label) ??
@@ -121,6 +120,7 @@ export function groupPayslipComponents(
         }
 
         const amount = Number(component.amount) || 0;
+
         if (amount < 0) {
             deductions.push(component);
         } else {
@@ -140,11 +140,13 @@ export function groupPayslipComponents(
 
 function translateOrNull(key: string, t: TranslateFn): string | null {
     const translated = t(key, { ns: 'payroll' });
+
     return translated !== key ? translated : null;
 }
 
 export function localizePayslipType(type: string, t: TranslateFn): string {
     const normalized = type.trim().toLowerCase();
+
     return (
         translateOrNull(`payslips.component_types.${normalized}`, t) ??
         translateOrNull('payslips.component_types.other', t) ??
@@ -158,8 +160,10 @@ export function localizePayslipLabel(
 ): string {
     if (component.code) {
         const byCode = SYSTEM_CODE_KEYS[component.code.toUpperCase()];
+
         if (byCode) {
             const translated = translateOrNull(byCode, t);
+
             if (translated) {
                 return translated;
             }
@@ -167,8 +171,10 @@ export function localizePayslipLabel(
     }
 
     const byLabel = SYSTEM_LABEL_KEYS[component.label.trim().toLowerCase()];
+
     if (byLabel) {
         const translated = translateOrNull(byLabel, t);
+
         if (translated) {
             return translated;
         }
@@ -176,6 +182,7 @@ export function localizePayslipLabel(
 
     // Avoid showing raw type keys like "earning" / "deduction" as the title.
     const typeKey = component.label.trim().toLowerCase();
+
     if (typeKey === 'earning' || typeKey === 'deduction') {
         return (
             translateOrNull(`payslips.system_labels.${typeKey}_generic`, t) ??
@@ -194,10 +201,12 @@ export function formatPayslipPeriod(
     const formatOne = (value: string) => {
         if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
             const [y, m, d] = value.split('-').map(Number);
+
             return new Date(y!, m! - 1, d!).toLocaleDateString(locale);
         }
 
         const date = new Date(value);
+
         if (Number.isNaN(date.getTime())) {
             return value;
         }

@@ -37,10 +37,7 @@ export function notificationBody(
 }
 
 /** Domain prefix label for the type code shown as metadata. */
-export function notificationTypeLabel(
-    t: TFunction,
-    type: string,
-): string {
+export function notificationTypeLabel(t: TFunction, type: string): string {
     const domain = type.includes('.') ? type.split('.')[0]! : type;
 
     return t(`types.${domain}`, {

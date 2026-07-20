@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
@@ -8,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ApiError } from '@/lib/api/errors';
-import i18n from '@/lib/i18n';
 import { forgotPassword } from '@/lib/api/modules/auth';
+import i18n from '@/lib/i18n';
 import { login } from '@/routes';
 
 export default function ForgotPassword() {
@@ -96,7 +97,9 @@ export default function ForgotPassword() {
 
                 <div className="space-x-1 text-center text-sm text-muted-foreground">
                     <span>{t('forgot.or_return')}</span>
-                    <TextLink href={login()}>{t('forgot.log_in_link')}</TextLink>
+                    <TextLink href={login()}>
+                        {t('forgot.log_in_link')}
+                    </TextLink>
                 </div>
             </div>
         </>

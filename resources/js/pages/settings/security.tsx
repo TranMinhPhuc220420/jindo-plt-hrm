@@ -79,7 +79,9 @@ export default function Security(props: Props) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">{t('profile.new_password')}</Label>
+                                <Label htmlFor="password">
+                                    {t('profile.new_password')}
+                                </Label>
 
                                 <PasswordInput
                                     id="password"
@@ -96,7 +98,9 @@ export default function Security(props: Props) {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="password_confirmation">
-                                    {t('register.confirm_password', { ns: 'auth' })}
+                                    {t('register.confirm_password', {
+                                        ns: 'auth',
+                                    })}
                                 </Label>
 
                                 <PasswordInput
@@ -104,7 +108,10 @@ export default function Security(props: Props) {
                                     name="password_confirmation"
                                     className="mt-1 block w-full"
                                     autoComplete="new-password"
-                                    placeholder={t('register.confirm_password_placeholder', { ns: 'auth' })}
+                                    placeholder={t(
+                                        'register.confirm_password_placeholder',
+                                        { ns: 'auth' },
+                                    )}
                                     passwordrules={props.passwordRules}
                                 />
 

@@ -1,12 +1,8 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import {
-    emptyShiftDefinitionForm,
-    ShiftDefinitionFormFields,
-    type ShiftDefinitionFormValues,
-} from '@/components/shifts/shift-definition-form-fields';
 import AdminPageShell from '@/components/shared/admin-page-shell';
 import {
     EmptyState,
@@ -14,6 +10,11 @@ import {
     LoadingState,
 } from '@/components/shared/async-state';
 import { PermissionGate } from '@/components/shared/permission-gate';
+import {
+    emptyShiftDefinitionForm,
+    ShiftDefinitionFormFields,
+} from '@/components/shifts/shift-definition-form-fields';
+import type { ShiftDefinitionFormValues } from '@/components/shifts/shift-definition-form-fields';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -29,8 +30,8 @@ import { Label } from '@/components/ui/label';
 import { ApiError } from '@/lib/api/errors';
 import * as shiftApi from '@/lib/api/modules/shifts';
 import type { Shift } from '@/lib/api/modules/shifts';
-import { shiftKindLabel } from '@/lib/i18n/shift-labels';
 import { useAuth } from '@/lib/auth/auth-context';
+import { shiftKindLabel } from '@/lib/i18n/shift-labels';
 
 function formFromShift(shift: Shift): ShiftDefinitionFormValues {
     return {
@@ -97,6 +98,7 @@ export default function ShiftsIndexPage() {
 
     function handleCreateOpenChange(open: boolean) {
         setCreateOpen(open);
+
         if (!open) {
             setCreateForm(emptyShiftDefinitionForm());
         }
@@ -134,6 +136,7 @@ export default function ShiftsIndexPage() {
 
     async function handleEdit(event: FormEvent) {
         event.preventDefault();
+
         if (!editShift) {
             return;
         }
@@ -141,10 +144,7 @@ export default function ShiftsIndexPage() {
         setSaving(true);
 
         try {
-            await shiftApi.updateShift(
-                editShift.id,
-                payloadFromForm(editForm),
-            );
+            await shiftApi.updateShift(editShift.id, payloadFromForm(editForm));
             toast.success(t('edit.toast_success'));
             handleEditOpenChange(false);
             await load();
@@ -264,7 +264,7 @@ export default function ShiftsIndexPage() {
             ) : (
                 <div className="overflow-x-auto rounded-lg border border-border">
                     <table className="min-w-full text-left text-sm">
-                        <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                        <thead className="bg-muted/50 text-xs text-muted-foreground uppercase">
                             <tr>
                                 <th className="px-3 py-2 font-medium">
                                     {t('index.col_code')}
@@ -284,7 +284,7 @@ export default function ShiftsIndexPage() {
                                 <th className="px-3 py-2 font-medium">
                                     {t('index.col_flags')}
                                 </th>
-                                <th className="px-3 py-2 font-medium text-right">
+                                <th className="px-3 py-2 text-right font-medium">
                                     {t('index.col_actions')}
                                 </th>
                             </tr>

@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import AdminPageShell from '@/components/shared/admin-page-shell';
 import {
@@ -50,6 +51,7 @@ export default function PayrollCompensationPage() {
                 ]);
 
                 const map = new Map<number, EmployeeSalary>();
+
                 for (const salary of salaryResult.data) {
                     if (!map.has(salary.employee_id)) {
                         map.set(salary.employee_id, salary);
@@ -108,7 +110,9 @@ export default function PayrollCompensationPage() {
                             id="compensation-search"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder={t('compensation.list_search_placeholder')}
+                            placeholder={t(
+                                'compensation.list_search_placeholder',
+                            )}
                             className="w-56"
                         />
                     </div>
@@ -159,7 +163,7 @@ export default function PayrollCompensationPage() {
                 <div className="space-y-4">
                     <div className="overflow-x-auto rounded-lg border border-border">
                         <table className="min-w-full text-left text-sm">
-                            <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                            <thead className="bg-muted/50 text-xs text-muted-foreground uppercase">
                                 <tr>
                                     <th className="px-3 py-2 font-medium">
                                         {t('compensation.col_code')}
@@ -179,7 +183,7 @@ export default function PayrollCompensationPage() {
                                     <th className="px-3 py-2 font-medium">
                                         {t('compensation.col_effective_from')}
                                     </th>
-                                    <th className="px-3 py-2 font-medium text-right">
+                                    <th className="px-3 py-2 text-right font-medium">
                                         {t('compensation.col_actions')}
                                     </th>
                                 </tr>
@@ -228,9 +232,7 @@ export default function PayrollCompensationPage() {
                                                     <Link
                                                         href={`/payroll/compensation/${employee.id}`}
                                                     >
-                                                        {t(
-                                                            'compensation.edit',
-                                                        )}
+                                                        {t('compensation.edit')}
                                                     </Link>
                                                 </Button>
                                             </td>

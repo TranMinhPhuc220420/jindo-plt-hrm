@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -26,7 +27,8 @@ import { ApiError } from '@/lib/api/errors';
 import * as payrollApi from '@/lib/api/modules/payroll';
 import type { PayrollRun } from '@/lib/api/modules/payroll';
 import { loadCompanyCurrency } from '@/lib/company-currency';
-import { formatCurrency, type AppCurrency } from '@/lib/currency';
+import { formatCurrency } from '@/lib/currency';
+import type { AppCurrency } from '@/lib/currency';
 
 function emptyCreateForm() {
     return { name: '', periodStart: '', periodEnd: '' };
@@ -73,6 +75,7 @@ export default function PayrollIndexPage() {
 
     function handleCreateOpenChange(open: boolean) {
         setCreateOpen(open);
+
         if (!open) {
             resetCreateForm();
         }
@@ -101,11 +104,7 @@ export default function PayrollIndexPage() {
     }
 
     async function handleDelete(run: PayrollRun) {
-        if (
-            !window.confirm(
-                t('index.confirm_delete', { name: run.name }),
-            )
-        ) {
+        if (!window.confirm(t('index.confirm_delete', { name: run.name }))) {
             return;
         }
 
@@ -148,7 +147,10 @@ export default function PayrollIndexPage() {
                         </Button>
                     </PermissionGate>
                     <PermissionGate permission="can_run_payroll">
-                        <Button type="button" onClick={() => setCreateOpen(true)}>
+                        <Button
+                            type="button"
+                            onClick={() => setCreateOpen(true)}
+                        >
                             {t('index.create')}
                         </Button>
                     </PermissionGate>
@@ -165,7 +167,9 @@ export default function PayrollIndexPage() {
                     </DialogHeader>
                     <form onSubmit={handleCreate} className="grid gap-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="payroll-name">{t('index.name')}</Label>
+                            <Label htmlFor="payroll-name">
+                                {t('index.name')}
+                            </Label>
                             <Input
                                 id="payroll-name"
                                 value={form.name}
@@ -222,7 +226,7 @@ export default function PayrollIndexPage() {
             ) : (
                 <div className="overflow-x-auto rounded-lg border border-border">
                     <table className="min-w-full text-left text-sm">
-                        <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                        <thead className="bg-muted/50 text-xs text-muted-foreground uppercase">
                             <tr>
                                 <th className="px-3 py-2 font-medium">
                                     {t('index.col_name')}
@@ -284,8 +288,14 @@ export default function PayrollIndexPage() {
                                                     </Button>
                                                 </PermissionGate>
                                             ) : null}
-                                            <Button variant="outline" size="sm" asChild>
-                                                <Link href={`/payroll/${run.id}`}>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                asChild
+                                            >
+                                                <Link
+                                                    href={`/payroll/${run.id}`}
+                                                >
                                                     {t('index.open')}
                                                 </Link>
                                             </Button>

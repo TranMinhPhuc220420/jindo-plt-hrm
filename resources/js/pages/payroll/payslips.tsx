@@ -26,7 +26,8 @@ import * as payrollApi from '@/lib/api/modules/payroll';
 import type { Payslip } from '@/lib/api/modules/payroll';
 import { useAuth } from '@/lib/auth/auth-context';
 import { loadCompanyCurrency } from '@/lib/company-currency';
-import { formatCurrency, type AppCurrency } from '@/lib/currency';
+import { formatCurrency } from '@/lib/currency';
+import type { AppCurrency } from '@/lib/currency';
 import {
     employeeDisplayName,
     formatPayslipPeriod,
@@ -34,8 +35,8 @@ import {
     localizePayslipLabel,
     localizePayslipType,
     parsePayslipComponents,
-    type PayslipComponent,
 } from '@/lib/payroll/payslip-components';
+import type { PayslipComponent } from '@/lib/payroll/payslip-components';
 import { cn } from '@/lib/utils';
 
 export default function PayrollPayslipsPage() {
@@ -142,6 +143,7 @@ export default function PayrollPayslipsPage() {
 
     function handleDialogOpenChange(open: boolean) {
         setDetailOpen(open);
+
         if (!open) {
             setSelected(null);
             setDetailLoading(false);
@@ -225,13 +227,13 @@ export default function PayrollPayslipsPage() {
                                             i18n.language,
                                         )}
                                     </td>
-                                    <td className="py-3 pr-4 tabular-nums text-muted-foreground">
+                                    <td className="py-3 pr-4 text-muted-foreground tabular-nums">
                                         {formatCurrency(
                                             slip.gross,
                                             companyCurrency,
                                         )}
                                     </td>
-                                    <td className="py-3 pr-4 tabular-nums font-medium">
+                                    <td className="py-3 pr-4 font-medium tabular-nums">
                                         {formatCurrency(
                                             slip.net,
                                             companyCurrency,
@@ -269,9 +271,7 @@ export default function PayrollPayslipsPage() {
                                                     downloadingId === slip.id
                                                 }
                                                 onClick={() =>
-                                                    void handleDownload(
-                                                        slip.id,
-                                                    )
+                                                    void handleDownload(slip.id)
                                                 }
                                             >
                                                 <Download className="size-4" />
@@ -289,9 +289,7 @@ export default function PayrollPayslipsPage() {
             <Dialog open={detailOpen} onOpenChange={handleDialogOpenChange}>
                 <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
                     <DialogHeader className="border-b border-border px-6 py-4 text-left">
-                        <DialogTitle>
-                            {t('payslips.detail_title')}
-                        </DialogTitle>
+                        <DialogTitle>{t('payslips.detail_title')}</DialogTitle>
                         <DialogDescription>
                             {selected
                                 ? `${employeeDisplayName(selected)} · ${formatPayslipPeriod(
@@ -340,11 +338,9 @@ export default function PayrollPayslipsPage() {
                                         </div>
                                         <div>
                                             <p className="text-muted-foreground">
-                                                {t(
-                                                    'payslips.deductions_total',
-                                                )}
+                                                {t('payslips.deductions_total')}
                                             </p>
-                                            <p className="mt-1 tabular-nums text-destructive">
+                                            <p className="mt-1 text-destructive tabular-nums">
                                                 −
                                                 {formatCurrency(
                                                     breakdown.deductionTotal,
@@ -386,9 +382,7 @@ export default function PayrollPayslipsPage() {
                                 />
                             </>
                         ) : (
-                            <EmptyState
-                                message={t('payslips.error_detail')}
-                            />
+                            <EmptyState message={t('payslips.error_detail')} />
                         )}
                     </div>
 
@@ -402,9 +396,7 @@ export default function PayrollPayslipsPage() {
                             <Button
                                 type="button"
                                 disabled={downloadingId === selected.id}
-                                onClick={() =>
-                                    void handleDownload(selected.id)
-                                }
+                                onClick={() => void handleDownload(selected.id)}
                             >
                                 <Download className="size-4" />
                                 {t('payslips.download')}

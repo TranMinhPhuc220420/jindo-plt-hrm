@@ -20,9 +20,7 @@ export function MonthSummaryStrip({ summary, loading, error }: Props) {
     }
 
     if (error) {
-        return (
-            <p className="mb-4 text-sm text-destructive">{error}</p>
-        );
+        return <p className="mb-4 text-sm text-destructive">{error}</p>;
     }
 
     if (!summary) {
@@ -55,7 +53,9 @@ export function MonthSummaryStrip({ summary, loading, error }: Props) {
                     key={item.label}
                     className="rounded-lg border bg-card px-3 py-3"
                 >
-                    <p className="text-xs text-muted-foreground">{item.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                        {item.label}
+                    </p>
                     <p className="mt-1 text-lg font-semibold tabular-nums">
                         {item.value}
                     </p>

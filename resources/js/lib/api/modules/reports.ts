@@ -37,19 +37,20 @@ export async function runReport(
     filters: Record<string, string> = {},
 ): Promise<ReportResult> {
     const query = new URLSearchParams();
+
     for (const [key, value] of Object.entries(filters)) {
         if (value) {
             query.set(key, value);
         }
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<{ rows: ReportRow[] }>(
         `/api/reports/${report}${suffix}`,
     );
 
     const meta = res.meta as unknown as
-        | { filters?: Record<string, unknown> }
-        | undefined;
+        { filters?: Record<string, unknown> } | undefined;
 
     return {
         rows: res.data?.rows ?? [],
@@ -95,6 +96,7 @@ export function downloadRowsAsCsv(
             : headers;
     const escape = (value: unknown): string => {
         const text = value === null || value === undefined ? '' : String(value);
+
         return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
     };
 

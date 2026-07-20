@@ -1,314 +1,314 @@
 {
-  "can_view_organization": {
-    "name": "View organization",
-    "description": "View the organization tree (company, branches, departments, teams, and positions)."
-  },
-  "can_manage_organization": {
-    "name": "Manage organization",
-    "description": "Create, update, and remove branches, departments, teams, and positions."
-  },
-  "can_manage_company": {
-    "name": "Manage company",
-    "description": "Update the company profile and company-level organization settings."
-  },
-  "can_view_roles": {
-    "name": "View roles",
-    "description": "List roles and browse the permission catalog."
-  },
-  "can_manage_roles": {
-    "name": "Manage roles",
-    "description": "Create and delete roles and change which permissions each role has."
-  },
-  "can_assign_roles": {
-    "name": "Assign roles",
-    "description": "Attach or detach roles for user accounts."
-  },
-  "can_view_settings": {
-    "name": "View settings",
-    "description": "View company and system settings values."
-  },
-  "can_manage_settings": {
-    "name": "Manage settings",
-    "description": "Change company and system settings values."
-  },
-  "can_view_audit_logs": {
-    "name": "View audit logs",
-    "description": "Browse the audit trail of sensitive actions in the system."
-  },
-  "can_view_employee": {
-    "name": "View employees",
-    "description": "List and view employee profiles within the caller's allowed scope."
-  },
-  "can_create_employee": {
-    "name": "Create employees",
-    "description": "Create new employee records."
-  },
-  "can_update_employee": {
-    "name": "Update employees",
-    "description": "Update non-sensitive employee profile fields."
-  },
-  "can_manage_employee_sensitive": {
-    "name": "Manage employee sensitive data",
-    "description": "View and edit sensitive fields such as bank, tax, and insurance data."
-  },
-  "can_change_employee_status": {
-    "name": "Change employee status",
-    "description": "Change employment status and archive or reactivate employees."
-  },
-  "can_view_own_profile": {
-    "name": "View own employee profile",
-    "description": "View the signed-in user's own limited employee profile."
-  },
-  "can_view_shifts": {
-    "name": "View shifts",
-    "description": "View shift definitions and assignments."
-  },
-  "can_manage_shift_definitions": {
-    "name": "Manage shift definitions",
-    "description": "Create, update, and remove shift definitions."
-  },
-  "can_assign_shifts": {
-    "name": "Assign shifts",
-    "description": "Assign shifts to employees and manage assignment changes."
-  },
-  "can_manage_overtime_rules": {
-    "name": "Manage overtime rules",
-    "description": "Configure overtime calculation rules."
-  },
-  "can_view_own_schedule": {
-    "name": "View own schedule",
-    "description": "View the signed-in user's own work schedule."
-  },
-  "can_check_in_out": {
-    "name": "Check in and out",
-    "description": "Record the signed-in user's own check-in and check-out punches."
-  },
-  "can_view_attendance": {
-    "name": "View attendance",
-    "description": "View attendance lists and summaries within the caller's allowed scope."
-  },
-  "can_request_attendance_correction": {
-    "name": "Request attendance corrections",
-    "description": "Submit requests to correct attendance records."
-  },
-  "can_approve_attendance": {
-    "name": "Approve attendance",
-    "description": "Approve or reject attendance records and correction requests."
-  },
-  "can_manage_attendance": {
-    "name": "Manage attendance",
-    "description": "Perform HR overrides such as locking periods or adjusting attendance data."
-  },
-  "can_request_leave": {
-    "name": "Request leave",
-    "description": "Create and cancel the signed-in user's own leave requests."
-  },
-  "can_view_leave": {
-    "name": "View leave",
-    "description": "View leave requests and balances within the caller's allowed scope."
-  },
-  "can_approve_leave": {
-    "name": "Approve leave",
-    "description": "Approve or reject leave requests."
-  },
-  "can_manage_leave_types": {
-    "name": "Manage leave types",
-    "description": "Create, update, and remove leave types."
-  },
-  "can_manage_leave_balances": {
-    "name": "Manage leave balances",
-    "description": "Manually adjust employee leave balances."
-  },
-  "can_manage_holidays": {
-    "name": "Manage holidays and weekend rules",
-    "description": "Configure public holidays and weekend rules used by leave calculations."
-  },
-  "can_view_salary": {
-    "name": "View salary and payslips",
-    "description": "View salary details and payslips within the caller's allowed scope."
-  },
-  "can_manage_salary": {
-    "name": "Manage salary components",
-    "description": "Edit compensation components such as base salary, allowances, and deductions."
-  },
-  "can_run_payroll": {
-    "name": "Run payroll calculations",
-    "description": "Create payroll runs and calculate payroll results."
-  },
-  "can_approve_payroll": {
-    "name": "Approve payroll runs",
-    "description": "Approve payroll runs before finalization."
-  },
-  "can_view_payroll_history": {
-    "name": "View payroll history",
-    "description": "Browse historical payroll runs and outcomes."
-  },
-  "can_manage_payslips": {
-    "name": "Manage payslips",
-    "description": "Perform administrative payslip operations such as regeneration or publishing."
-  },
-  "can_view_company_documents": {
-    "name": "View company documents",
-    "description": "View company-level documents and files."
-  },
-  "can_manage_company_documents": {
-    "name": "Manage company documents",
-    "description": "Upload, update, and remove company-level documents."
-  },
-  "can_view_employee_documents": {
-    "name": "View employee documents",
-    "description": "View employee documents within the caller's allowed scope."
-  },
-  "can_manage_employee_documents": {
-    "name": "Manage employee documents",
-    "description": "Upload, update, and remove employee documents within allowed scope."
-  },
-  "can_upload_own_documents": {
-    "name": "Upload own documents",
-    "description": "Upload documents for the signed-in user's own employee record."
-  },
-  "can_manage_document_templates": {
-    "name": "Manage document templates",
-    "description": "Configure document templates and related document policies."
-  },
-  "can_view_assets": {
-    "name": "View assets",
-    "description": "View the company asset inventory."
-  },
-  "can_manage_assets": {
-    "name": "Manage assets",
-    "description": "Create, update, and remove asset records."
-  },
-  "can_assign_asset": {
-    "name": "Assign assets",
-    "description": "Assign assets to employees."
-  },
-  "can_return_asset": {
-    "name": "Return assets",
-    "description": "Process asset returns from employees."
-  },
-  "can_report_asset_damage": {
-    "name": "Report asset damage",
-    "description": "Report damage or issues for assigned assets."
-  },
-  "can_manage_asset_maintenance": {
-    "name": "Manage asset maintenance",
-    "description": "Track and manage asset maintenance activities."
-  },
-  "can_manage_job_positions": {
-    "name": "Manage job openings",
-    "description": "Create and manage job openings used in recruitment."
-  },
-  "can_view_candidates": {
-    "name": "View candidates",
-    "description": "View candidates in the recruitment pipeline."
-  },
-  "can_manage_candidates": {
-    "name": "Manage candidates",
-    "description": "Create, update, and move candidates through the hiring pipeline."
-  },
-  "can_manage_interviews": {
-    "name": "Manage interviews",
-    "description": "Schedule and manage candidate interviews."
-  },
-  "can_create_offer": {
-    "name": "Create offers",
-    "description": "Create job offers for candidates."
-  },
-  "can_approve_offer": {
-    "name": "Approve and send offers",
-    "description": "Approve offers and send them to candidates when dual control is required."
-  },
-  "can_hire_candidate": {
-    "name": "Hire candidate / accept offer",
-    "description": "Mark a candidate as hired and hand off to onboarding."
-  },
-  "can_view_onboarding": {
-    "name": "View onboarding",
-    "description": "View onboarding cases and progress."
-  },
-  "can_manage_onboarding": {
-    "name": "Manage onboarding",
-    "description": "Create and configure onboarding cases for new hires."
-  },
-  "can_complete_onboarding_task": {
-    "name": "Complete onboarding tasks",
-    "description": "Complete onboarding tasks assigned to the signed-in user."
-  },
-  "can_complete_onboarding": {
-    "name": "Complete onboarding cases",
-    "description": "Mark an onboarding case as fully completed."
-  },
-  "can_manage_onboarding_templates": {
-    "name": "Manage onboarding templates",
-    "description": "Create and maintain onboarding templates used for new hires."
-  },
-  "can_view_performance": {
-    "name": "View performance",
-    "description": "View performance cycles, goals, and evaluations within allowed scope."
-  },
-  "can_manage_goals": {
-    "name": "Manage goals",
-    "description": "Create and update employee goals / KPI / OKR items."
-  },
-  "can_evaluate_employee": {
-    "name": "Evaluate employees",
-    "description": "Submit performance evaluations for eligible employees."
-  },
-  "can_manage_review_cycles": {
-    "name": "Manage review cycles",
-    "description": "Create, start, and finalize performance review cycles."
-  },
-  "can_view_promotion_suggestions": {
-    "name": "View promotion suggestions",
-    "description": "View advisory promotion suggestions from evaluations."
-  },
-  "can_manage_performance_settings": {
-    "name": "Manage performance settings",
-    "description": "Configure performance framework settings for the company."
-  },
-  "can_view_attendance_reports": {
-    "name": "View attendance reports",
-    "description": "Run and view attendance reports."
-  },
-  "can_view_payroll_reports": {
-    "name": "View payroll reports",
-    "description": "Run and view sensitive payroll reports."
-  },
-  "can_view_leave_reports": {
-    "name": "View leave reports",
-    "description": "Run and view leave reports."
-  },
-  "can_view_employee_reports": {
-    "name": "View employee reports",
-    "description": "Run and view employee and headcount reports."
-  },
-  "can_view_performance_reports": {
-    "name": "View performance reports",
-    "description": "Run and view performance reports."
-  },
-  "can_manage_custom_reports": {
-    "name": "Manage custom reports",
-    "description": "Create and manage custom report definitions (reserved)."
-  },
-  "can_export_reports": {
-    "name": "Export reports",
-    "description": "Queue and download report exports."
-  },
-  "can_view_own_notifications": {
-    "name": "View own notifications",
-    "description": "View and manage the signed-in user notification inbox."
-  },
-  "can_manage_notification_templates": {
-    "name": "Manage notification templates",
-    "description": "Manage notification templates (admin; reserved for MVP)."
-  },
-  "can_send_broadcast_notification": {
-    "name": "Send broadcast notifications",
-    "description": "Send broadcast notifications to users (reserved for MVP)."
-  },
-  "can_manage_notification_settings": {
-    "name": "Manage notification settings",
-    "description": "Manage company notification defaults and settings."
-  }
+    "can_view_organization": {
+        "name": "View organization",
+        "description": "View the organization tree (company, branches, departments, teams, and positions)."
+    },
+    "can_manage_organization": {
+        "name": "Manage organization",
+        "description": "Create, update, and remove branches, departments, teams, and positions."
+    },
+    "can_manage_company": {
+        "name": "Manage company",
+        "description": "Update the company profile and company-level organization settings."
+    },
+    "can_view_roles": {
+        "name": "View roles",
+        "description": "List roles and browse the permission catalog."
+    },
+    "can_manage_roles": {
+        "name": "Manage roles",
+        "description": "Create and delete roles and change which permissions each role has."
+    },
+    "can_assign_roles": {
+        "name": "Assign roles",
+        "description": "Attach or detach roles for user accounts."
+    },
+    "can_view_settings": {
+        "name": "View settings",
+        "description": "View company and system settings values."
+    },
+    "can_manage_settings": {
+        "name": "Manage settings",
+        "description": "Change company and system settings values."
+    },
+    "can_view_audit_logs": {
+        "name": "View audit logs",
+        "description": "Browse the audit trail of sensitive actions in the system."
+    },
+    "can_view_employee": {
+        "name": "View employees",
+        "description": "List and view employee profiles within the caller's allowed scope."
+    },
+    "can_create_employee": {
+        "name": "Create employees",
+        "description": "Create new employee records."
+    },
+    "can_update_employee": {
+        "name": "Update employees",
+        "description": "Update non-sensitive employee profile fields."
+    },
+    "can_manage_employee_sensitive": {
+        "name": "Manage employee sensitive data",
+        "description": "View and edit sensitive fields such as bank, tax, and insurance data."
+    },
+    "can_change_employee_status": {
+        "name": "Change employee status",
+        "description": "Change employment status and archive or reactivate employees."
+    },
+    "can_view_own_profile": {
+        "name": "View own employee profile",
+        "description": "View the signed-in user's own limited employee profile."
+    },
+    "can_view_shifts": {
+        "name": "View shifts",
+        "description": "View shift definitions and assignments."
+    },
+    "can_manage_shift_definitions": {
+        "name": "Manage shift definitions",
+        "description": "Create, update, and remove shift definitions."
+    },
+    "can_assign_shifts": {
+        "name": "Assign shifts",
+        "description": "Assign shifts to employees and manage assignment changes."
+    },
+    "can_manage_overtime_rules": {
+        "name": "Manage overtime rules",
+        "description": "Configure overtime calculation rules."
+    },
+    "can_view_own_schedule": {
+        "name": "View own schedule",
+        "description": "View the signed-in user's own work schedule."
+    },
+    "can_check_in_out": {
+        "name": "Check in and out",
+        "description": "Record the signed-in user's own check-in and check-out punches."
+    },
+    "can_view_attendance": {
+        "name": "View attendance",
+        "description": "View attendance lists and summaries within the caller's allowed scope."
+    },
+    "can_request_attendance_correction": {
+        "name": "Request attendance corrections",
+        "description": "Submit requests to correct attendance records."
+    },
+    "can_approve_attendance": {
+        "name": "Approve attendance",
+        "description": "Approve or reject attendance records and correction requests."
+    },
+    "can_manage_attendance": {
+        "name": "Manage attendance",
+        "description": "Perform HR overrides such as locking periods or adjusting attendance data."
+    },
+    "can_request_leave": {
+        "name": "Request leave",
+        "description": "Create and cancel the signed-in user's own leave requests."
+    },
+    "can_view_leave": {
+        "name": "View leave",
+        "description": "View leave requests and balances within the caller's allowed scope."
+    },
+    "can_approve_leave": {
+        "name": "Approve leave",
+        "description": "Approve or reject leave requests."
+    },
+    "can_manage_leave_types": {
+        "name": "Manage leave types",
+        "description": "Create, update, and remove leave types."
+    },
+    "can_manage_leave_balances": {
+        "name": "Manage leave balances",
+        "description": "Manually adjust employee leave balances."
+    },
+    "can_manage_holidays": {
+        "name": "Manage holidays and weekend rules",
+        "description": "Configure public holidays and weekend rules used by leave calculations."
+    },
+    "can_view_salary": {
+        "name": "View salary and payslips",
+        "description": "View salary details and payslips within the caller's allowed scope."
+    },
+    "can_manage_salary": {
+        "name": "Manage salary components",
+        "description": "Edit compensation components such as base salary, allowances, and deductions."
+    },
+    "can_run_payroll": {
+        "name": "Run payroll calculations",
+        "description": "Create payroll runs and calculate payroll results."
+    },
+    "can_approve_payroll": {
+        "name": "Approve payroll runs",
+        "description": "Approve payroll runs before finalization."
+    },
+    "can_view_payroll_history": {
+        "name": "View payroll history",
+        "description": "Browse historical payroll runs and outcomes."
+    },
+    "can_manage_payslips": {
+        "name": "Manage payslips",
+        "description": "Perform administrative payslip operations such as regeneration or publishing."
+    },
+    "can_view_company_documents": {
+        "name": "View company documents",
+        "description": "View company-level documents and files."
+    },
+    "can_manage_company_documents": {
+        "name": "Manage company documents",
+        "description": "Upload, update, and remove company-level documents."
+    },
+    "can_view_employee_documents": {
+        "name": "View employee documents",
+        "description": "View employee documents within the caller's allowed scope."
+    },
+    "can_manage_employee_documents": {
+        "name": "Manage employee documents",
+        "description": "Upload, update, and remove employee documents within allowed scope."
+    },
+    "can_upload_own_documents": {
+        "name": "Upload own documents",
+        "description": "Upload documents for the signed-in user's own employee record."
+    },
+    "can_manage_document_templates": {
+        "name": "Manage document templates",
+        "description": "Configure document templates and related document policies."
+    },
+    "can_view_assets": {
+        "name": "View assets",
+        "description": "View the company asset inventory."
+    },
+    "can_manage_assets": {
+        "name": "Manage assets",
+        "description": "Create, update, and remove asset records."
+    },
+    "can_assign_asset": {
+        "name": "Assign assets",
+        "description": "Assign assets to employees."
+    },
+    "can_return_asset": {
+        "name": "Return assets",
+        "description": "Process asset returns from employees."
+    },
+    "can_report_asset_damage": {
+        "name": "Report asset damage",
+        "description": "Report damage or issues for assigned assets."
+    },
+    "can_manage_asset_maintenance": {
+        "name": "Manage asset maintenance",
+        "description": "Track and manage asset maintenance activities."
+    },
+    "can_manage_job_positions": {
+        "name": "Manage job openings",
+        "description": "Create and manage job openings used in recruitment."
+    },
+    "can_view_candidates": {
+        "name": "View candidates",
+        "description": "View candidates in the recruitment pipeline."
+    },
+    "can_manage_candidates": {
+        "name": "Manage candidates",
+        "description": "Create, update, and move candidates through the hiring pipeline."
+    },
+    "can_manage_interviews": {
+        "name": "Manage interviews",
+        "description": "Schedule and manage candidate interviews."
+    },
+    "can_create_offer": {
+        "name": "Create offers",
+        "description": "Create job offers for candidates."
+    },
+    "can_approve_offer": {
+        "name": "Approve and send offers",
+        "description": "Approve offers and send them to candidates when dual control is required."
+    },
+    "can_hire_candidate": {
+        "name": "Hire candidate / accept offer",
+        "description": "Mark a candidate as hired and hand off to onboarding."
+    },
+    "can_view_onboarding": {
+        "name": "View onboarding",
+        "description": "View onboarding cases and progress."
+    },
+    "can_manage_onboarding": {
+        "name": "Manage onboarding",
+        "description": "Create and configure onboarding cases for new hires."
+    },
+    "can_complete_onboarding_task": {
+        "name": "Complete onboarding tasks",
+        "description": "Complete onboarding tasks assigned to the signed-in user."
+    },
+    "can_complete_onboarding": {
+        "name": "Complete onboarding cases",
+        "description": "Mark an onboarding case as fully completed."
+    },
+    "can_manage_onboarding_templates": {
+        "name": "Manage onboarding templates",
+        "description": "Create and maintain onboarding templates used for new hires."
+    },
+    "can_view_performance": {
+        "name": "View performance",
+        "description": "View performance cycles, goals, and evaluations within allowed scope."
+    },
+    "can_manage_goals": {
+        "name": "Manage goals",
+        "description": "Create and update employee goals / KPI / OKR items."
+    },
+    "can_evaluate_employee": {
+        "name": "Evaluate employees",
+        "description": "Submit performance evaluations for eligible employees."
+    },
+    "can_manage_review_cycles": {
+        "name": "Manage review cycles",
+        "description": "Create, start, and finalize performance review cycles."
+    },
+    "can_view_promotion_suggestions": {
+        "name": "View promotion suggestions",
+        "description": "View advisory promotion suggestions from evaluations."
+    },
+    "can_manage_performance_settings": {
+        "name": "Manage performance settings",
+        "description": "Configure performance framework settings for the company."
+    },
+    "can_view_attendance_reports": {
+        "name": "View attendance reports",
+        "description": "Run and view attendance reports."
+    },
+    "can_view_payroll_reports": {
+        "name": "View payroll reports",
+        "description": "Run and view sensitive payroll reports."
+    },
+    "can_view_leave_reports": {
+        "name": "View leave reports",
+        "description": "Run and view leave reports."
+    },
+    "can_view_employee_reports": {
+        "name": "View employee reports",
+        "description": "Run and view employee and headcount reports."
+    },
+    "can_view_performance_reports": {
+        "name": "View performance reports",
+        "description": "Run and view performance reports."
+    },
+    "can_manage_custom_reports": {
+        "name": "Manage custom reports",
+        "description": "Create and manage custom report definitions (reserved)."
+    },
+    "can_export_reports": {
+        "name": "Export reports",
+        "description": "Queue and download report exports."
+    },
+    "can_view_own_notifications": {
+        "name": "View own notifications",
+        "description": "View and manage the signed-in user notification inbox."
+    },
+    "can_manage_notification_templates": {
+        "name": "Manage notification templates",
+        "description": "Manage notification templates (admin; reserved for MVP)."
+    },
+    "can_send_broadcast_notification": {
+        "name": "Send broadcast notifications",
+        "description": "Send broadcast notifications to users (reserved for MVP)."
+    },
+    "can_manage_notification_settings": {
+        "name": "Manage notification settings",
+        "description": "Manage company notification defaults and settings."
+    }
 }

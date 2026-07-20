@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { CalendarClockIcon } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
 import type { Matcher } from 'react-day-picker';
+import { useTranslation } from 'react-i18next';
 
 import { TimePicker } from '@/components/shared/time-picker';
 import { Button } from '@/components/ui/button';
@@ -58,6 +58,7 @@ export function DateTimePicker({
         : '';
 
     const disabledMatchers: Matcher[] = [];
+
     if (min || max) {
         disabledMatchers.push((date) => {
             return isDateBeforeMin(date, min) || isDateAfterMax(date, max);
@@ -67,18 +68,20 @@ export function DateTimePicker({
     const applyDate = (date: Date | undefined) => {
         if (!date) {
             onChange('');
+
             return;
         }
+
         onChange(
-            formatDateTimeLocal(
-                combineDateAndTime(date, timeValue || '00:00'),
-            ),
+            formatDateTimeLocal(combineDateAndTime(date, timeValue || '00:00')),
         );
     };
 
     const applyTime = (time: string) => {
         const base = selected ?? new Date();
-        onChange(formatDateTimeLocal(combineDateAndTime(base, time || '00:00')));
+        onChange(
+            formatDateTimeLocal(combineDateAndTime(base, time || '00:00')),
+        );
     };
 
     return (
@@ -92,7 +95,7 @@ export function DateTimePicker({
                     aria-required={required || undefined}
                     data-empty={!value}
                     className={cn(
-                        'border-input h-9 w-full justify-start gap-2 px-3 text-left font-normal shadow-xs',
+                        'h-9 w-full justify-start gap-2 border-input px-3 text-left font-normal shadow-xs',
                         'data-[empty=true]:text-muted-foreground',
                         className,
                     )}
@@ -106,7 +109,7 @@ export function DateTimePicker({
                 </Button>
             </PopoverTrigger>
             <PopoverContent
-                className="flex w-auto max-h-[min(36rem,var(--radix-popover-content-available-height))] flex-col overflow-hidden p-0"
+                className="flex max-h-[min(36rem,var(--radix-popover-content-available-height))] w-auto flex-col overflow-hidden p-0"
                 align="start"
                 collisionPadding={16}
             >
@@ -127,8 +130,8 @@ export function DateTimePicker({
                         toYear={2100}
                     />
                 </div>
-                <div className="border-border bg-popover sticky bottom-0 shrink-0 border-t p-3 shadow-[0_-4px_12px_-8px_rgba(0,0,0,0.15)]">
-                    <p className="text-muted-foreground mb-2 text-xs font-medium">
+                <div className="sticky bottom-0 shrink-0 border-t border-border bg-popover p-3 shadow-[0_-4px_12px_-8px_rgba(0,0,0,0.15)]">
+                    <p className="mb-2 text-xs font-medium text-muted-foreground">
                         {t('date_picker.time')}
                     </p>
                     <TimePicker

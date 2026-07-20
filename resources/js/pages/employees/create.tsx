@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';

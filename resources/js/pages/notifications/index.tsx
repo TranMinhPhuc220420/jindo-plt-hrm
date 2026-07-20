@@ -64,18 +64,23 @@ export default function NotificationsPage() {
             await notificationsApi.markRead(id);
             await load();
         } catch (err) {
-            toast.error(err instanceof ApiError ? err.message : t('toast_error'));
+            toast.error(
+                err instanceof ApiError ? err.message : t('toast_error'),
+            );
         }
     }
 
     async function handleMarkAll() {
         setBusy(true);
+
         try {
             await notificationsApi.markAllRead();
             toast.success(t('toast_all_read'));
             await load();
         } catch (err) {
-            toast.error(err instanceof ApiError ? err.message : t('toast_error'));
+            toast.error(
+                err instanceof ApiError ? err.message : t('toast_error'),
+            );
         } finally {
             setBusy(false);
         }
@@ -86,7 +91,9 @@ export default function NotificationsPage() {
             await notificationsApi.deleteNotification(id);
             await load();
         } catch (err) {
-            toast.error(err instanceof ApiError ? err.message : t('toast_error'));
+            toast.error(
+                err instanceof ApiError ? err.message : t('toast_error'),
+            );
         }
     }
 
@@ -94,8 +101,10 @@ export default function NotificationsPage() {
         if (!prefs) {
             return;
         }
+
         const next = { ...prefs, [key]: !prefs[key] };
         setPrefs(next);
+
         try {
             const saved = await notificationsApi.updatePreferences({
                 email: next.email,
@@ -106,7 +115,9 @@ export default function NotificationsPage() {
             toast.success(t('toast_prefs_saved'));
         } catch (err) {
             setPrefs(prefs);
-            toast.error(err instanceof ApiError ? err.message : t('toast_error'));
+            toast.error(
+                err instanceof ApiError ? err.message : t('toast_error'),
+            );
         }
     }
 
@@ -172,66 +183,72 @@ export default function NotificationsPage() {
                         const href = notificationHref(item);
 
                         return (
-                        <li
-                            key={item.id}
-                            className={`flex flex-wrap items-start justify-between gap-3 rounded-lg border border-border p-3 text-sm ${
-                                item.read_at ? 'opacity-70' : 'bg-muted/30'
-                            }`}
-                        >
-                            <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2">
-                                    {!item.read_at && (
-                                        <span className="inline-block size-2 rounded-full bg-primary" />
+                            <li
+                                key={item.id}
+                                className={`flex flex-wrap items-start justify-between gap-3 rounded-lg border border-border p-3 text-sm ${
+                                    item.read_at ? 'opacity-70' : 'bg-muted/30'
+                                }`}
+                            >
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2">
+                                        {!item.read_at && (
+                                            <span className="inline-block size-2 rounded-full bg-primary" />
+                                        )}
+                                        {href ? (
+                                            <Link
+                                                href={href}
+                                                className="font-medium hover:underline"
+                                                onClick={() => {
+                                                    if (!item.read_at) {
+                                                        void handleMarkRead(
+                                                            item.id,
+                                                        );
+                                                    }
+                                                }}
+                                            >
+                                                {title}
+                                            </Link>
+                                        ) : (
+                                            <p className="font-medium">
+                                                {title}
+                                            </p>
+                                        )}
+                                    </div>
+                                    {body && (
+                                        <p className="mt-1 text-muted-foreground">
+                                            {body}
+                                        </p>
                                     )}
-                                    {href ? (
-                                        <Link
-                                            href={href}
-                                            className="font-medium hover:underline"
-                                            onClick={() => {
-                                                if (!item.read_at) {
-                                                    void handleMarkRead(item.id);
-                                                }
-                                            }}
-                                        >
-                                            {title}
-                                        </Link>
-                                    ) : (
-                                        <p className="font-medium">{title}</p>
-                                    )}
-                                </div>
-                                {body && (
-                                    <p className="mt-1 text-muted-foreground">
-                                        {body}
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        {notificationTypeLabel(t, item.type)}
+                                        {item.created_at
+                                            ? ` · ${new Date(item.created_at).toLocaleString(i18n.language)}`
+                                            : ''}
                                     </p>
-                                )}
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                    {notificationTypeLabel(t, item.type)}
-                                    {item.created_at
-                                        ? ` · ${new Date(item.created_at).toLocaleString(i18n.language)}`
-                                        : ''}
-                                </p>
-                            </div>
-                            <div className="flex shrink-0 gap-2">
-                                {!item.read_at && (
+                                </div>
+                                <div className="flex shrink-0 gap-2">
+                                    {!item.read_at && (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() =>
+                                                void handleMarkRead(item.id)
+                                            }
+                                        >
+                                            {t('mark_read')}
+                                        </Button>
+                                    )}
                                     <Button
-                                        variant="outline"
+                                        variant="ghost"
                                         size="sm"
                                         onClick={() =>
-                                            void handleMarkRead(item.id)
+                                            void handleDelete(item.id)
                                         }
                                     >
-                                        {t('mark_read')}
+                                        {t('delete', { ns: 'common' })}
                                     </Button>
-                                )}
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => void handleDelete(item.id)}
-                                >
-                                    {t('delete', { ns: 'common' })}
-                                </Button>
-                            </div>
-                        </li>
+                                </div>
+                            </li>
                         );
                     })}
                 </ul>

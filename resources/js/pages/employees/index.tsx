@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -80,6 +81,7 @@ export default function EmployeesIndexPage() {
 
     function handleCreateOpenChange(open: boolean) {
         setCreateOpen(open);
+
         if (!open) {
             resetCreateForm();
         }
@@ -166,7 +168,9 @@ export default function EmployeesIndexPage() {
                                     }
                                 >
                                     <option value="probation">
-                                        {t('status_probation', { ns: 'common' })}
+                                        {t('status_probation', {
+                                            ns: 'common',
+                                        })}
                                     </option>
                                     <option value="active">
                                         {t('status_active', { ns: 'common' })}
@@ -333,7 +337,7 @@ export default function EmployeesIndexPage() {
             {!loading && !error && employees.length > 0 && (
                 <div className="overflow-x-auto rounded-lg border border-border">
                     <table className="min-w-full text-left text-sm">
-                        <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                        <thead className="bg-muted/50 text-xs text-muted-foreground uppercase">
                             <tr>
                                 <th className="px-3 py-2 font-medium">
                                     {t('index.col_code')}

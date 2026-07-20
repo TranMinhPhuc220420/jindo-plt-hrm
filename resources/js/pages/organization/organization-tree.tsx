@@ -47,15 +47,13 @@ export default function OrganizationTree({
         Record<number, boolean>
     >(() => {
         const firstBranch = tree.branches[0];
+
         if (!firstBranch) {
             return {};
         }
 
         return Object.fromEntries(
-            firstBranch.departments.map((department) => [
-                department.id,
-                true,
-            ]),
+            firstBranch.departments.map((department) => [department.id, true]),
         );
     });
 
@@ -106,9 +104,7 @@ export default function OrganizationTree({
                                     size="sm"
                                     className="size-7 shrink-0 p-0"
                                     aria-label={
-                                        branchOpen
-                                            ? t('collapse')
-                                            : t('expand')
+                                        branchOpen ? t('collapse') : t('expand')
                                     }
                                 >
                                     {branchOpen ? (
@@ -128,7 +124,11 @@ export default function OrganizationTree({
                                 }
                                 className={cn(
                                     'flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted',
-                                    isSelected(selection, 'branch', branch.id) &&
+                                    isSelected(
+                                        selection,
+                                        'branch',
+                                        branch.id,
+                                    ) &&
                                         'bg-primary-deep text-white hover:bg-primary-deep',
                                 )}
                             >
@@ -263,10 +263,14 @@ export default function OrganizationTree({
                                                                 : 'text-muted-foreground',
                                                         )}
                                                     >
-                                                        {t('counts_department', {
-                                                            teams: department
-                                                                .teams.length,
-                                                        })}
+                                                        {t(
+                                                            'counts_department',
+                                                            {
+                                                                teams: department
+                                                                    .teams
+                                                                    .length,
+                                                            },
+                                                        )}
                                                     </span>
                                                 </button>
                                             </div>

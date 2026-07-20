@@ -111,7 +111,10 @@ export async function createShift(payload: Record<string, unknown>) {
     return res.data;
 }
 
-export async function updateShift(id: number, payload: Record<string, unknown>) {
+export async function updateShift(
+    id: number,
+    payload: Record<string, unknown>,
+) {
     const res = await apiPatch<Shift>(`/api/shifts/${id}`, payload);
 
     return res.data;
@@ -121,11 +124,13 @@ export async function deleteShift(id: number) {
     await apiDelete(`/api/shifts/${id}`);
 }
 
-export async function listShiftAssignments(params: {
-    employee_id?: number;
-    shift_id?: number;
-    per_page?: number;
-} = {}) {
+export async function listShiftAssignments(
+    params: {
+        employee_id?: number;
+        shift_id?: number;
+        per_page?: number;
+    } = {},
+) {
     const query = new URLSearchParams();
 
     if (params.employee_id) {
@@ -141,7 +146,9 @@ export async function listShiftAssignments(params: {
     }
 
     const suffix = query.toString() ? `?${query.toString()}` : '';
-    const res = await apiGet<ShiftAssignment[]>(`/api/shift-assignments${suffix}`);
+    const res = await apiGet<ShiftAssignment[]>(
+        `/api/shift-assignments${suffix}`,
+    );
 
     return {
         data: res.data,
@@ -150,7 +157,10 @@ export async function listShiftAssignments(params: {
 }
 
 export async function createShiftAssignment(payload: Record<string, unknown>) {
-    const res = await apiPost<ShiftAssignment>('/api/shift-assignments', payload);
+    const res = await apiPost<ShiftAssignment>(
+        '/api/shift-assignments',
+        payload,
+    );
 
     return res.data;
 }

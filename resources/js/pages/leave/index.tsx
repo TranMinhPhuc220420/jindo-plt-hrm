@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -92,6 +93,7 @@ export default function LeaveIndexPage() {
 
     function handleCreateOpenChange(open: boolean) {
         setCreateOpen(open);
+
         if (!open) {
             resetRequestForm();
         }
@@ -105,6 +107,7 @@ export default function LeaveIndexPage() {
 
         if (!form.leaveTypeId || !startDate) {
             toast.error(t('index.toast_error'));
+
             return;
         }
 
@@ -175,7 +178,9 @@ export default function LeaveIndexPage() {
                 <div className="flex flex-wrap items-center justify-end gap-2">
                     <PermissionGate permission="can_manage_leave_types">
                         <Button variant="outline" asChild>
-                            <Link href="/leave/types">{t('index.types_link')}</Link>
+                            <Link href="/leave/types">
+                                {t('index.types_link')}
+                            </Link>
                         </Button>
                     </PermissionGate>
                     <PermissionGate permission="can_manage_holidays">
@@ -186,7 +191,10 @@ export default function LeaveIndexPage() {
                         </Button>
                     </PermissionGate>
                     <PermissionGate permission="can_request_leave">
-                        <Button type="button" onClick={() => setCreateOpen(true)}>
+                        <Button
+                            type="button"
+                            onClick={() => setCreateOpen(true)}
+                        >
                             {t('index.submit')}
                         </Button>
                     </PermissionGate>
@@ -213,7 +221,7 @@ export default function LeaveIndexPage() {
                                 </Label>
                                 <select
                                     id="leave_type"
-                                    className="border-input bg-background h-9 rounded-md border px-3 text-sm"
+                                    className="h-9 rounded-md border border-input bg-background px-3 text-sm"
                                     value={form.leaveTypeId}
                                     onChange={(e) =>
                                         setForm((prev) => ({
@@ -261,7 +269,9 @@ export default function LeaveIndexPage() {
                                 />
                             </div>
                             <div className="grid gap-1.5">
-                                <Label htmlFor="reason">{t('index.reason')}</Label>
+                                <Label htmlFor="reason">
+                                    {t('index.reason')}
+                                </Label>
                                 <Input
                                     id="reason"
                                     value={form.reason}
@@ -327,7 +337,7 @@ export default function LeaveIndexPage() {
             ) : (
                 <div className="overflow-x-auto rounded-lg border border-border">
                     <table className="min-w-full text-left text-sm">
-                        <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                        <thead className="bg-muted/50 text-xs text-muted-foreground uppercase">
                             <tr>
                                 <th className="px-3 py-2 font-medium">
                                     {t('index.col_employee')}
@@ -371,7 +381,9 @@ export default function LeaveIndexPage() {
                                             ? ` → ${row.end_date}`
                                             : ''}
                                     </td>
-                                    <td className="px-3 py-2">{row.quantity}</td>
+                                    <td className="px-3 py-2">
+                                        {row.quantity}
+                                    </td>
                                     <td className="px-3 py-2">
                                         {t(`status.${row.status}`, {
                                             defaultValue: row.status,

@@ -11,28 +11,24 @@ import {
 import { ApiError } from '@/lib/api/errors';
 import { updateLocale } from '@/lib/api/modules/auth';
 import { useAuth } from '@/lib/auth/auth-context';
-import {
-    applyLocale,
-    SUPPORTED_LOCALES,
-    type AppLocale,
-} from '@/lib/i18n';
+import { applyLocale, SUPPORTED_LOCALES } from '@/lib/i18n';
+import type { AppLocale } from '@/lib/i18n';
 
 type Props = {
     variant?: 'ghost' | 'outline';
     className?: string;
 };
 
-export function LanguageSwitcher({
-    variant = 'ghost',
-    className,
-}: Props) {
+export function LanguageSwitcher({ variant = 'ghost', className }: Props) {
     const { t, i18n } = useTranslation('common');
     const { setSession, user } = useAuth();
     const [saving, setSaving] = useState(false);
 
-    const current = (SUPPORTED_LOCALES.includes(i18n.language as AppLocale)
-        ? i18n.language
-        : 'vi') as AppLocale;
+    const current = (
+        SUPPORTED_LOCALES.includes(i18n.language as AppLocale)
+            ? i18n.language
+            : 'vi'
+    ) as AppLocale;
 
     async function selectLocale(locale: AppLocale) {
         if (locale === current || saving) {
@@ -51,9 +47,7 @@ export function LanguageSwitcher({
             }
         } catch (err) {
             toast.error(
-                err instanceof ApiError
-                    ? err.message
-                    : t('request_failed'),
+                err instanceof ApiError ? err.message : t('request_failed'),
             );
         } finally {
             setSaving(false);

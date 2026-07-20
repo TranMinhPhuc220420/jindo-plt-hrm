@@ -116,7 +116,9 @@ export default function TwoFactorRecoveryCodes({
                                     ref={codesSectionRef}
                                     className="grid gap-1 rounded-lg bg-muted p-4 font-mono text-sm"
                                     role="list"
-                                    aria-label={t('two_factor_manage.codes_label')}
+                                    aria-label={t(
+                                        'two_factor_manage.codes_label',
+                                    )}
                                 >
                                     {recoveryCodesList.length ? (
                                         recoveryCodesList.map((code, index) => (

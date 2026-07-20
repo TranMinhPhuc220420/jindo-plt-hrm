@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -44,9 +45,7 @@ export default function CompanySettingsPage() {
             setSettings(await settingsApi.getSettings());
         } catch (err) {
             setError(
-                err instanceof ApiError
-                    ? err.message
-                    : t('company.error_load'),
+                err instanceof ApiError ? err.message : t('company.error_load'),
             );
         } finally {
             setLoading(false);
@@ -58,9 +57,7 @@ export default function CompanySettingsPage() {
     }, [load]);
 
     function settingLabel(key: string): string {
-        if (
-            (SETTING_KEY_LABELS as readonly string[]).includes(key)
-        ) {
+        if ((SETTING_KEY_LABELS as readonly string[]).includes(key)) {
             return t(`keys.${key}`);
         }
 

@@ -42,9 +42,7 @@ export default function Register({ passwordRules }: Props) {
                                     tabIndex={1}
                                     autoComplete="name"
                                     name="name"
-                                    placeholder={t(
-                                        'register.name_placeholder',
-                                    )}
+                                    placeholder={t('register.name_placeholder')}
                                 />
                                 <InputError
                                     message={errors.name}

@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -64,6 +65,7 @@ export default function LeaveTypesPage() {
 
     function handleCreateOpenChange(open: boolean) {
         setCreateOpen(open);
+
         if (!open) {
             resetCreateForm();
         }
@@ -166,7 +168,7 @@ export default function LeaveTypesPage() {
             ) : (
                 <div className="overflow-x-auto rounded-lg border border-border">
                     <table className="min-w-full text-left text-sm">
-                        <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                        <thead className="bg-muted/50 text-xs text-muted-foreground uppercase">
                             <tr>
                                 <th className="px-3 py-2 font-medium">
                                     {t('types.code')}
@@ -174,7 +176,7 @@ export default function LeaveTypesPage() {
                                 <th className="px-3 py-2 font-medium">
                                     {t('types.name')}
                                 </th>
-                                <th className="px-3 py-2 font-medium text-right">
+                                <th className="px-3 py-2 text-right font-medium">
                                     {t('status', { ns: 'common' })}
                                 </th>
                             </tr>
@@ -190,7 +192,7 @@ export default function LeaveTypesPage() {
                                     </td>
                                     <td className="px-3 py-3 font-medium">
                                         {row.name}
-                                        <span className="ml-2 text-muted-foreground font-normal">
+                                        <span className="ml-2 font-normal text-muted-foreground">
                                             · {row.unit_default}
                                         </span>
                                     </td>

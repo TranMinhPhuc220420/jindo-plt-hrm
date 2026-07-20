@@ -84,7 +84,10 @@ export async function getCurrentCompany() {
 
 export async function updateCurrentCompany(
     payload: Partial<
-        Pick<Company, 'name' | 'legal_name' | 'tax_code' | 'email' | 'phone' | 'address'>
+        Pick<
+            Company,
+            'name' | 'legal_name' | 'tax_code' | 'email' | 'phone' | 'address'
+        >
     >,
 ) {
     const res = await apiPatch<Company>('/api/companies/current', payload);
@@ -110,7 +113,12 @@ export async function createBranch(payload: {
 
 export async function updateBranch(
     id: number,
-    payload: Partial<{ name: string; code: string; address: string; is_active: boolean }>,
+    payload: Partial<{
+        name: string;
+        code: string;
+        address: string;
+        is_active: boolean;
+    }>,
 ) {
     const res = await apiPatch<Branch>(`/api/branches/${id}`, payload);
 
@@ -133,7 +141,12 @@ export async function createDepartment(payload: {
 
 export async function updateDepartment(
     id: number,
-    payload: Partial<{ name: string; code: string; branch_id: number; is_active: boolean }>,
+    payload: Partial<{
+        name: string;
+        code: string;
+        branch_id: number;
+        is_active: boolean;
+    }>,
 ) {
     const res = await apiPatch<Department>(`/api/departments/${id}`, payload);
 

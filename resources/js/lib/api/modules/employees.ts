@@ -2,11 +2,7 @@ import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '../client';
 import type { PaginationMeta } from '../types';
 
 export type EmployeeStatus =
-    | 'probation'
-    | 'active'
-    | 'suspended'
-    | 'resigned'
-    | 'archived';
+    'probation' | 'active' | 'suspended' | 'resigned' | 'archived';
 
 export type Employee = {
     id: number;
@@ -97,7 +93,10 @@ export async function updateEmployeePassword(
         | { use_default: true }
         | { password: string; password_confirmation: string },
 ) {
-    const res = await apiPut<Employee>(`/api/employees/${id}/password`, payload);
+    const res = await apiPut<Employee>(
+        `/api/employees/${id}/password`,
+        payload,
+    );
 
     return res.data;
 }

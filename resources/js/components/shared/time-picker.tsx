@@ -8,10 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import {
-    formatTimeString,
-    parseTimeString,
-} from '@/lib/datetime';
+import { formatTimeString, parseTimeString } from '@/lib/datetime';
 import { cn } from '@/lib/utils';
 
 type TimePickerProps = {
@@ -31,9 +28,11 @@ function pad(n: number): string {
 
 function buildMinutes(step: number): number[] {
     const minutes: number[] = [];
+
     for (let m = 0; m < 60; m += step) {
         minutes.push(m);
     }
+
     return minutes;
 }
 
@@ -56,8 +55,10 @@ export function TimePicker({
     const emit = (h: number | undefined, m: number | undefined) => {
         if (h === undefined || m === undefined) {
             onChange('');
+
             return;
         }
+
         onChange(formatTimeString(h, m));
     };
 
@@ -67,7 +68,7 @@ export function TimePicker({
             className={cn('flex w-full items-center gap-2', className)}
             data-required={required || undefined}
         >
-            <ClockIcon className="text-muted-foreground size-4 shrink-0 opacity-60" />
+            <ClockIcon className="size-4 shrink-0 text-muted-foreground opacity-60" />
             <Select
                 value={hours !== undefined ? String(hours) : undefined}
                 onValueChange={(v) => {
@@ -96,7 +97,7 @@ export function TimePicker({
                     ))}
                 </SelectContent>
             </Select>
-            <span className="text-muted-foreground text-sm">:</span>
+            <span className="text-sm text-muted-foreground">:</span>
             <Select
                 value={minutes !== undefined ? String(minutes) : undefined}
                 onValueChange={(v) => {

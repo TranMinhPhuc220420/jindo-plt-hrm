@@ -1,5 +1,11 @@
 import type { PayslipComponent } from '@/lib/payroll/payslip-components';
-import { apiGet, apiPost, apiPut, apiDelete, ensureCsrfCookie } from '../client';
+import {
+    apiGet,
+    apiPost,
+    apiPut,
+    apiDelete,
+    ensureCsrfCookie,
+} from '../client';
 import { normalizeError } from '../errors';
 import type { PaginationMeta } from '../types';
 
@@ -80,20 +86,27 @@ export async function listSalaries(
     } = {},
 ) {
     const query = new URLSearchParams();
+
     if (params.employee_id) {
         query.set('employee_id', String(params.employee_id));
     }
+
     if (params.current_only) {
         query.set('current_only', '1');
     }
+
     if (params.page) {
         query.set('page', String(params.page));
     }
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
-    const res = await apiGet<EmployeeSalary[]>(`/api/employee-salaries${suffix}`);
+    const res = await apiGet<EmployeeSalary[]>(
+        `/api/employee-salaries${suffix}`,
+    );
 
     return {
         data: res.data ?? [],
@@ -180,9 +193,11 @@ export async function replaceBonuses(
 
 export async function listPayrollRuns(params: { per_page?: number } = {}) {
     const query = new URLSearchParams();
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<PayrollRun[]>(`/api/payroll-runs${suffix}`);
 
@@ -243,11 +258,16 @@ export async function finalizePayrollRun(id: number) {
     return res.data;
 }
 
-export async function listPayrollItems(runId: number, params: { per_page?: number } = {}) {
+export async function listPayrollItems(
+    runId: number,
+    params: { per_page?: number } = {},
+) {
     const query = new URLSearchParams();
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<PayrollItem[]>(
         `/api/payroll-runs/${runId}/items${suffix}`,
@@ -259,17 +279,22 @@ export async function listPayrollItems(runId: number, params: { per_page?: numbe
     };
 }
 
-export async function listPayslips(params: {
-    employee_id?: number;
-    per_page?: number;
-} = {}) {
+export async function listPayslips(
+    params: {
+        employee_id?: number;
+        per_page?: number;
+    } = {},
+) {
     const query = new URLSearchParams();
+
     if (params.employee_id) {
         query.set('employee_id', String(params.employee_id));
     }
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<Payslip[]>(`/api/payslips${suffix}`);
 
@@ -293,6 +318,7 @@ export async function downloadPayslip(id: number): Promise<void> {
         Accept: 'application/pdf, application/json',
         'X-Requested-With': 'XMLHttpRequest',
     };
+
     if (xsrf) {
         headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf[1]);
     }
@@ -305,6 +331,7 @@ export async function downloadPayslip(id: number): Promise<void> {
 
     if (!response.ok) {
         const body = await response.json().catch(() => null);
+
         throw normalizeError(response.status, body);
     }
 

@@ -141,7 +141,10 @@ export const AUDIT_SUBJECT_OPTIONS: readonly {
     { basename: 'Shift', morph: 'App\\Models\\Shift' },
     { basename: 'ShiftAssignment', morph: 'App\\Models\\ShiftAssignment' },
     { basename: 'AttendanceRecord', morph: 'App\\Models\\AttendanceRecord' },
-    { basename: 'AttendanceCorrection', morph: 'App\\Models\\AttendanceCorrection' },
+    {
+        basename: 'AttendanceCorrection',
+        morph: 'App\\Models\\AttendanceCorrection',
+    },
     { basename: 'PayrollRun', morph: 'App\\Models\\PayrollRun' },
     { basename: 'EmployeeSalary', morph: 'App\\Models\\EmployeeSalary' },
     { basename: 'Document', morph: 'App\\Models\\Document' },
@@ -152,10 +155,19 @@ export const AUDIT_SUBJECT_OPTIONS: readonly {
     { basename: 'Offer', morph: 'App\\Models\\Offer' },
     { basename: 'OnboardingCase', morph: 'App\\Models\\OnboardingCase' },
     { basename: 'OnboardingTask', morph: 'App\\Models\\OnboardingTask' },
-    { basename: 'OnboardingTemplate', morph: 'App\\Models\\OnboardingTemplate' },
+    {
+        basename: 'OnboardingTemplate',
+        morph: 'App\\Models\\OnboardingTemplate',
+    },
     { basename: 'PerformanceGoal', morph: 'App\\Models\\PerformanceGoal' },
-    { basename: 'PerformanceReviewCycle', morph: 'App\\Models\\PerformanceReviewCycle' },
-    { basename: 'PerformanceEvaluation', morph: 'App\\Models\\PerformanceEvaluation' },
+    {
+        basename: 'PerformanceReviewCycle',
+        morph: 'App\\Models\\PerformanceReviewCycle',
+    },
+    {
+        basename: 'PerformanceEvaluation',
+        morph: 'App\\Models\\PerformanceEvaluation',
+    },
     {
         basename: 'PerformancePromotionSuggestion',
         morph: 'App\\Models\\PerformancePromotionSuggestion',

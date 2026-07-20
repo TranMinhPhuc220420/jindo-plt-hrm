@@ -7,8 +7,8 @@ import {
     ErrorState,
     LoadingState,
 } from '@/components/shared/async-state';
-import { PermissionGate } from '@/components/shared/permission-gate';
 import { DateRangePicker } from '@/components/shared/date-range-picker';
+import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { ApiError } from '@/lib/api/errors';
@@ -20,7 +20,7 @@ import type {
     ReportType,
 } from '@/lib/api/modules/reports';
 import { loadCompanyCurrency } from '@/lib/company-currency';
-import { type AppCurrency } from '@/lib/currency';
+import type { AppCurrency } from '@/lib/currency';
 import {
     reportCellLabel,
     reportColumnLabel,
@@ -54,8 +54,7 @@ export default function ReportsPage() {
     const [error, setError] = useState<string | null>(null);
     const [exportStatus, setExportStatus] = useState<ExportStatus | null>(null);
     const [exporting, setExporting] = useState(false);
-    const [companyCurrency, setCompanyCurrency] =
-        useState<AppCurrency>('VND');
+    const [companyCurrency, setCompanyCurrency] = useState<AppCurrency>('VND');
     const [refreshToken, setRefreshToken] = useState(0);
     const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const hasDateFilter = Boolean(dateFrom || dateTo);
@@ -75,12 +74,15 @@ export default function ReportsPage() {
 
     const buildFilters = useCallback((): Record<string, string> => {
         const filters: Record<string, string> = {};
+
         if (dateFrom) {
             filters.date_from = dateFrom;
         }
+
         if (dateTo) {
             filters.date_to = dateTo;
         }
+
         return filters;
     }, [dateFrom, dateTo]);
 
@@ -92,6 +94,7 @@ export default function ReportsPage() {
         setError(null);
         setExportStatus(null);
         setExporting(false);
+
         if (pollRef.current) {
             clearTimeout(pollRef.current);
             pollRef.current = null;
@@ -101,9 +104,11 @@ export default function ReportsPage() {
             void (async () => {
                 try {
                     const result = await reportsApi.runReport(report, filters);
+
                     if (cancelled) {
                         return;
                     }
+
                     setRows(result.rows);
                     setAppliedReport(report);
                     setHasRun(true);
@@ -111,6 +116,7 @@ export default function ReportsPage() {
                     if (cancelled) {
                         return;
                     }
+
                     setError(
                         err instanceof ApiError ? err.message : t('error_run'),
                     );
@@ -138,6 +144,7 @@ export default function ReportsPage() {
     function handleClearFilters() {
         setDateFrom('');
         setDateTo('');
+
         if (!dateFrom && !dateTo) {
             setRefreshToken((token) => token + 1);
         }
@@ -194,6 +201,7 @@ export default function ReportsPage() {
         const headerLabels = keys.map((h) => reportColumnLabel(t, h));
         const formattedRows = rows.map((row) => {
             const next: ReportRow = {};
+
             for (const key of keys) {
                 next[key] = reportCellLabel(t, appliedReport, key, row[key], {
                     currency: companyCurrency,
@@ -201,9 +209,14 @@ export default function ReportsPage() {
                     row,
                 });
             }
+
             return next;
         });
-        reportsApi.downloadRowsAsCsv(appliedReport, formattedRows, headerLabels);
+        reportsApi.downloadRowsAsCsv(
+            appliedReport,
+            formattedRows,
+            headerLabels,
+        );
     }
 
     const headers = reportVisibleColumns(rows[0]);
@@ -219,7 +232,7 @@ export default function ReportsPage() {
                     <Label htmlFor="report_type">{t('report_type')}</Label>
                     <select
                         id="report_type"
-                        className="border-input bg-background h-9 rounded-md border px-3 text-sm"
+                        className="h-9 rounded-md border border-input bg-background px-3 text-sm"
                         value={report}
                         onChange={(e) =>
                             setReport(e.target.value as ReportType)

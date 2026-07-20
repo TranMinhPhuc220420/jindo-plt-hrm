@@ -1,10 +1,5 @@
-import {
-    useCallback,
-    useEffect,
-    useMemo,
-    useState,
-    type FormEvent,
-} from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -159,13 +154,13 @@ export default function RolesPage() {
             if (first && selectedRoleId === null) {
                 setSelectedRoleId(first.id);
                 setSelectedKeys(
-                    (first.permissions ?? []).map((permission) => permission.key),
+                    (first.permissions ?? []).map(
+                        (permission) => permission.key,
+                    ),
                 );
             }
         } catch (err) {
-            setError(
-                err instanceof ApiError ? err.message : t('error_load'),
-            );
+            setError(err instanceof ApiError ? err.message : t('error_load'));
         } finally {
             setLoading(false);
         }
@@ -210,9 +205,7 @@ export default function RolesPage() {
             activePermissions.map((permission) => permission.key),
         );
 
-        setSelectedKeys((current) =>
-            current.filter((key) => !keys.has(key)),
-        );
+        setSelectedKeys((current) => current.filter((key) => !keys.has(key)));
     }
 
     function groupLabel(group: string): string {
@@ -305,7 +298,9 @@ export default function RolesPage() {
         try {
             await rolesApi.deleteRole(role.id);
             toast.success(t('toast_role_deleted'));
-            setRoles((current) => current.filter((item) => item.id !== role.id));
+            setRoles((current) =>
+                current.filter((item) => item.id !== role.id),
+            );
 
             if (selectedRoleId === role.id) {
                 setSelectedRoleId(null);
@@ -409,329 +404,339 @@ export default function RolesPage() {
 
             {!loading && !error && (
                 <div className="min-w-0 space-y-8">
-                <div className="grid min-w-0 gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
-                    <div className="min-w-0 space-y-3">
-                        <h3 className="text-sm font-semibold">
-                            {t('section_roles')}
-                        </h3>
-                        {roles.length === 0 ? (
-                            <EmptyState message={t('empty_roles')} />
-                        ) : (
-                            <ul className="space-y-1">
-                                {roles.map((role) => (
-                                    <li key={role.id}>
-                                        <button
-                                            type="button"
-                                            onClick={() => selectRole(role)}
-                                            className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm ${
-                                                selectedRoleId === role.id
-                                                    ? 'bg-primary-deep text-white'
-                                                    : 'hover:bg-muted'
-                                            }`}
-                                        >
-                                            <span>
-                                                {roleDisplayName(role, t)}
-                                            </span>
-                                            {role.is_system && (
-                                                <span className="text-[10px] opacity-80">
-                                                    {t('system_badge')}
+                    <div className="grid min-w-0 gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+                        <div className="min-w-0 space-y-3">
+                            <h3 className="text-sm font-semibold">
+                                {t('section_roles')}
+                            </h3>
+                            {roles.length === 0 ? (
+                                <EmptyState message={t('empty_roles')} />
+                            ) : (
+                                <ul className="space-y-1">
+                                    {roles.map((role) => (
+                                        <li key={role.id}>
+                                            <button
+                                                type="button"
+                                                onClick={() => selectRole(role)}
+                                                className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm ${
+                                                    selectedRoleId === role.id
+                                                        ? 'bg-primary-deep text-white'
+                                                        : 'hover:bg-muted'
+                                                }`}
+                                            >
+                                                <span>
+                                                    {roleDisplayName(role, t)}
                                                 </span>
-                                            )}
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
+                                                {role.is_system && (
+                                                    <span className="text-[10px] opacity-80">
+                                                        {t('system_badge')}
+                                                    </span>
+                                                )}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
 
-                        <PermissionGate permission="can_manage_roles">
-                            <form
-                                onSubmit={handleCreateRole}
-                                className="space-y-2 border-t border-border pt-3"
-                            >
-                                <Label htmlFor="role-key">{t('role_key')}</Label>
-                                <Input
-                                    id="role-key"
-                                    value={newKey}
-                                    onChange={(e) => setNewKey(e.target.value)}
-                                    placeholder={t('role_key_placeholder')}
-                                    required
-                                />
-                                <Label htmlFor="role-name">
-                                    {t('role_name')}
-                                </Label>
-                                <Input
-                                    id="role-name"
-                                    value={newName}
-                                    onChange={(e) => setNewName(e.target.value)}
-                                    placeholder={t('role_name_placeholder')}
-                                    required
-                                />
-                                <Button
-                                    type="submit"
-                                    size="sm"
-                                    disabled={saving}
+                            <PermissionGate permission="can_manage_roles">
+                                <form
+                                    onSubmit={handleCreateRole}
+                                    className="space-y-2 border-t border-border pt-3"
                                 >
-                                    {t('create_role')}
-                                </Button>
-                            </form>
-                        </PermissionGate>
-                    </div>
-
-                    <div className="min-w-0 space-y-4">
-                        {selectedRoleId === null ? (
-                            <EmptyState message={t('empty_select_role')} />
-                        ) : (
-                            <>
-                                <div className="flex flex-wrap items-center justify-between gap-3">
-                                    <h3 className="text-sm font-semibold">
-                                        {t('section_permissions')}
-                                    </h3>
-                                    <PermissionGate permission="can_manage_roles">
-                                        <div className="flex flex-wrap gap-2">
-                                            <Button
-                                                size="sm"
-                                                onClick={() =>
-                                                    void handleSavePermissions()
-                                                }
-                                                disabled={saving || !canManage}
-                                            >
-                                                {t('save_permissions')}
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => {
-                                                    const role = roles.find(
-                                                        (item) =>
-                                                            item.id ===
-                                                            selectedRoleId,
-                                                    );
-
-                                                    if (role) {
-                                                        void handleDeleteRole(
-                                                            role,
-                                                        );
-                                                    }
-                                                }}
-                                            >
-                                                {t('delete_role')}
-                                            </Button>
-                                        </div>
-                                    </PermissionGate>
-                                </div>
-
-                                {groups.length === 0 ? (
-                                    <EmptyState
-                                        message={t('empty_select_role')}
+                                    <Label htmlFor="role-key">
+                                        {t('role_key')}
+                                    </Label>
+                                    <Input
+                                        id="role-key"
+                                        value={newKey}
+                                        onChange={(e) =>
+                                            setNewKey(e.target.value)
+                                        }
+                                        placeholder={t('role_key_placeholder')}
+                                        required
                                     />
-                                ) : (
-                                    <>
-                                        <div className="-mx-1 w-full overflow-x-auto px-1 pb-1">
-                                            <div className="flex w-max max-w-none gap-1 rounded-lg bg-muted p-1">
-                                                {groups.map((group) => {
-                                                    const total =
-                                                        byGroup[group]
-                                                            ?.length ?? 0;
-                                                    const selected =
-                                                        groupSelectedCount(
-                                                            group,
-                                                        );
+                                    <Label htmlFor="role-name">
+                                        {t('role_name')}
+                                    </Label>
+                                    <Input
+                                        id="role-name"
+                                        value={newName}
+                                        onChange={(e) =>
+                                            setNewName(e.target.value)
+                                        }
+                                        placeholder={t('role_name_placeholder')}
+                                        required
+                                    />
+                                    <Button
+                                        type="submit"
+                                        size="sm"
+                                        disabled={saving}
+                                    >
+                                        {t('create_role')}
+                                    </Button>
+                                </form>
+                            </PermissionGate>
+                        </div>
 
-                                                    return (
-                                                        <button
-                                                            key={group}
-                                                            type="button"
-                                                            onClick={() =>
-                                                                setActiveGroup(
-                                                                    group,
-                                                                )
-                                                            }
-                                                            className={cn(
-                                                                'inline-flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap transition-colors',
-                                                                activeGroup ===
-                                                                    group
-                                                                    ? 'bg-background text-foreground shadow-xs'
-                                                                    : 'text-muted-foreground hover:bg-background/60 hover:text-foreground',
-                                                            )}
-                                                        >
-                                                            <span>
-                                                                {groupLabel(
-                                                                    group,
-                                                                )}
-                                                            </span>
-                                                            <span
-                                                                className={cn(
-                                                                    'rounded-full px-1.5 py-0.5 text-[10px] font-medium',
-                                                                    activeGroup ===
-                                                                        group
-                                                                        ? 'bg-primary-deep/10 text-primary-deep'
-                                                                        : 'bg-background/80 text-muted-foreground',
-                                                                )}
-                                                            >
-                                                                {selected}/
-                                                                {total}
-                                                            </span>
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-
-                                        {canManage && (
+                        <div className="min-w-0 space-y-4">
+                            {selectedRoleId === null ? (
+                                <EmptyState message={t('empty_select_role')} />
+                            ) : (
+                                <>
+                                    <div className="flex flex-wrap items-center justify-between gap-3">
+                                        <h3 className="text-sm font-semibold">
+                                            {t('section_permissions')}
+                                        </h3>
+                                        <PermissionGate permission="can_manage_roles">
                                             <div className="flex flex-wrap gap-2">
                                                 <Button
-                                                    type="button"
                                                     size="sm"
-                                                    variant="outline"
-                                                    onClick={
-                                                        selectAllInActiveGroup
+                                                    onClick={() =>
+                                                        void handleSavePermissions()
                                                     }
                                                     disabled={
-                                                        activePermissions.length ===
-                                                        0
+                                                        saving || !canManage
                                                     }
                                                 >
-                                                    {t('select_all_group')}
+                                                    {t('save_permissions')}
                                                 </Button>
                                                 <Button
-                                                    type="button"
                                                     size="sm"
                                                     variant="outline"
-                                                    onClick={clearActiveGroup}
-                                                    disabled={
-                                                        activePermissions.length ===
-                                                        0
-                                                    }
+                                                    onClick={() => {
+                                                        const role = roles.find(
+                                                            (item) =>
+                                                                item.id ===
+                                                                selectedRoleId,
+                                                        );
+
+                                                        if (role) {
+                                                            void handleDeleteRole(
+                                                                role,
+                                                            );
+                                                        }
+                                                    }}
                                                 >
-                                                    {t('clear_group')}
+                                                    {t('delete_role')}
                                                 </Button>
                                             </div>
-                                        )}
+                                        </PermissionGate>
+                                    </div>
 
-                                        <div className="grid min-w-0 gap-2 sm:grid-cols-2">
-                                            {activePermissions.map(
-                                                (permission) => (
-                                                    <label
-                                                        key={permission.key}
-                                                        className="flex min-w-0 items-start gap-2 rounded-md border border-border px-3 py-2 text-sm"
+                                    {groups.length === 0 ? (
+                                        <EmptyState
+                                            message={t('empty_select_role')}
+                                        />
+                                    ) : (
+                                        <>
+                                            <div className="-mx-1 w-full overflow-x-auto px-1 pb-1">
+                                                <div className="flex w-max max-w-none gap-1 rounded-lg bg-muted p-1">
+                                                    {groups.map((group) => {
+                                                        const total =
+                                                            byGroup[group]
+                                                                ?.length ?? 0;
+                                                        const selected =
+                                                            groupSelectedCount(
+                                                                group,
+                                                            );
+
+                                                        return (
+                                                            <button
+                                                                key={group}
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    setActiveGroup(
+                                                                        group,
+                                                                    )
+                                                                }
+                                                                className={cn(
+                                                                    'inline-flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-sm whitespace-nowrap transition-colors',
+                                                                    activeGroup ===
+                                                                        group
+                                                                        ? 'bg-background text-foreground shadow-xs'
+                                                                        : 'text-muted-foreground hover:bg-background/60 hover:text-foreground',
+                                                                )}
+                                                            >
+                                                                <span>
+                                                                    {groupLabel(
+                                                                        group,
+                                                                    )}
+                                                                </span>
+                                                                <span
+                                                                    className={cn(
+                                                                        'rounded-full px-1.5 py-0.5 text-[10px] font-medium',
+                                                                        activeGroup ===
+                                                                            group
+                                                                            ? 'bg-primary-deep/10 text-primary-deep'
+                                                                            : 'bg-background/80 text-muted-foreground',
+                                                                    )}
+                                                                >
+                                                                    {selected}/
+                                                                    {total}
+                                                                </span>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+
+                                            {canManage && (
+                                                <div className="flex flex-wrap gap-2">
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={
+                                                            selectAllInActiveGroup
+                                                        }
+                                                        disabled={
+                                                            activePermissions.length ===
+                                                            0
+                                                        }
                                                     >
-                                                        <Checkbox
-                                                            className="mt-0.5 shrink-0"
-                                                            checked={selectedKeys.includes(
-                                                                permission.key,
-                                                            )}
-                                                            disabled={
-                                                                !canManage
-                                                            }
-                                                            onCheckedChange={() =>
-                                                                togglePermission(
-                                                                    permission.key,
-                                                                )
-                                                            }
-                                                        />
-                                                        <span className="min-w-0 flex-1">
-                                                            <span className="block font-medium break-words">
-                                                                {t(
-                                                                    `${permission.key}.name`,
-                                                                    {
-                                                                        ns: 'permissions',
-                                                                        defaultValue:
-                                                                            permission.name,
-                                                                    },
-                                                                )}
-                                                            </span>
-                                                            <span className="mt-0.5 block text-xs break-words text-muted-foreground">
-                                                                {t(
-                                                                    `${permission.key}.description`,
-                                                                    {
-                                                                        ns: 'permissions',
-                                                                        defaultValue:
-                                                                            permission.description ??
-                                                                            '',
-                                                                    },
-                                                                )}
-                                                            </span>
-                                                        </span>
-                                                    </label>
-                                                ),
+                                                        {t('select_all_group')}
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={
+                                                            clearActiveGroup
+                                                        }
+                                                        disabled={
+                                                            activePermissions.length ===
+                                                            0
+                                                        }
+                                                    >
+                                                        {t('clear_group')}
+                                                    </Button>
+                                                </div>
                                             )}
-                                        </div>
-                                    </>
-                                )}
-                            </>
-                        )}
-                    </div>
-                </div>
 
-                <PermissionGate permission="can_assign_roles">
-                    <div className="space-y-4 border-t border-border pt-6">
-                        <div>
-                            <h3 className="text-sm font-semibold">
-                                {t('assign_title')}
-                            </h3>
-                            <p className="text-xs text-muted-foreground">
-                                {t('assign_help')}
-                            </p>
-                        </div>
-                        <div className="flex flex-wrap items-end gap-3">
-                            <EmployeePickerField
-                                id="assign-employee"
-                                label={t('assign_employee')}
-                                value={assignEmployeeId}
-                                onChange={handleAssignEmployeeChange}
-                                disabled={!canAssign}
-                                className="min-w-[16rem] max-w-sm flex-1"
-                            />
-                            <Button
-                                type="button"
-                                variant="outline"
-                                disabled={
-                                    assignLoading ||
-                                    !canAssign ||
-                                    assignUserId === null
-                                }
-                                onClick={() => void handleLoadUserRoles()}
-                            >
-                                {t('load_roles')}
-                            </Button>
-                            <Button
-                                type="button"
-                                disabled={
-                                    assignLoading ||
-                                    !canAssign ||
-                                    assignUserId === null
-                                }
-                                onClick={() => void handleSaveUserRoles()}
-                            >
-                                {t('save_assignment')}
-                            </Button>
-                        </div>
-                        <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
-                            {roles.map((role) => (
-                                <label
-                                    key={`assign-${role.key}`}
-                                    className="flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm"
-                                >
-                                    <Checkbox
-                                        checked={assignRoleKeys.includes(
-                                            role.key,
-                                        )}
-                                        disabled={!canAssign}
-                                        onCheckedChange={() =>
-                                            toggleAssignRole(role.key)
-                                        }
-                                    />
-                                    <span>
-                                        {roleDisplayName(role, t)}{' '}
-                                        <span className="text-xs text-muted-foreground">
-                                            ({role.key})
-                                        </span>
-                                    </span>
-                                </label>
-                            ))}
+                                            <div className="grid min-w-0 gap-2 sm:grid-cols-2">
+                                                {activePermissions.map(
+                                                    (permission) => (
+                                                        <label
+                                                            key={permission.key}
+                                                            className="flex min-w-0 items-start gap-2 rounded-md border border-border px-3 py-2 text-sm"
+                                                        >
+                                                            <Checkbox
+                                                                className="mt-0.5 shrink-0"
+                                                                checked={selectedKeys.includes(
+                                                                    permission.key,
+                                                                )}
+                                                                disabled={
+                                                                    !canManage
+                                                                }
+                                                                onCheckedChange={() =>
+                                                                    togglePermission(
+                                                                        permission.key,
+                                                                    )
+                                                                }
+                                                            />
+                                                            <span className="min-w-0 flex-1">
+                                                                <span className="block font-medium break-words">
+                                                                    {t(
+                                                                        `${permission.key}.name`,
+                                                                        {
+                                                                            ns: 'permissions',
+                                                                            defaultValue:
+                                                                                permission.name,
+                                                                        },
+                                                                    )}
+                                                                </span>
+                                                                <span className="mt-0.5 block text-xs break-words text-muted-foreground">
+                                                                    {t(
+                                                                        `${permission.key}.description`,
+                                                                        {
+                                                                            ns: 'permissions',
+                                                                            defaultValue:
+                                                                                permission.description ??
+                                                                                '',
+                                                                        },
+                                                                    )}
+                                                                </span>
+                                                            </span>
+                                                        </label>
+                                                    ),
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
+                                </>
+                            )}
                         </div>
                     </div>
-                </PermissionGate>
+
+                    <PermissionGate permission="can_assign_roles">
+                        <div className="space-y-4 border-t border-border pt-6">
+                            <div>
+                                <h3 className="text-sm font-semibold">
+                                    {t('assign_title')}
+                                </h3>
+                                <p className="text-xs text-muted-foreground">
+                                    {t('assign_help')}
+                                </p>
+                            </div>
+                            <div className="flex flex-wrap items-end gap-3">
+                                <EmployeePickerField
+                                    id="assign-employee"
+                                    label={t('assign_employee')}
+                                    value={assignEmployeeId}
+                                    onChange={handleAssignEmployeeChange}
+                                    disabled={!canAssign}
+                                    className="max-w-sm min-w-[16rem] flex-1"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    disabled={
+                                        assignLoading ||
+                                        !canAssign ||
+                                        assignUserId === null
+                                    }
+                                    onClick={() => void handleLoadUserRoles()}
+                                >
+                                    {t('load_roles')}
+                                </Button>
+                                <Button
+                                    type="button"
+                                    disabled={
+                                        assignLoading ||
+                                        !canAssign ||
+                                        assignUserId === null
+                                    }
+                                    onClick={() => void handleSaveUserRoles()}
+                                >
+                                    {t('save_assignment')}
+                                </Button>
+                            </div>
+                            <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
+                                {roles.map((role) => (
+                                    <label
+                                        key={`assign-${role.key}`}
+                                        className="flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm"
+                                    >
+                                        <Checkbox
+                                            checked={assignRoleKeys.includes(
+                                                role.key,
+                                            )}
+                                            disabled={!canAssign}
+                                            onCheckedChange={() =>
+                                                toggleAssignRole(role.key)
+                                            }
+                                        />
+                                        <span>
+                                            {roleDisplayName(role, t)}{' '}
+                                            <span className="text-xs text-muted-foreground">
+                                                ({role.key})
+                                            </span>
+                                        </span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                    </PermissionGate>
                 </div>
             )}
         </AdminPageShell>

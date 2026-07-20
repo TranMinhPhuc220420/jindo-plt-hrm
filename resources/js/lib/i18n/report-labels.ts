@@ -55,6 +55,7 @@ function formatDateValue(
     withTime: boolean,
 ): string {
     const date = new Date(value);
+
     if (Number.isNaN(date.getTime())) {
         return value;
     }
@@ -68,6 +69,7 @@ function formatDateValue(
     // Date-only strings (YYYY-MM-DD) should not shift by timezone.
     if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
         const [y, m, d] = value.split('-').map(Number);
+
         return new Date(y!, m! - 1, d!).toLocaleDateString(lang);
     }
 
@@ -110,6 +112,7 @@ export function reportCellLabel(
 
     if (column === 'leave_type') {
         const code = options.row?.leave_type_code;
+
         if (typeof code === 'string' && code !== '') {
             return leaveTypeLabel(t, code, String(value));
         }

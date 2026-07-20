@@ -4,11 +4,7 @@ import type { PaginationMeta } from '../types';
 
 export type DocumentOwnerType = 'company' | 'employee' | 'candidate';
 export type DocumentCategory =
-    | 'policy'
-    | 'template'
-    | 'contract'
-    | 'certificate'
-    | 'other';
+    'policy' | 'template' | 'contract' | 'certificate' | 'other';
 
 export type Document = {
     id: number;
@@ -34,18 +30,23 @@ export async function listDocuments(
     } = {},
 ) {
     const query = new URLSearchParams();
+
     if (params.owner_type) {
         query.set('owner_type', params.owner_type);
     }
+
     if (params.owner_id) {
         query.set('owner_id', String(params.owner_id));
     }
+
     if (params.category) {
         query.set('category', params.category);
     }
+
     if (params.per_page) {
         query.set('per_page', String(params.per_page));
     }
+
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const res = await apiGet<Document[]>(`/api/documents${suffix}`);
 
@@ -73,12 +74,15 @@ export async function uploadDocument(payload: {
     const form = new FormData();
     form.append('file', payload.file);
     form.append('owner_type', payload.owner_type);
+
     if (payload.owner_id != null) {
         form.append('owner_id', String(payload.owner_id));
     }
+
     if (payload.category) {
         form.append('category', payload.category);
     }
+
     if (payload.title) {
         form.append('title', payload.title);
     }
@@ -88,6 +92,7 @@ export async function uploadDocument(payload: {
         Accept: 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
     };
+
     if (xsrf) {
         headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf[1]);
     }
@@ -129,6 +134,7 @@ export async function downloadDocument(doc: Document): Promise<void> {
         Accept: 'application/octet-stream, application/json',
         'X-Requested-With': 'XMLHttpRequest',
     };
+
     if (xsrf) {
         headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf[1]);
     }
@@ -141,6 +147,7 @@ export async function downloadDocument(doc: Document): Promise<void> {
 
     if (!response.ok) {
         const body = await response.json().catch(() => null);
+
         throw normalizeError(response.status, body);
     }
 

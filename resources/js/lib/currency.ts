@@ -9,6 +9,7 @@ export function normalizeCurrency(
     code: string | null | undefined,
 ): AppCurrency {
     const upper = (code ?? '').trim().toUpperCase();
+
     return upper === 'USD' ? 'USD' : 'VND';
 }
 
@@ -18,6 +19,7 @@ function toNumber(amount: string | number | null | undefined): number | null {
     }
 
     const n = typeof amount === 'number' ? amount : Number(amount);
+
     if (!Number.isFinite(n)) {
         return null;
     }
@@ -33,6 +35,7 @@ export function formatCurrency(
     currency?: string | null,
 ): string {
     const n = toNumber(amount);
+
     if (n === null) {
         return '—';
     }
@@ -61,6 +64,7 @@ export function parseMoneyInput(
 
     const code = normalizeCurrency(currency);
     const trimmed = text.trim();
+
     if (!trimmed) {
         return null;
     }
@@ -72,19 +76,24 @@ export function parseMoneyInput(
         // more than two fraction digits or multiple separators, so it falls through.
         if (/^\d+$/.test(trimmed) || /^\d+\.\d{1,2}$/.test(trimmed)) {
             const n = Math.trunc(Number(trimmed));
+
             return Number.isFinite(n) ? n : null;
         }
 
         const digits = trimmed.replace(/\D/g, '');
+
         if (!digits) {
             return null;
         }
+
         const n = Number(digits);
+
         return Number.isFinite(n) ? n : null;
     }
 
     // USD: keep digits and at most one decimal point (last segment = fraction).
     const cleaned = trimmed.replace(/[^\d.]/g, '');
+
     if (!cleaned || cleaned === '.') {
         return null;
     }
@@ -96,6 +105,7 @@ export function parseMoneyInput(
         parts.length > 1 ? `${intPart || '0'}.${fracRaw}` : intPart;
 
     const n = Number(normalized);
+
     return Number.isFinite(n) ? n : null;
 }
 
@@ -116,11 +126,13 @@ export function formatMoneyInput(
     // Preserve in-progress USD decimal typing (e.g. "12." / "12.5").
     if (typeof amount === 'string' && code === 'USD') {
         const trimmed = amount.trim();
+
         if (trimmed.endsWith('.')) {
             const intPart = trimmed.slice(0, -1).replace(/\D/g, '') || '0';
             const intFormatted = new Intl.NumberFormat('en-US', {
                 maximumFractionDigits: 0,
             }).format(Number(intPart));
+
             return `${intFormatted}.`;
         }
 
@@ -131,6 +143,7 @@ export function formatMoneyInput(
             const intFormatted = new Intl.NumberFormat('en-US', {
                 maximumFractionDigits: 0,
             }).format(Number(rawInt || '0'));
+
             return rawFrac.length > 0
                 ? `${intFormatted}.${rawFrac}`
                 : intFormatted;
@@ -138,6 +151,7 @@ export function formatMoneyInput(
     }
 
     const n = toNumber(amount);
+
     if (n === null) {
         return '';
     }
@@ -163,16 +177,19 @@ export function toCanonicalMoneyString(
 ): string {
     const code = normalizeCurrency(currency);
     const trimmed = text.trim();
+
     if (!trimmed) {
         return '';
     }
 
     if (code === 'VND') {
         const digits = trimmed.replace(/\D/g, '');
+
         return digits;
     }
 
     const cleaned = trimmed.replace(/[^\d.]/g, '');
+
     if (!cleaned) {
         return '';
     }
@@ -180,6 +197,7 @@ export function toCanonicalMoneyString(
     // Allow trailing decimal while typing.
     if (cleaned.endsWith('.') && cleaned.indexOf('.') === cleaned.length - 1) {
         const intPart = cleaned.slice(0, -1).replace(/\D/g, '') || '0';
+
         return `${intPart}.`;
     }
 

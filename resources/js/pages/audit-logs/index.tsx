@@ -122,8 +122,7 @@ export default function AuditLogsPage() {
                         onValueChange={(value) =>
                             setFilters((prev) => ({
                                 ...prev,
-                                action:
-                                    value === AUDIT_FILTER_ALL ? '' : value,
+                                action: value === AUDIT_FILTER_ALL ? '' : value,
                             }))
                         }
                     >
@@ -233,7 +232,7 @@ export default function AuditLogsPage() {
                         <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
                             <div className="overflow-x-auto rounded-lg border border-border">
                                 <table className="min-w-full text-left text-sm">
-                                    <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                                    <thead className="bg-muted/50 text-xs text-muted-foreground uppercase">
                                         <tr>
                                             <th className="px-3 py-2 font-medium">
                                                 {t('col_when')}
@@ -314,7 +313,7 @@ export default function AuditLogsPage() {
                                         </div>
                                         <dl className="grid gap-2">
                                             <div>
-                                                <dt className="text-xs uppercase text-muted-foreground">
+                                                <dt className="text-xs text-muted-foreground uppercase">
                                                     {t('col_action')}
                                                 </dt>
                                                 <dd className="font-medium">
@@ -325,13 +324,15 @@ export default function AuditLogsPage() {
                                                 </dd>
                                                 {selected.action && (
                                                     <dd className="mt-0.5 text-xs text-muted-foreground">
-                                                        {t('detail_action_code')}
+                                                        {t(
+                                                            'detail_action_code',
+                                                        )}
                                                         : {selected.action}
                                                     </dd>
                                                 )}
                                             </div>
                                             <div>
-                                                <dt className="text-xs uppercase text-muted-foreground">
+                                                <dt className="text-xs text-muted-foreground uppercase">
                                                     {t('col_when')}
                                                 </dt>
                                                 <dd>
@@ -345,7 +346,7 @@ export default function AuditLogsPage() {
                                                 </dd>
                                             </div>
                                             <div>
-                                                <dt className="text-xs uppercase text-muted-foreground">
+                                                <dt className="text-xs text-muted-foreground uppercase">
                                                     {t('col_actor')}
                                                 </dt>
                                                 <dd>
@@ -357,7 +358,7 @@ export default function AuditLogsPage() {
                                                 </dd>
                                             </div>
                                             <div>
-                                                <dt className="text-xs uppercase text-muted-foreground">
+                                                <dt className="text-xs text-muted-foreground uppercase">
                                                     {t('col_subject')}
                                                 </dt>
                                                 <dd>
@@ -369,7 +370,7 @@ export default function AuditLogsPage() {
                                                 </dd>
                                             </div>
                                             <div>
-                                                <dt className="text-xs uppercase text-muted-foreground">
+                                                <dt className="text-xs text-muted-foreground uppercase">
                                                     {t('detail_ip')}
                                                 </dt>
                                                 <dd>
@@ -378,7 +379,7 @@ export default function AuditLogsPage() {
                                                 </dd>
                                             </div>
                                             <div>
-                                                <dt className="mb-1 text-xs uppercase text-muted-foreground">
+                                                <dt className="mb-1 text-xs text-muted-foreground uppercase">
                                                     {t('detail_payload')}
                                                 </dt>
                                                 <dd>

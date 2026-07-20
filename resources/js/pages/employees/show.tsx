@@ -1,22 +1,17 @@
 import { Link } from '@inertiajs/react';
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
-import {
-    ErrorState,
-    LoadingState,
-} from '@/components/shared/async-state';
+import { ErrorState, LoadingState } from '@/components/shared/async-state';
 import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ApiError } from '@/lib/api/errors';
 import * as employeeApi from '@/lib/api/modules/employees';
-import type {
-    Employee,
-    EmployeeStatus,
-} from '@/lib/api/modules/employees';
+import type { Employee, EmployeeStatus } from '@/lib/api/modules/employees';
 import * as shiftApi from '@/lib/api/modules/shifts';
 import type { ShiftAssignment } from '@/lib/api/modules/shifts';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -80,6 +75,7 @@ export default function EmployeeShowPage({ id }: Props) {
 
             if (can('can_view_shifts')) {
                 setScheduleLoading(true);
+
                 try {
                     const result = await shiftApi.listShiftAssignments({
                         employee_id: id,
@@ -406,9 +402,7 @@ export default function EmployeeShowPage({ id }: Props) {
                                             </div>
                                             <div className="space-y-1">
                                                 <Label htmlFor="confirm-password">
-                                                    {t(
-                                                        'show.confirm_password',
-                                                    )}
+                                                    {t('show.confirm_password')}
                                                 </Label>
                                                 <Input
                                                     id="confirm-password"
@@ -562,7 +556,11 @@ export default function EmployeeShowPage({ id }: Props) {
                                         }
                                     />
                                 </div>
-                                <Button type="submit" disabled={saving} size="sm">
+                                <Button
+                                    type="submit"
+                                    disabled={saving}
+                                    size="sm"
+                                >
                                     {t('show.add_contact')}
                                 </Button>
                             </form>

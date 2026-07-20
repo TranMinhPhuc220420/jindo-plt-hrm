@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
 import { CalendarIcon } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { useRef, useState } from 'react';
 import type { DateRange, Matcher } from 'react-day-picker';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -64,6 +64,7 @@ export function DateRangePicker({
             : undefined;
 
     const disabledMatchers: Matcher[] = [];
+
     if (min || max) {
         disabledMatchers.push((date) => {
             return isDateBeforeMin(date, min) || isDateAfterMax(date, max);
@@ -81,6 +82,7 @@ export function DateRangePicker({
 
     const commitRange = (nextFrom: string, nextTo: string, close: boolean) => {
         onChange({ from: nextFrom, to: nextTo || nextFrom });
+
         if (close) {
             awaitingEndRef.current = false;
             pendingFromRef.current = '';
@@ -92,12 +94,15 @@ export function DateRangePicker({
         if (!next && awaitingEndRef.current) {
             // Closing while waiting for end: keep a valid single-day (or partial) range.
             const start = from || pendingFromRef.current;
+
             if (start) {
                 onChange({ from: start, to: to || start });
             }
+
             awaitingEndRef.current = false;
             pendingFromRef.current = '';
         }
+
         setOpen(next);
     };
 
@@ -112,7 +117,7 @@ export function DateRangePicker({
                     aria-required={required || undefined}
                     data-empty={!from && !to}
                     className={cn(
-                        'border-input h-9 w-full justify-start gap-2 px-3 text-left font-normal shadow-xs',
+                        'h-9 w-full justify-start gap-2 border-input px-3 text-left font-normal shadow-xs',
                         'data-[empty=true]:text-muted-foreground',
                         className,
                     )}
@@ -136,12 +141,14 @@ export function DateRangePicker({
                         // confirming a single-day selection.
                         if (!range?.from && awaitingEndRef.current) {
                             const start = pendingFromRef.current || from;
+
                             if (start) {
                                 commitRange(start, start, true);
                             } else {
                                 awaitingEndRef.current = false;
                                 pendingFromRef.current = '';
                             }
+
                             return;
                         }
 
@@ -152,6 +159,7 @@ export function DateRangePicker({
                             awaitingEndRef.current = false;
                             pendingFromRef.current = '';
                             onChange({ from: '', to: '' });
+
                             return;
                         }
 
@@ -160,6 +168,7 @@ export function DateRangePicker({
                             pendingFromRef.current = nextFrom;
                             awaitingEndRef.current = true;
                             commitRange(nextFrom, nextTo || nextFrom, false);
+
                             return;
                         }
 
