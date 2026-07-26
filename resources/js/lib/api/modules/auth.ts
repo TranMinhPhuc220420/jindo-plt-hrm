@@ -1,4 +1,10 @@
-import { apiDelete, apiGet, apiPost, apiPut, ensureCsrfCookie } from '../client';
+import {
+    apiDelete,
+    apiGet,
+    apiPost,
+    apiPut,
+    ensureCsrfCookie,
+} from '../client';
 import { normalizeError } from '../errors';
 import type { AuthPayload, LoginPayload } from '../types';
 

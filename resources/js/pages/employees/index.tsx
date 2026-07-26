@@ -11,11 +11,7 @@ import {
 } from '@/components/shared/async-state';
 import { DatePicker } from '@/components/shared/date-picker';
 import { PermissionGate } from '@/components/shared/permission-gate';
-import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-} from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,

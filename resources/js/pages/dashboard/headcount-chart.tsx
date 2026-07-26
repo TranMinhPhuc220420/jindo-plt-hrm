@@ -7,17 +7,21 @@ import {
     ResponsiveContainer,
     Tooltip,
 } from 'recharts';
-import type {
-    DepartmentCount,
-    StatusCount,
-} from '@/lib/api/modules/dashboard';
+import type { DepartmentCount, StatusCount } from '@/lib/api/modules/dashboard';
 
 type Props = {
     byStatus: StatusCount[];
     byDepartment: DepartmentCount[];
 };
 
-const COLORS = ['#059669', '#0ea5e9', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'];
+const COLORS = [
+    '#059669',
+    '#0ea5e9',
+    '#f59e0b',
+    '#ef4444',
+    '#8b5cf6',
+    '#64748b',
+];
 
 function statusLabel(
     status: string,
@@ -29,10 +33,7 @@ function statusLabel(
     return translated || status;
 }
 
-function departmentLabel(
-    name: string,
-    t: (key: string) => string,
-): string {
+function departmentLabel(name: string, t: (key: string) => string): string {
     if (name === 'Unassigned') {
         return t('unassigned');
     }

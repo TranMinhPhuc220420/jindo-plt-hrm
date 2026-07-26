@@ -1,4 +1,11 @@
-import { apiDelete, apiGet, apiPatch, apiPost, apiPut, ensureCsrfCookie } from '../client';
+import {
+    apiDelete,
+    apiGet,
+    apiPatch,
+    apiPost,
+    apiPut,
+    ensureCsrfCookie,
+} from '../client';
 import { normalizeError } from '../errors';
 import type { PaginationMeta } from '../types';
 

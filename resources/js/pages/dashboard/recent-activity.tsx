@@ -55,7 +55,7 @@ export function RecentActivity({ items }: Props) {
                                             : 'bg-muted-foreground/40',
                                     )}
                                 />
-                                <p className="text-sm font-medium leading-snug">
+                                <p className="text-sm leading-snug font-medium">
                                     {item.title}
                                 </p>
                                 {item.body ? (

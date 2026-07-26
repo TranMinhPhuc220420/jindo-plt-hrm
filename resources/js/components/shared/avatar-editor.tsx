@@ -1,11 +1,7 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-} from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useInitials } from '@/hooks/use-initials';
 import { ApiError } from '@/lib/api/errors';
@@ -101,9 +97,7 @@ export function AvatarEditor({
                     accept="image/jpeg,image/png,image/webp"
                     className="hidden"
                     disabled={disabled || busy}
-                    onChange={(e) =>
-                        void handleFileChange(e.target.files?.[0])
-                    }
+                    onChange={(e) => void handleFileChange(e.target.files?.[0])}
                 />
                 <Button
                     type="button"

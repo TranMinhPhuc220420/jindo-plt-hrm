@@ -13,7 +13,9 @@ export function UpcomingPanel({ items }: Props) {
 
     return (
         <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold">{t('upcoming_title')}</h2>
+            <h2 className="mb-4 text-lg font-semibold">
+                {t('upcoming_title')}
+            </h2>
             {items.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                     {t('upcoming_empty')}
@@ -38,10 +40,10 @@ export function UpcomingPanel({ items }: Props) {
                                 className="flex items-center gap-3"
                             >
                                 <div className="flex size-12 shrink-0 flex-col items-center justify-center rounded-xl bg-muted text-primary">
-                                    <span className="text-[10px] font-bold uppercase leading-none">
+                                    <span className="text-[10px] leading-none font-bold uppercase">
                                         {month}
                                     </span>
-                                    <span className="text-lg font-bold leading-tight">
+                                    <span className="text-lg leading-tight font-bold">
                                         {day}
                                     </span>
                                 </div>

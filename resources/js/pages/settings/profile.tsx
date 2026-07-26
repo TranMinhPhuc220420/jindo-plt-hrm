@@ -30,8 +30,7 @@ export default function Profile({
     const { auth } = usePage<PageProps>().props;
     const { employeeId, setSession, user: sessionUser } = useAuth();
 
-    const avatarUrl =
-        sessionUser?.avatar ?? auth.user.avatar ?? null;
+    const avatarUrl = sessionUser?.avatar ?? auth.user.avatar ?? null;
 
     async function handleAvatarUpload(file: File) {
         const payload = await authApi.uploadMyAvatar(file);

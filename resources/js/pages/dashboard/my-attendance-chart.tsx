@@ -70,7 +70,9 @@ export function MyAttendanceChart({ series }: Props) {
                         />
                         <Tooltip
                             formatter={(value) => [
-                                typeof value === 'number' ? value : Number(value) || 0,
+                                typeof value === 'number'
+                                    ? value
+                                    : Number(value) || 0,
                                 t('self_chart_hours'),
                             ]}
                             labelFormatter={(_, payload) => {

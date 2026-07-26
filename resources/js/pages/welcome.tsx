@@ -78,7 +78,7 @@ export default function Welcome() {
                     </nav>
                 </header>
 
-                <main className="relative z-10 flex flex-1 flex-col justify-center px-6 pb-20 pt-8 md:px-10 md:pb-28">
+                <main className="relative z-10 flex flex-1 flex-col justify-center px-6 pt-8 pb-20 md:px-10 md:pb-28">
                     <div className="mx-auto w-full max-w-2xl text-center md:mx-0 md:text-left">
                         <p className="mb-3 text-sm font-medium tracking-wide text-primary-brand-soft uppercase">
                             {productName}
@@ -86,7 +86,7 @@ export default function Welcome() {
                         <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl md:text-5xl">
                             {t('headline')}
                         </h1>
-                        <p className="mt-4 max-w-lg text-base text-white/80 text-pretty sm:text-lg md:mx-0 mx-auto">
+                        <p className="mx-auto mt-4 max-w-lg text-base text-pretty text-white/80 sm:text-lg md:mx-0">
                             {t('tagline', { company: COMPANY_NAME })}
                         </p>
                         <div className="mt-8 flex flex-wrap items-center justify-center gap-3 md:justify-start">

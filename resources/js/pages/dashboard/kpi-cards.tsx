@@ -8,7 +8,8 @@ type Props = {
 };
 
 const CARDS: Array<{
-    key: 'active_employees' | 'attendance_today' | 'pending_leave' | 'new_hires';
+    key:
+        'active_employees' | 'attendance_today' | 'pending_leave' | 'new_hires';
     label: string;
     icon: typeof Users;
     accent: string;

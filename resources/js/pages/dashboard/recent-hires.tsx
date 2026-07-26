@@ -36,9 +36,13 @@ export function RecentHires({ hires }: Props) {
 
                         if (hire.hired_at) {
                             try {
-                                hiredLabel = format(parseISO(hire.hired_at), 'PP', {
-                                    locale,
-                                });
+                                hiredLabel = format(
+                                    parseISO(hire.hired_at),
+                                    'PP',
+                                    {
+                                        locale,
+                                    },
+                                );
                             } catch {
                                 // keep ISO
                             }
@@ -47,7 +51,10 @@ export function RecentHires({ hires }: Props) {
                         const statusKey = `status_${hire.status}`;
 
                         return (
-                            <li key={hire.id} className="py-2.5 first:pt-0 last:pb-0">
+                            <li
+                                key={hire.id}
+                                className="py-2.5 first:pt-0 last:pb-0"
+                            >
                                 <Link
                                     href={`/employees/${hire.id}`}
                                     className="block rounded-md transition-colors hover:bg-muted/40"
