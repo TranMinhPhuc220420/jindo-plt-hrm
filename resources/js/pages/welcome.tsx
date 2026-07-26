@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
 import { COMPANY_NAME, DEFAULT_APP_NAME } from '@/lib/brand';
-import { dashboard, login, register } from '@/routes';
+import { dashboard, login } from '@/routes';
 
 /** Photo: Unsplash — team collaboration (photo-1522071820081-009f0129c71c). */
 const HERO_SRC = '/images/welcome-hero.jpg';
@@ -76,20 +76,12 @@ export default function Welcome() {
                                 {t('dashboard')}
                             </Link>
                         ) : (
-                            <>
-                                <Link
-                                    href={login()}
-                                    className="inline-flex h-9 items-center rounded-md px-3 font-medium text-white/90 hover:bg-white/10 hover:text-white sm:px-4"
-                                >
-                                    {t('log_in')}
-                                </Link>
-                                <Link
-                                    href={register()}
-                                    className="inline-flex h-9 items-center rounded-md border border-white/40 px-3 font-medium text-white hover:bg-white/10 sm:px-4"
-                                >
-                                    {t('register')}
-                                </Link>
-                            </>
+                            <Link
+                                href={login()}
+                                className="inline-flex h-9 items-center rounded-md bg-primary px-4 font-medium text-primary-foreground hover:bg-primary/90"
+                            >
+                                {t('log_in')}
+                            </Link>
                         )}
                     </nav>
                 </header>

@@ -161,8 +161,8 @@ return [
     */
 
     'features' => [
-        Features::registration(),
-        Features::resetPasswords(),
+        // Registration and self-serve password reset are disabled —
+        // accounts are provisioned by admins; password changes happen while logged in.
         Features::emailVerification(),
         Features::twoFactorAuthentication([
             'confirm' => true,

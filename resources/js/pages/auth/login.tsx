@@ -5,7 +5,6 @@ import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
-import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -24,15 +23,12 @@ import {
 } from '@/lib/api/modules/auth';
 import { useAuth } from '@/lib/auth/auth-context';
 import i18n from '@/lib/i18n';
-import { register } from '@/routes';
-import { request } from '@/routes/password';
 
 type Props = {
     status?: string;
-    canResetPassword: boolean;
 };
 
-export default function Login({ status, canResetPassword }: Props) {
+export default function Login({ status }: Props) {
     const { t } = useTranslation(['auth', 'common']);
     const { setSession } = useAuth();
     const [email, setEmail] = useState('');
@@ -258,20 +254,9 @@ export default function Login({ status, canResetPassword }: Props) {
                     </div>
 
                     <div className="grid gap-2">
-                        <div className="flex items-center">
-                            <Label htmlFor="password">
-                                {t('password', { ns: 'common' })}
-                            </Label>
-                            {canResetPassword && (
-                                <TextLink
-                                    href={request()}
-                                    className="ml-auto text-sm"
-                                    tabIndex={5}
-                                >
-                                    {t('login.forgot_password')}
-                                </TextLink>
-                            )}
-                        </div>
+                        <Label htmlFor="password">
+                            {t('password', { ns: 'common' })}
+                        </Label>
                         <PasswordInput
                             id="password"
                             name="password"
@@ -318,13 +303,6 @@ export default function Login({ status, canResetPassword }: Props) {
                         {processing && <Spinner />}
                         {t('login.submit')}
                     </Button>
-                </div>
-
-                <div className="text-center text-sm text-muted-foreground">
-                    {t('login.no_account')}{' '}
-                    <TextLink href={register()} tabIndex={5}>
-                        {t('login.sign_up')}
-                    </TextLink>
                 </div>
             </form>
 

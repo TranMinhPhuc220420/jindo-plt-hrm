@@ -5,9 +5,6 @@ use App\Models\Company;
 use App\Models\User;
 use App\Services\Auth\AuthService;
 use App\Services\Settings\SettingsService;
-use Illuminate\Auth\Notifications\ResetPassword;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Password;
 
 test('users can login via api and fetch me', function () {
     $user = User::factory()->create();
@@ -125,8 +122,14 @@ test('AuthService::updateLocale defensively rejects an unsupported locale', func
     }
 });
 
-test('resetting a password with an invalid token returns AUTH_RESET_TOKEN_INVALID', function () {
+test('forgot password and reset password api endpoints are disabled', function () {
     $user = User::factory()->create();
+
+    $this->withHeaders(spaJsonHeaders())
+        ->postJson('/api/auth/forgot-password', [
+            'email' => $user->email,
+        ])
+        ->assertNotFound();
 
     $this->withHeaders(spaJsonHeaders())
         ->postJson('/api/auth/reset-password', [
@@ -135,8 +138,7 @@ test('resetting a password with an invalid token returns AUTH_RESET_TOKEN_INVALI
             'password' => 'new-password-123',
             'password_confirmation' => 'new-password-123',
         ])
-        ->assertUnprocessable()
-        ->assertJsonPath('error_code', 'AUTH_RESET_TOKEN_INVALID');
+        ->assertNotFound();
 });
 
 test('repeated failed logins are rate limited with TOO_MANY_REQUESTS', function () {
@@ -207,55 +209,6 @@ test('users can logout via api', function () {
         ->assertJsonPath('error_code', 'UNAUTHENTICATED');
 
     $this->assertGuest();
-});
-test('forgot password always returns generic success', function () {
-    Notification::fake();
-
-    $user = User::factory()->create();
-
-    $existing = $this->withHeaders(spaJsonHeaders())
-        ->postJson('/api/auth/forgot-password', [
-            'email' => $user->email,
-        ]);
-
-    $existing->assertOk()
-        ->assertJsonPath('success', true);
-
-    Notification::assertSentTo($user, ResetPassword::class);
-
-    $unknown = $this->withHeaders(spaJsonHeaders())
-        ->postJson('/api/auth/forgot-password', [
-            'email' => 'nobody@example.test',
-        ]);
-
-    $unknown->assertOk()
-        ->assertJsonPath('success', true);
-});
-
-test('users can reset password via api', function () {
-    Notification::fake();
-
-    $user = User::factory()->create();
-
-    $token = Password::broker()->createToken($user);
-
-    $response = $this->withHeaders(spaJsonHeaders())
-        ->postJson('/api/auth/reset-password', [
-            'token' => $token,
-            'email' => $user->email,
-            'password' => 'new-password-123',
-            'password_confirmation' => 'new-password-123',
-        ]);
-
-    $response->assertOk()
-        ->assertJsonPath('success', true);
-
-    $this->withHeaders(spaJsonHeaders())
-        ->postJson('/api/auth/login', [
-            'email' => $user->email,
-            'password' => 'new-password-123',
-        ])
-        ->assertOk();
 });
 
 test('two factor challenge without pending login returns required error', function () {

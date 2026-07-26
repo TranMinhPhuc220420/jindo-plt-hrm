@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Requests\Auth\TwoFactorChallengeRequest;
 use App\Services\Auth\AuthService;
 use App\Support\ApiResponse;
@@ -48,27 +46,5 @@ class AuthController extends Controller
         $this->auth->logout();
 
         return ApiResponse::success(null, 'Logged out.');
-    }
-
-    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
-    {
-        $this->auth->forgotPassword($request->string('email')->toString());
-
-        return ApiResponse::success(
-            null,
-            'If that email address exists in our system, we have sent a password reset link.',
-        );
-    }
-
-    public function resetPassword(ResetPasswordRequest $request): JsonResponse
-    {
-        $this->auth->resetPassword($request->safe()->only([
-            'email',
-            'password',
-            'password_confirmation',
-            'token',
-        ]));
-
-        return ApiResponse::success(null, 'Password has been reset.');
     }
 }

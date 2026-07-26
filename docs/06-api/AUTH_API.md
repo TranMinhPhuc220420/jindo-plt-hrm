@@ -41,8 +41,6 @@ Paths below are the **stable product contract**. Map Fortify/Sanctum internals t
 |--------|------|------|-------------|
 | `POST` | `/api/auth/login` | Guest | Login with credentials (+ optional 2FA step) |
 | `POST` | `/api/auth/logout` | Yes | Invalidate session/token |
-| `POST` | `/api/auth/forgot-password` | Guest | Request reset link/token |
-| `POST` | `/api/auth/reset-password` | Guest | Reset with token |
 | `GET` | `/api/me` | Yes | Current user + permissions + locale |
 | `PUT` | `/api/me/locale` | Yes | Set personal locale preference (`vi` \| `en` \| `null`) |
 | `POST` | `/api/auth/two-factor/enable` | Yes | Start 2FA enrollment |
@@ -50,7 +48,9 @@ Paths below are the **stable product contract**. Map Fortify/Sanctum internals t
 | `POST` | `/api/auth/two-factor/challenge` | Guest/partial | Complete 2FA during login |
 | `DELETE` | `/api/auth/two-factor` | Yes | Disable 2FA (re-auth may be required) |
 
-Rate-limit login, forgot-password, and 2FA challenge.
+Self-serve registration and forgot/reset password are **disabled**. Accounts are provisioned by admins; authenticated users change passwords from settings.
+
+Rate-limit login and 2FA challenge.
 
 ---
 
@@ -147,29 +147,6 @@ Company-wide default remains `PUT /api/settings` (`can_manage_settings`).
 
 ---
 
-## Forgot / Reset Password
-
-`POST /api/auth/forgot-password`
-
-```json
-{ "email": "user@example.test" }
-```
-
-Always return a generic success message (no account enumeration).
-
-`POST /api/auth/reset-password`
-
-```json
-{
-  "token": "…",
-  "email": "user@example.test",
-  "password": "new-password",
-  "password_confirmation": "new-password"
-}
-```
-
----
-
 ## Logout
 
 `POST /api/auth/logout` → **200** with empty/null `data` or message.
@@ -183,7 +160,6 @@ Always return a generic success message (no account enumeration).
 | `AUTH_INVALID_CREDENTIALS` | Login failed |
 | `AUTH_TWO_FACTOR_REQUIRED` | Challenge needed |
 | `AUTH_TWO_FACTOR_INVALID` | Bad 2FA code |
-| `AUTH_RESET_TOKEN_INVALID` | Bad/expired reset token |
 
 ---
 

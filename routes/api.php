@@ -79,14 +79,6 @@ Route::prefix('auth')->group(function (): void {
         ->middleware('throttle:5,1')
         ->name('api.auth.login');
 
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])
-        ->middleware('throttle:5,1')
-        ->name('api.auth.forgot-password');
-
-    Route::post('/reset-password', [AuthController::class, 'resetPassword'])
-        ->middleware('throttle:5,1')
-        ->name('api.auth.reset-password');
-
     Route::post('/two-factor/challenge', [AuthController::class, 'challengeTwoFactor'])
         ->middleware('throttle:5,1')
         ->name('api.auth.two-factor.challenge');

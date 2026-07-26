@@ -22,7 +22,7 @@
 
 | Group | Path prefix | Layout | Auth |
 |-------|-------------|--------|------|
-| Public auth | `/login`, `/forgot-password`, … | `auth-layout` | Guest |
+| Public auth | `/login` | `auth-layout` | Guest |
 | App | `/`, `/employees`, … | `app-layout` | Authenticated |
 | Admin / config | `/organization`, `/roles`, `/settings/*`, `/audit-logs` | `app-layout` (+ optional settings subnav) | Authenticated + permissions |
 
