@@ -4,7 +4,10 @@ import { useCallback, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { CycleStatusBadge, ProgressMeter } from '@/components/performance/performance-status';
+import {
+    CycleStatusBadge,
+    ProgressMeter,
+} from '@/components/performance/performance-status';
 import AdminPageShell from '@/components/shared/admin-page-shell';
 import {
     EmptyState,
@@ -328,9 +331,7 @@ export default function PerformanceIndexPage() {
                             </DialogClose>
                             <Button
                                 type="submit"
-                                disabled={
-                                    busy || form.participants.length < 1
-                                }
+                                disabled={busy || form.participants.length < 1}
                             >
                                 {t('create', { ns: 'common' })}
                             </Button>

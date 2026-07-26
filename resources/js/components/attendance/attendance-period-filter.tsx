@@ -1,9 +1,4 @@
-import {
-    endOfMonth,
-    endOfWeek,
-    startOfMonth,
-    startOfWeek,
-} from 'date-fns';
+import { endOfMonth, endOfWeek, startOfMonth, startOfWeek } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { DateRangePicker } from '@/components/shared/date-range-picker';
 import { Label } from '@/components/ui/label';

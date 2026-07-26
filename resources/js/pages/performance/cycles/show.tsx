@@ -1,10 +1,5 @@
 import { Link, router } from '@inertiajs/react';
-import {
-    ArrowLeftIcon,
-    CheckIcon,
-    PlusIcon,
-    XIcon,
-} from 'lucide-react';
+import { ArrowLeftIcon, CheckIcon, PlusIcon, XIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -468,8 +463,7 @@ export default function PerformanceCycleShowPage({ id }: Props) {
                     {incomplete ? (
                         <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm">
                             {t('incomplete_notice', {
-                                remaining:
-                                    participantsCount - evaluationsCount,
+                                remaining: participantsCount - evaluationsCount,
                             })}
                         </div>
                     ) : null}
@@ -937,7 +931,9 @@ export default function PerformanceCycleShowPage({ id }: Props) {
                                                 </p>
                                                 <div className="mt-1 flex flex-wrap items-center gap-2 text-muted-foreground">
                                                     <Badge variant="outline">
-                                                        {suggestion.overall_score}
+                                                        {
+                                                            suggestion.overall_score
+                                                        }
                                                         /5
                                                     </Badge>
                                                     <Badge

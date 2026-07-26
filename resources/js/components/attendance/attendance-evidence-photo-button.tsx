@@ -82,7 +82,9 @@ export function AttendanceEvidencePhotoButton({
                 disabled={loading}
                 onClick={() => void handleOpen()}
             >
-                {loading ? t('evidence.photo_loading') : t('evidence.view_photo')}
+                {loading
+                    ? t('evidence.photo_loading')
+                    : t('evidence.view_photo')}
             </button>
 
             <Dialog

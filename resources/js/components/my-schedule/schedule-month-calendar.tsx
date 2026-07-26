@@ -220,9 +220,7 @@ export function ScheduleMonthCalendar({
                                                                     entry.start_time
                                                                 }
                                                                 –
-                                                                {
-                                                                    entry.end_time
-                                                                }
+                                                                {entry.end_time}
                                                             </p>
                                                         ) : null}
                                                     </>

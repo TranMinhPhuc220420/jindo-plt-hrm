@@ -16,13 +16,15 @@ export async function getCurrentPunchLocation(
         throw new Error('GEOLOCATION_UNSUPPORTED');
     }
 
-    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 15_000,
-            maximumAge: 0,
-        });
-    });
+    const position = await new Promise<GeolocationPosition>(
+        (resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 15_000,
+                maximumAge: 0,
+            });
+        },
+    );
 
     if (signal?.aborted) {
         throw new DOMException('Aborted', 'AbortError');
