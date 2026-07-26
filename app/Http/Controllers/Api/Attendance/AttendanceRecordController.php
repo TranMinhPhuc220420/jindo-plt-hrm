@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Attendance;
 
+use App\Exceptions\DomainException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Attendance\CheckInRequest;
 use App\Http\Requests\Attendance\CheckOutRequest;
@@ -12,6 +13,7 @@ use App\Services\Attendance\AttendanceService;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AttendanceRecordController extends Controller
@@ -24,10 +26,19 @@ class AttendanceRecordController extends Controller
     {
         $this->authorize('checkInOut', AttendanceRecord::class);
 
-        $payload = $request->validated();
-        $payload['photo'] = $request->file('photo');
+        $validated = $request->validated();
 
-        $record = $this->attendance->checkIn($payload);
+        $record = $this->attendance->checkIn([
+            'worked_at' => $validated['worked_at'] ?? null,
+            'note' => $validated['note'] ?? null,
+            'source' => $validated['source'] ?? null,
+            'latitude' => $validated['latitude'],
+            'longitude' => $validated['longitude'],
+            'accuracy_meters' => $validated['accuracy_meters'] ?? null,
+            'address' => $validated['address'],
+            'captured_at' => $validated['captured_at'] ?? null,
+            'photo' => $this->requireEvidencePhoto($request),
+        ]);
 
         return ApiResponse::created(
             (new AttendanceRecordResource($record))->resolve(),
@@ -39,10 +50,18 @@ class AttendanceRecordController extends Controller
     {
         $this->authorize('checkInOut', AttendanceRecord::class);
 
-        $payload = $request->validated();
-        $payload['photo'] = $request->file('photo');
+        $validated = $request->validated();
 
-        $record = $this->attendance->checkOut($payload);
+        $record = $this->attendance->checkOut([
+            'worked_at' => $validated['worked_at'] ?? null,
+            'note' => $validated['note'] ?? null,
+            'latitude' => $validated['latitude'],
+            'longitude' => $validated['longitude'],
+            'accuracy_meters' => $validated['accuracy_meters'] ?? null,
+            'address' => $validated['address'],
+            'captured_at' => $validated['captured_at'] ?? null,
+            'photo' => $this->requireEvidencePhoto($request),
+        ]);
 
         return ApiResponse::success(
             (new AttendanceRecordResource($record))->resolve(),
@@ -108,5 +127,20 @@ class AttendanceRecordController extends Controller
             ['locked_count' => $count],
             'Attendance period locked.',
         );
+    }
+
+    private function requireEvidencePhoto(Request $request): UploadedFile
+    {
+        $photo = $request->file('photo');
+
+        if (! $photo instanceof UploadedFile) {
+            throw new DomainException(
+                message: 'A camera photo is required to record attendance.',
+                errorCode: 'ATTENDANCE_EVIDENCE_REQUIRED',
+                status: 422,
+            );
+        }
+
+        return $photo;
     }
 }

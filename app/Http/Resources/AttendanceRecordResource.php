@@ -42,7 +42,7 @@ class AttendanceRecordResource extends JsonResource
                     'longitude' => $row->longitude,
                     'accuracy_meters' => $row->accuracy_meters,
                     'address' => $row->address,
-                    'has_photo' => $row->photo_path !== null && $row->photo_path !== '',
+                    'has_photo' => $row->photo_path !== '',
                     'photo_url' => "/api/attendance/records/{$this->id}/evidences/{$row->punch_type}/photo",
                     'captured_at' => $row->captured_at?->toIso8601String(),
                 ])->values()->all();

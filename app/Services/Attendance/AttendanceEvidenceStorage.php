@@ -21,6 +21,9 @@ class AttendanceEvidenceStorage
         'image/webp',
     ];
 
+    /**
+     * @return array{photo_path: string, photo_mime: string|null, photo_size: int|null}
+     */
     public function store(
         int $companyId,
         int $recordId,
