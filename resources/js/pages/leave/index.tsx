@@ -3,27 +3,21 @@ import { useCallback, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { LeaveRequestCreate } from '@/components/leave/leave-request-create';
+import { emptyLeaveRequestForm } from '@/components/leave/leave-request-form';
+import type { LeaveRequestFormValues } from '@/components/leave/leave-request-form';
+import { LeaveRequestSheet } from '@/components/leave/leave-request-sheet';
+import { LeaveRequestsTable } from '@/components/leave/leave-requests-table';
 import AdminPageShell from '@/components/shared/admin-page-shell';
 import {
     EmptyState,
     ErrorState,
     LoadingState,
 } from '@/components/shared/async-state';
-import { DateRangePicker } from '@/components/shared/date-range-picker';
 import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useLoadEffect } from '@/hooks/use-load-effect';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { ApiError } from '@/lib/api/errors';
 import * as leaveApi from '@/lib/api/modules/leave';
 import type {
@@ -34,18 +28,10 @@ import type {
 import { useAuth } from '@/lib/auth/auth-context';
 import { leaveTypeLabel } from '@/lib/i18n/leave-labels';
 
-function emptyRequestForm() {
-    return {
-        leaveTypeId: '',
-        startDate: '',
-        endDate: '',
-        reason: '',
-    };
-}
-
 export default function LeaveIndexPage() {
     const { t } = useTranslation(['leave', 'common']);
     const { employeeId, can } = useAuth();
+    const isMobile = useIsMobile();
     const [requests, setRequests] = useState<LeaveRequest[]>([]);
     const [balances, setBalances] = useState<LeaveBalance[]>([]);
     const [types, setTypes] = useState<LeaveType[]>([]);
@@ -53,8 +39,18 @@ export default function LeaveIndexPage() {
     const [error, setError] = useState<string | null>(null);
 
     const [createOpen, setCreateOpen] = useState(false);
-    const [form, setForm] = useState(emptyRequestForm);
+    const [form, setForm] = useState<LeaveRequestFormValues>(
+        emptyLeaveRequestForm,
+    );
     const [busy, setBusy] = useState(false);
+    const [selectedRequestId, setSelectedRequestId] = useState<number | null>(
+        null,
+    );
+
+    const canApproveLeave = can('can_approve_leave');
+    const canRequestLeave = can('can_request_leave');
+    const canManageTypes = can('can_manage_leave_types');
+    const canManageHolidays = can('can_manage_holidays');
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -87,7 +83,7 @@ export default function LeaveIndexPage() {
     useLoadEffect(load, [load]);
 
     function resetRequestForm() {
-        setForm(emptyRequestForm());
+        setForm(emptyLeaveRequestForm());
     }
 
     function handleCreateOpenChange(open: boolean) {
@@ -168,141 +164,91 @@ export default function LeaveIndexPage() {
         }
     }
 
+    const selectedRequest =
+        selectedRequestId != null
+            ? (requests.find((row) => row.id === selectedRequestId) ?? null)
+            : null;
+
+    const desktopActions = (
+        <div className="flex flex-wrap items-center justify-end gap-2">
+            <PermissionGate permission="can_manage_leave_types">
+                <Button variant="outline" asChild>
+                    <Link href="/leave/types">{t('index.types_link')}</Link>
+                </Button>
+            </PermissionGate>
+            <PermissionGate permission="can_manage_holidays">
+                <Button variant="outline" asChild>
+                    <Link href="/leave/holidays">
+                        {t('index.holidays_link')}
+                    </Link>
+                </Button>
+            </PermissionGate>
+            <PermissionGate permission="can_request_leave">
+                <Button type="button" onClick={() => setCreateOpen(true)}>
+                    {t('index.submit')}
+                </Button>
+            </PermissionGate>
+        </div>
+    );
+
     return (
         <AdminPageShell
             title={t('index.title')}
             description={t('index.description')}
             permission="can_view_leave"
-            actions={
-                <div className="flex flex-wrap items-center justify-end gap-2">
-                    <PermissionGate permission="can_manage_leave_types">
-                        <Button variant="outline" asChild>
-                            <Link href="/leave/types">
-                                {t('index.types_link')}
-                            </Link>
-                        </Button>
-                    </PermissionGate>
-                    <PermissionGate permission="can_manage_holidays">
-                        <Button variant="outline" asChild>
-                            <Link href="/leave/holidays">
-                                {t('index.holidays_link')}
-                            </Link>
-                        </Button>
-                    </PermissionGate>
+            actions={isMobile ? undefined : desktopActions}
+        >
+            <LeaveRequestCreate
+                open={createOpen}
+                onOpenChange={handleCreateOpenChange}
+                employeeId={employeeId}
+                types={types}
+                values={form}
+                onChange={setForm}
+                busy={busy}
+                onSubmit={(event) => void handleCreate(event)}
+            />
+
+            {isMobile ? (
+                <div className="mb-6 space-y-2">
                     <PermissionGate permission="can_request_leave">
                         <Button
                             type="button"
+                            size="lg"
+                            className="min-h-11 w-full"
                             onClick={() => setCreateOpen(true)}
                         >
                             {t('index.submit')}
                         </Button>
                     </PermissionGate>
-                </div>
-            }
-        >
-            <Dialog open={createOpen} onOpenChange={handleCreateOpenChange}>
-                <DialogContent className="sm:max-w-xl">
-                    <DialogHeader>
-                        <DialogTitle>{t('index.request_title')}</DialogTitle>
-                        <DialogDescription>
-                            {t('index.description')}
-                        </DialogDescription>
-                    </DialogHeader>
-                    {!employeeId ? (
-                        <p className="text-sm text-muted-foreground">
-                            {t('index.no_employee')}
-                        </p>
-                    ) : (
-                        <form onSubmit={handleCreate} className="grid gap-4">
-                            <div className="grid gap-1.5">
-                                <Label htmlFor="leave_type">
-                                    {t('index.leave_type')}
-                                </Label>
-                                <select
-                                    id="leave_type"
-                                    className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-                                    value={form.leaveTypeId}
-                                    onChange={(e) =>
-                                        setForm((prev) => ({
-                                            ...prev,
-                                            leaveTypeId: e.target.value,
-                                        }))
-                                    }
-                                    required
-                                >
-                                    <option value="">
-                                        {t('index.select_type')}
-                                    </option>
-                                    {types
-                                        .filter((row) => row.is_active)
-                                        .map((row) => (
-                                            <option key={row.id} value={row.id}>
-                                                {leaveTypeLabel(
-                                                    t,
-                                                    row.code,
-                                                    row.name,
-                                                )}
-                                            </option>
-                                        ))}
-                                </select>
-                            </div>
-                            <div className="grid gap-1.5">
-                                <Label htmlFor="leave_dates">
-                                    {t('index.start_date')}
-                                    {' – '}
-                                    {t('index.end_date')}
-                                </Label>
-                                <DateRangePicker
-                                    id="leave_dates"
-                                    from={form.startDate}
-                                    to={form.endDate}
-                                    onChange={({ from, to }) => {
-                                        setForm((prev) => ({
-                                            ...prev,
-                                            startDate: from,
-                                            endDate: to,
-                                        }));
-                                    }}
-                                    required
-                                    numberOfMonths={1}
-                                />
-                            </div>
-                            <div className="grid gap-1.5">
-                                <Label htmlFor="reason">
-                                    {t('index.reason')}
-                                </Label>
-                                <Input
-                                    id="reason"
-                                    value={form.reason}
-                                    onChange={(e) =>
-                                        setForm((prev) => ({
-                                            ...prev,
-                                            reason: e.target.value,
-                                        }))
-                                    }
-                                />
-                            </div>
-                            <DialogFooter>
-                                <DialogClose asChild>
-                                    <Button type="button" variant="secondary">
-                                        {t('cancel', { ns: 'common' })}
-                                    </Button>
-                                </DialogClose>
+                    {(canManageTypes || canManageHolidays) && (
+                        <div className="flex gap-2">
+                            {canManageTypes ? (
                                 <Button
-                                    type="submit"
-                                    disabled={
-                                        busy ||
-                                        !form.leaveTypeId ||
-                                        !form.startDate
-                                    }
+                                    variant="outline"
+                                    className="min-h-11 flex-1"
+                                    asChild
                                 >
-                                    {t('index.submit')}
+                                    <Link href="/leave/types">
+                                        {t('index.types_link')}
+                                    </Link>
                                 </Button>
-                            </DialogFooter>
-                        </form>
+                            ) : null}
+                            {canManageHolidays ? (
+                                <Button
+                                    variant="outline"
+                                    className="min-h-11 flex-1"
+                                    asChild
+                                >
+                                    <Link href="/leave/holidays">
+                                        {t('index.holidays_link')}
+                                    </Link>
+                                </Button>
+                            ) : null}
+                        </div>
                     )}
-                </DialogContent>
-            </Dialog>
+                </div>
+            ) : null}
 
             {balances.length > 0 && (
                 <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -334,112 +280,41 @@ export default function LeaveIndexPage() {
             ) : requests.length === 0 ? (
                 <EmptyState message={t('index.empty')} />
             ) : (
-                <div className="overflow-x-auto rounded-lg border border-border">
-                    <table className="min-w-full text-left text-sm">
-                        <thead className="bg-muted/50 text-xs text-muted-foreground uppercase">
-                            <tr>
-                                <th className="px-3 py-2 font-medium">
-                                    {t('index.col_employee')}
-                                </th>
-                                <th className="px-3 py-2 font-medium">
-                                    {t('index.col_type')}
-                                </th>
-                                <th className="px-3 py-2 font-medium">
-                                    {t('index.col_dates')}
-                                </th>
-                                <th className="px-3 py-2 font-medium">
-                                    {t('index.col_qty')}
-                                </th>
-                                <th className="px-3 py-2 font-medium">
-                                    {t('index.col_status')}
-                                </th>
-                                <th className="px-3 py-2 font-medium" />
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {requests.map((row) => (
-                                <tr
-                                    key={row.id}
-                                    className="border-t border-border/60"
-                                >
-                                    <td className="px-3 py-2">
-                                        {row.employee_name ??
-                                            row.employee_code ??
-                                            row.employee_id}
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        {leaveTypeLabel(
-                                            t,
-                                            row.leave_type_code,
-                                            row.leave_type_name,
-                                        )}
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        {row.start_date}
-                                        {row.end_date !== row.start_date
-                                            ? ` → ${row.end_date}`
-                                            : ''}
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        {row.quantity}
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        {t(`status.${row.status}`, {
-                                            defaultValue: row.status,
-                                        })}
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        <div className="flex flex-wrap justify-end gap-2">
-                                            {row.status === 'pending' &&
-                                                can('can_approve_leave') && (
-                                                    <>
-                                                        <Button
-                                                            size="sm"
-                                                            onClick={() =>
-                                                                void handleApprove(
-                                                                    row.id,
-                                                                )
-                                                            }
-                                                        >
-                                                            {t('index.approve')}
-                                                        </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="outline"
-                                                            onClick={() =>
-                                                                void handleReject(
-                                                                    row.id,
-                                                                )
-                                                            }
-                                                        >
-                                                            {t('index.reject')}
-                                                        </Button>
-                                                    </>
-                                                )}
-                                            {row.status === 'pending' &&
-                                                can('can_request_leave') &&
-                                                row.employee_id ===
-                                                    employeeId && (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        onClick={() =>
-                                                            void handleCancel(
-                                                                row.id,
-                                                            )
-                                                        }
-                                                    >
-                                                        {t('index.cancel')}
-                                                    </Button>
-                                                )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <LeaveRequestsTable
+                    requests={requests}
+                    employeeId={employeeId}
+                    canApproveLeave={canApproveLeave}
+                    canRequestLeave={canRequestLeave}
+                    onApprove={(id) => void handleApprove(id)}
+                    onReject={(id) => void handleReject(id)}
+                    onCancel={(id) => void handleCancel(id)}
+                    onSelectRequest={setSelectedRequestId}
+                />
             )}
+
+            <LeaveRequestSheet
+                open={selectedRequestId !== null}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setSelectedRequestId(null);
+                    }
+                }}
+                request={selectedRequest}
+                canApprove={
+                    !!selectedRequest &&
+                    selectedRequest.status === 'pending' &&
+                    canApproveLeave
+                }
+                canCancel={
+                    !!selectedRequest &&
+                    selectedRequest.status === 'pending' &&
+                    canRequestLeave &&
+                    selectedRequest.employee_id === employeeId
+                }
+                onApprove={(id) => void handleApprove(id)}
+                onReject={(id) => void handleReject(id)}
+                onCancel={(id) => void handleCancel(id)}
+            />
         </AdminPageShell>
     );
 }

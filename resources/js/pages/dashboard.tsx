@@ -63,7 +63,7 @@ export default function Dashboard() {
     return (
         <>
             <Head title={t('title')} />
-            <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4 md:p-6">
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 md:gap-6 md:p-6">
                 <div>
                     <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
                         {user?.name
@@ -96,8 +96,8 @@ export default function Dashboard() {
                     <>
                         <KpiCards summary={summary} />
 
-                        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3">
-                            <div className="space-y-4 lg:col-span-2">
+                        <div className="flex flex-col gap-4 lg:grid lg:grid-cols-3 lg:items-start">
+                            <div className="order-2 space-y-4 lg:order-1 lg:col-span-2">
                                 <AttendanceChart
                                     series={summary.attendance_last_7_days}
                                 />
@@ -111,7 +111,7 @@ export default function Dashboard() {
                                     <RecentHires hires={summary.recent_hires} />
                                 </div>
                             </div>
-                            <div className="space-y-4">
+                            <div className="order-1 space-y-4 lg:order-2">
                                 <PendingActions
                                     actions={summary.pending_actions}
                                 />
@@ -130,8 +130,8 @@ export default function Dashboard() {
                             <SelfKpiCards summary={summary} />
                         )}
 
-                        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3">
-                            <div className="space-y-4 lg:col-span-2">
+                        <div className="flex flex-col gap-4 lg:grid lg:grid-cols-3 lg:items-start">
+                            <div className="order-2 space-y-4 lg:order-1 lg:col-span-2">
                                 <MyAttendanceChart
                                     series={summary.my_attendance_last_7_days}
                                 />
@@ -139,7 +139,7 @@ export default function Dashboard() {
                                     balances={summary.leave_balances}
                                 />
                             </div>
-                            <div className="space-y-4">
+                            <div className="order-1 space-y-4 lg:order-2">
                                 <PendingActions
                                     actions={summary.pending_actions}
                                 />

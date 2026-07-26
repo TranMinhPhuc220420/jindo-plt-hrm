@@ -9,6 +9,9 @@ import {
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MonthSummaryStrip } from '@/components/attendance/month-summary-strip';
+import { ScheduleAgendaList } from '@/components/my-schedule/schedule-agenda-list';
+import { indexDaysByDate } from '@/components/my-schedule/schedule-day-helpers';
+import { ScheduleDaySheet } from '@/components/my-schedule/schedule-day-sheet';
 import { ScheduleMonthCalendar } from '@/components/my-schedule/schedule-month-calendar';
 import { ScheduleTable } from '@/components/my-schedule/schedule-table';
 import { ScheduleToolbar } from '@/components/my-schedule/schedule-toolbar';
@@ -23,6 +26,7 @@ import {
     LoadingState,
 } from '@/components/shared/async-state';
 import { useLoadEffect } from '@/hooks/use-load-effect';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { ApiError } from '@/lib/api/errors';
 import * as attendanceApi from '@/lib/api/modules/attendance';
 import type {
@@ -67,6 +71,7 @@ export function WorkingSchedulePreview({
 }: Props) {
     const { t, i18n } = useTranslation(['shifts', 'common']);
     const locale = dateFnsLocale(i18n.language);
+    const isMobile = useIsMobile();
 
     const [view, setView] = useState<ScheduleViewMode>(() =>
         readStoredScheduleView(),
@@ -86,6 +91,7 @@ export function WorkingSchedulePreview({
     const [summaryError, setSummaryError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
     const queryRange = useMemo(() => {
         if (view === 'calendar') {
@@ -94,6 +100,8 @@ export function WorkingSchedulePreview({
 
         return { from: dateFrom, to: dateTo };
     }, [view, visibleMonth, dateFrom, dateTo]);
+
+    const daysByDate = useMemo(() => indexDaysByDate(days), [days]);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -171,6 +179,10 @@ export function WorkingSchedulePreview({
         }
     };
 
+    const handleSelectDate = (date: string) => {
+        setSelectedDate(date);
+    };
+
     const monthLabel = format(visibleMonth, 'MMMM yyyy', { locale });
 
     return (
@@ -178,7 +190,7 @@ export function WorkingSchedulePreview({
             <div className="flex justify-end">
                 <Link
                     href="/attendance"
-                    className="text-sm text-primary underline-offset-4 hover:underline"
+                    className="inline-flex min-h-11 items-center text-sm text-primary underline-offset-4 hover:underline"
                 >
                     {t('my_schedule.view_attendance')}
                 </Link>
@@ -215,19 +227,46 @@ export function WorkingSchedulePreview({
             ) : error ? (
                 <ErrorState message={error} />
             ) : view === 'calendar' ? (
-                <ScheduleMonthCalendar
-                    month={visibleMonth}
-                    days={days}
-                    attendanceByDate={attendanceByDate}
-                />
+                <div className="space-y-6">
+                    <ScheduleMonthCalendar
+                        month={visibleMonth}
+                        days={days}
+                        attendanceByDate={attendanceByDate}
+                        onSelectDate={handleSelectDate}
+                    />
+                    {isMobile ? (
+                        <ScheduleAgendaList
+                            days={days}
+                            attendanceByDate={attendanceByDate}
+                            onSelectDate={handleSelectDate}
+                        />
+                    ) : null}
+                </div>
             ) : days.length === 0 ? (
                 <EmptyState message={emptyMessage ?? t('my_schedule.empty')} />
             ) : (
                 <ScheduleTable
                     days={days}
                     attendanceByDate={attendanceByDate}
+                    onSelectDate={handleSelectDate}
                 />
             )}
+
+            <ScheduleDaySheet
+                open={selectedDate !== null}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setSelectedDate(null);
+                    }
+                }}
+                date={selectedDate}
+                entry={selectedDate ? daysByDate.get(selectedDate) : undefined}
+                attendance={
+                    selectedDate
+                        ? attendanceByDate.get(selectedDate)
+                        : undefined
+                }
+            />
         </div>
     );
 }

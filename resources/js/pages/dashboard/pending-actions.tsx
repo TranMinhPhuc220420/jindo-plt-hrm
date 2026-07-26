@@ -19,7 +19,7 @@ export function PendingActions({ actions }: Props) {
     const { t } = useTranslation('dashboard');
 
     return (
-        <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
             <h2 className="mb-4 text-lg font-semibold">
                 {t('pending_actions_title')}
             </h2>
@@ -33,7 +33,7 @@ export function PendingActions({ actions }: Props) {
                         <li key={action.key}>
                             <Link
                                 href={action.href}
-                                className="flex items-center justify-between rounded-lg border border-border px-3 py-2.5 text-sm transition-colors hover:bg-muted/50"
+                                className="flex min-h-11 items-center justify-between rounded-lg border border-border px-3 py-2.5 text-sm transition-colors hover:bg-muted/50 active:bg-muted/60"
                             >
                                 <span>
                                     {t(LABEL_KEYS[action.key] ?? action.key)}

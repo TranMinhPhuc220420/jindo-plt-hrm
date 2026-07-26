@@ -37,7 +37,7 @@ export function AttendanceChart({ series }: Props) {
     });
 
     return (
-        <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
             <div className="mb-4">
                 <h2 className="text-lg font-semibold">
                     {t('attendance_chart_title')}
@@ -46,7 +46,7 @@ export function AttendanceChart({ series }: Props) {
                     {t('attendance_chart_subtitle')}
                 </p>
             </div>
-            <div className="h-64 w-full">
+            <div className="h-52 w-full sm:h-64">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                         data={data}

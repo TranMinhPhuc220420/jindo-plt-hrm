@@ -10,6 +10,7 @@ import {
 } from '@/components/shared/async-state';
 import { Button } from '@/components/ui/button';
 import { useLoadEffect } from '@/hooks/use-load-effect';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { ApiError } from '@/lib/api/errors';
 import * as notificationsApi from '@/lib/api/modules/notifications';
 import type {
@@ -22,9 +23,11 @@ import {
     notificationTypeLabel,
 } from '@/lib/i18n/notification-labels';
 import { notificationHref } from '@/lib/notifications/notification-href';
+import { cn } from '@/lib/utils';
 
 export default function NotificationsPage() {
     const { t, i18n } = useTranslation(['notifications', 'common']);
+    const isMobile = useIsMobile();
     const [items, setItems] = useState<Notification[]>([]);
     const [unread, setUnread] = useState(0);
     const [prefs, setPrefs] = useState<NotificationPreferences | null>(null);
@@ -126,34 +129,53 @@ export default function NotificationsPage() {
             description={t('description')}
             permission="can_view_own_notifications"
         >
-            <div className="mb-4 flex flex-wrap items-center gap-3">
-                <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+            <div
+                className={cn(
+                    'mb-4 flex gap-3',
+                    isMobile ? 'flex-col' : 'flex-wrap items-center',
+                )}
+            >
+                <span className="w-fit rounded-full bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
                     {t('unread_badge', { count: unread })}
                 </span>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setUnreadOnly((v) => !v)}
+                <div
+                    className={cn(
+                        'flex gap-2',
+                        isMobile ? 'w-full flex-col' : 'flex-wrap',
+                    )}
                 >
-                    {unreadOnly ? t('show_all') : t('show_unread')}
-                </Button>
-                <Button
-                    size="sm"
-                    disabled={busy || unread === 0}
-                    onClick={() => void handleMarkAll()}
-                >
-                    {t('mark_all_read')}
-                </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className={cn(isMobile && 'min-h-11 w-full')}
+                        onClick={() => setUnreadOnly((v) => !v)}
+                    >
+                        {unreadOnly ? t('show_all') : t('show_unread')}
+                    </Button>
+                    <Button
+                        size="sm"
+                        className={cn(isMobile && 'min-h-11 w-full')}
+                        disabled={busy || unread === 0}
+                        onClick={() => void handleMarkAll()}
+                    >
+                        {t('mark_all_read')}
+                    </Button>
+                </div>
             </div>
 
             {prefs && (
-                <div className="mb-6 grid max-w-xl gap-3 rounded-lg border border-border p-4">
+                <div className="mb-6 grid w-full max-w-xl gap-3 rounded-lg border border-border p-4">
                     <h2 className="font-medium">{t('prefs_title')}</h2>
-                    <div className="flex flex-wrap gap-4">
+                    <div
+                        className={cn(
+                            'flex gap-4',
+                            isMobile ? 'flex-col' : 'flex-wrap',
+                        )}
+                    >
                         {(['email', 'push', 'system'] as const).map((key) => (
                             <label
                                 key={key}
-                                className="flex items-center gap-2 text-sm"
+                                className="flex min-h-11 items-center gap-2 text-sm sm:min-h-0"
                             >
                                 <input
                                     type="checkbox"
@@ -184,14 +206,18 @@ export default function NotificationsPage() {
                         return (
                             <li
                                 key={item.id}
-                                className={`flex flex-wrap items-start justify-between gap-3 rounded-lg border border-border p-3 text-sm ${
-                                    item.read_at ? 'opacity-70' : 'bg-muted/30'
-                                }`}
+                                className={cn(
+                                    'flex gap-3 rounded-lg border border-border p-3 text-sm',
+                                    isMobile
+                                        ? 'flex-col'
+                                        : 'flex-wrap items-start justify-between',
+                                    item.read_at ? 'opacity-70' : 'bg-muted/30',
+                                )}
                             >
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2">
                                         {!item.read_at && (
-                                            <span className="inline-block size-2 rounded-full bg-primary" />
+                                            <span className="inline-block size-2 shrink-0 rounded-full bg-primary" />
                                         )}
                                         {href ? (
                                             <Link
@@ -225,11 +251,19 @@ export default function NotificationsPage() {
                                             : ''}
                                     </p>
                                 </div>
-                                <div className="flex shrink-0 gap-2">
+                                <div
+                                    className={cn(
+                                        'flex shrink-0 gap-2',
+                                        isMobile && 'w-full',
+                                    )}
+                                >
                                     {!item.read_at && (
                                         <Button
                                             variant="outline"
                                             size="sm"
+                                            className={cn(
+                                                isMobile && 'min-h-11 flex-1',
+                                            )}
                                             onClick={() =>
                                                 void handleMarkRead(item.id)
                                             }
@@ -240,6 +274,9 @@ export default function NotificationsPage() {
                                     <Button
                                         variant="ghost"
                                         size="sm"
+                                        className={cn(
+                                            isMobile && 'min-h-11 flex-1',
+                                        )}
                                         onClick={() =>
                                             void handleDelete(item.id)
                                         }

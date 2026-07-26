@@ -93,19 +93,19 @@ export function AttendancePeriodFilter({
                     }}
                     variant="outline"
                     size="sm"
-                    className="flex w-full flex-wrap justify-start sm:w-fit"
+                    className="flex w-full flex-nowrap justify-start overflow-x-auto sm:w-fit sm:flex-wrap"
                     aria-labelledby="attendance_period_label"
                 >
-                    <ToggleGroupItem value="today" className="px-3">
+                    <ToggleGroupItem value="today" className="shrink-0 px-3">
                         {t('index.filter_today')}
                     </ToggleGroupItem>
-                    <ToggleGroupItem value="week" className="px-3">
+                    <ToggleGroupItem value="week" className="shrink-0 px-3">
                         {t('index.filter_week')}
                     </ToggleGroupItem>
-                    <ToggleGroupItem value="month" className="px-3">
+                    <ToggleGroupItem value="month" className="shrink-0 px-3">
                         {t('index.filter_month')}
                     </ToggleGroupItem>
-                    <ToggleGroupItem value="custom" className="px-3">
+                    <ToggleGroupItem value="custom" className="shrink-0 px-3">
                         {t('index.filter_custom')}
                     </ToggleGroupItem>
                 </ToggleGroup>
@@ -122,7 +122,7 @@ export function AttendancePeriodFilter({
                         to={dateTo}
                         onChange={onCustomRangeChange}
                         numberOfMonths={1}
-                        className="min-w-[16rem]"
+                        className="w-full min-w-0 sm:min-w-[16rem]"
                     />
                 </div>
             ) : (

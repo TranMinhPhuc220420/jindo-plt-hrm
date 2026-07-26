@@ -28,7 +28,8 @@
         "toast_approved": "Leave approved",
         "toast_rejected": "Leave rejected",
         "toast_cancelled": "Leave cancelled",
-        "toast_error": "Action failed"
+        "toast_error": "Action failed",
+        "request_detail_title": "Request details"
     },
     "types": {
         "title": "Leave types",

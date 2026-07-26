@@ -10,6 +10,15 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetFooter,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet';
+import { useIsMobile } from '@/hooks/use-mobile';
+import {
     getCurrentPunchLocation,
     mapGeolocationError,
 } from '@/lib/attendance/geolocation';
@@ -40,6 +49,7 @@ export function PunchEvidenceDialog({
     onSubmit,
 }: Props) {
     const { t } = useTranslation('attendance');
+    const isMobile = useIsMobile();
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
     const [location, setLocation] = useState<PunchLocation | null>(null);
@@ -224,6 +234,149 @@ export function PunchEvidenceDialog({
     const titleKey =
         mode === 'check_in' ? 'evidence.title_in' : 'evidence.title_out';
 
+    const body = (
+        <div className="space-y-4">
+            <section className="space-y-2">
+                <h3 className="text-sm font-medium">
+                    {t('evidence.location')}
+                </h3>
+                {locationLoading ? (
+                    <p className="text-sm text-muted-foreground">
+                        {t('evidence.location_loading')}
+                    </p>
+                ) : locationError ? (
+                    <p className="text-sm text-destructive">
+                        {t(`evidence.${locationError}`)}
+                    </p>
+                ) : location ? (
+                    <div className="rounded-md border bg-muted/30 p-3 text-sm">
+                        <p>{location.address}</p>
+                        <p className="mt-1 text-xs text-muted-foreground tabular-nums">
+                            {location.latitude.toFixed(6)},{' '}
+                            {location.longitude.toFixed(6)}
+                            {location.accuracyMeters != null
+                                ? ` (±${Math.round(location.accuracyMeters)}m)`
+                                : null}
+                        </p>
+                    </div>
+                ) : null}
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="min-h-9"
+                    disabled={locationLoading || busy || submitting}
+                    onClick={() => {
+                        setLocationLoading(true);
+                        setLocationError(null);
+                        void getCurrentPunchLocation()
+                            .then(setLocation)
+                            .catch((error) => {
+                                setLocation(null);
+                                setLocationError(mapGeolocationError(error));
+                            })
+                            .finally(() => setLocationLoading(false));
+                    }}
+                >
+                    {t('evidence.retry_location')}
+                </Button>
+            </section>
+
+            <section className="space-y-2">
+                <h3 className="text-sm font-medium">{t('evidence.photo')}</h3>
+                {cameraError ? (
+                    <p className="text-sm text-destructive">
+                        {t(`evidence.${cameraError}`)}
+                    </p>
+                ) : null}
+                {previewUrl ? (
+                    <img
+                        src={previewUrl}
+                        alt={t('evidence.photo_preview_alt')}
+                        className="aspect-video w-full rounded-md border object-cover"
+                    />
+                ) : (
+                    <video
+                        ref={videoRef}
+                        muted
+                        playsInline
+                        className="aspect-video w-full rounded-md border bg-black object-cover"
+                    />
+                )}
+                <div className="flex flex-wrap gap-2">
+                    {photo ? (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="min-h-9"
+                            disabled={busy || submitting}
+                            onClick={retake}
+                        >
+                            {t('evidence.retake')}
+                        </Button>
+                    ) : (
+                        <Button
+                            type="button"
+                            size="sm"
+                            className="min-h-9"
+                            disabled={!!cameraError || busy || submitting}
+                            onClick={capturePhoto}
+                        >
+                            {t('evidence.capture')}
+                        </Button>
+                    )}
+                </div>
+            </section>
+        </div>
+    );
+
+    const actions = (
+        <>
+            <Button
+                type="button"
+                variant="outline"
+                className="min-h-11"
+                disabled={busy || submitting}
+                onClick={() => onOpenChange(false)}
+            >
+                {t('evidence.cancel')}
+            </Button>
+            <Button
+                type="button"
+                className="min-h-11"
+                disabled={!canSubmit}
+                onClick={() => void handleSubmit()}
+            >
+                {busy || submitting
+                    ? t('evidence.submitting')
+                    : t('evidence.confirm')}
+            </Button>
+        </>
+    );
+
+    if (isMobile) {
+        return (
+            <Sheet open={open} onOpenChange={onOpenChange}>
+                <SheetContent
+                    side="bottom"
+                    className="flex max-h-[90vh] flex-col gap-0 overflow-hidden rounded-t-xl pb-[max(1rem,env(safe-area-inset-bottom))]"
+                >
+                    <SheetHeader className="border-b border-border text-left">
+                        <SheetTitle>{t(titleKey)}</SheetTitle>
+                        <SheetDescription>
+                            {t('evidence.description')}
+                        </SheetDescription>
+                    </SheetHeader>
+                    <div className="flex-1 overflow-y-auto p-4">{body}</div>
+                    <SheetFooter className="flex-row gap-2 border-t border-border">
+                        {actions}
+                    </SheetFooter>
+                </SheetContent>
+            </Sheet>
+        );
+    }
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-h-[min(92vh,820px)] overflow-y-auto sm:max-w-lg">
@@ -233,124 +386,8 @@ export function PunchEvidenceDialog({
                         {t('evidence.description')}
                     </DialogDescription>
                 </DialogHeader>
-
-                <div className="space-y-4">
-                    <section className="space-y-2">
-                        <h3 className="text-sm font-medium">
-                            {t('evidence.location')}
-                        </h3>
-                        {locationLoading ? (
-                            <p className="text-sm text-muted-foreground">
-                                {t('evidence.location_loading')}
-                            </p>
-                        ) : locationError ? (
-                            <p className="text-sm text-destructive">
-                                {t(`evidence.${locationError}`)}
-                            </p>
-                        ) : location ? (
-                            <div className="rounded-md border bg-muted/30 p-3 text-sm">
-                                <p>{location.address}</p>
-                                <p className="mt-1 text-xs text-muted-foreground tabular-nums">
-                                    {location.latitude.toFixed(6)},{' '}
-                                    {location.longitude.toFixed(6)}
-                                    {location.accuracyMeters != null
-                                        ? ` (±${Math.round(location.accuracyMeters)}m)`
-                                        : null}
-                                </p>
-                            </div>
-                        ) : null}
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            disabled={locationLoading || busy || submitting}
-                            onClick={() => {
-                                setLocationLoading(true);
-                                setLocationError(null);
-                                void getCurrentPunchLocation()
-                                    .then(setLocation)
-                                    .catch((error) => {
-                                        setLocation(null);
-                                        setLocationError(
-                                            mapGeolocationError(error),
-                                        );
-                                    })
-                                    .finally(() => setLocationLoading(false));
-                            }}
-                        >
-                            {t('evidence.retry_location')}
-                        </Button>
-                    </section>
-
-                    <section className="space-y-2">
-                        <h3 className="text-sm font-medium">
-                            {t('evidence.photo')}
-                        </h3>
-                        {cameraError ? (
-                            <p className="text-sm text-destructive">
-                                {t(`evidence.${cameraError}`)}
-                            </p>
-                        ) : null}
-                        {previewUrl ? (
-                            <img
-                                src={previewUrl}
-                                alt={t('evidence.photo_preview_alt')}
-                                className="aspect-video w-full rounded-md border object-cover"
-                            />
-                        ) : (
-                            <video
-                                ref={videoRef}
-                                muted
-                                playsInline
-                                className="aspect-video w-full rounded-md border bg-black object-cover"
-                            />
-                        )}
-                        <div className="flex flex-wrap gap-2">
-                            {photo ? (
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={busy || submitting}
-                                    onClick={retake}
-                                >
-                                    {t('evidence.retake')}
-                                </Button>
-                            ) : (
-                                <Button
-                                    type="button"
-                                    size="sm"
-                                    disabled={
-                                        !!cameraError || busy || submitting
-                                    }
-                                    onClick={capturePhoto}
-                                >
-                                    {t('evidence.capture')}
-                                </Button>
-                            )}
-                        </div>
-                    </section>
-                </div>
-
-                <DialogFooter>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        disabled={busy || submitting}
-                        onClick={() => onOpenChange(false)}
-                    >
-                        {t('evidence.cancel')}
-                    </Button>
-                    <Button
-                        type="button"
-                        disabled={!canSubmit}
-                        onClick={() => void handleSubmit()}
-                    >
-                        {busy || submitting
-                            ? t('evidence.submitting')
-                            : t('evidence.confirm')}
-                    </Button>
-                </DialogFooter>
+                {body}
+                <DialogFooter>{actions}</DialogFooter>
             </DialogContent>
         </Dialog>
     );

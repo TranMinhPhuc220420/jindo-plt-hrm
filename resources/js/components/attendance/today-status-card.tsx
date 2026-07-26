@@ -7,11 +7,13 @@ import { AttendanceStatusBadge } from '@/components/attendance/attendance-status
 import { formatDuration } from '@/components/attendance/format-minutes';
 import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 import type {
     AttendanceEvidence,
     AttendanceRecord,
 } from '@/lib/api/modules/attendance';
 import { dateFnsLocale, displayTime } from '@/lib/datetime';
+import { cn } from '@/lib/utils';
 
 type Props = {
     employeeId: number | null;
@@ -55,6 +57,7 @@ export function TodayStatusCard({
 }: Props) {
     const { t, i18n } = useTranslation(['attendance', 'common']);
     const locale = dateFnsLocale(i18n.language);
+    const isMobile = useIsMobile();
     const [now, setNow] = useState(() => new Date());
 
     useEffect(() => {
@@ -140,7 +143,12 @@ export function TodayStatusCard({
                     ) : null}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div
+                    className={cn(
+                        'flex items-center gap-2',
+                        isMobile ? 'w-full flex-col' : 'flex-wrap',
+                    )}
+                >
                     <PermissionGate permission="can_check_in_out">
                         {!employeeId ? (
                             <p className="text-sm text-muted-foreground">
@@ -151,6 +159,9 @@ export function TodayStatusCard({
                                 <Button
                                     type="button"
                                     size="lg"
+                                    className={cn(
+                                        isMobile && 'min-h-11 w-full',
+                                    )}
                                     disabled={busy || !!today?.check_in_at}
                                     onClick={onCheckIn}
                                 >
@@ -160,6 +171,9 @@ export function TodayStatusCard({
                                     type="button"
                                     size="lg"
                                     variant="secondary"
+                                    className={cn(
+                                        isMobile && 'min-h-11 w-full',
+                                    )}
                                     disabled={
                                         busy ||
                                         !today?.check_in_at ||
@@ -172,7 +186,12 @@ export function TodayStatusCard({
                             </>
                         )}
                     </PermissionGate>
-                    <Button variant="outline" size="lg" asChild>
+                    <Button
+                        variant={isMobile ? 'ghost' : 'outline'}
+                        size="lg"
+                        className={cn(isMobile && 'min-h-11 w-full')}
+                        asChild
+                    >
                         <Link href="/attendance/corrections">
                             {t('index.corrections_link')}
                         </Link>

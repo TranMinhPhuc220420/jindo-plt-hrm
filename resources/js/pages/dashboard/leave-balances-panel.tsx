@@ -10,14 +10,14 @@ export function LeaveBalancesPanel({ balances }: Props) {
     const { t } = useTranslation('dashboard');
 
     return (
-        <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
             <div className="mb-4 flex items-center justify-between gap-2">
                 <h2 className="text-lg font-semibold">
                     {t('self_leave_balances_title')}
                 </h2>
                 <Link
                     href="/leave"
-                    className="text-sm font-medium text-primary hover:underline"
+                    className="inline-flex min-h-9 items-center text-sm font-medium text-primary hover:underline"
                 >
                     {t('view_leave')}
                 </Link>
@@ -31,7 +31,7 @@ export function LeaveBalancesPanel({ balances }: Props) {
                     {balances.map((row) => (
                         <li
                             key={row.leave_type_id}
-                            className="flex items-center justify-between rounded-lg border border-border px-3 py-2.5"
+                            className="flex min-h-11 items-center justify-between rounded-lg border border-border px-3 py-2.5"
                         >
                             <div className="min-w-0">
                                 <p className="truncate text-sm font-medium">

@@ -12,7 +12,7 @@ export function UpcomingPanel({ items }: Props) {
     const locale = dateFnsLocale(i18n.language);
 
     return (
-        <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
             <h2 className="mb-4 text-lg font-semibold">
                 {t('upcoming_title')}
             </h2>

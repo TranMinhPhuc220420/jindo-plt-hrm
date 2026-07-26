@@ -30,7 +30,16 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetFooter,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet';
 import { useLoadEffect } from '@/hooks/use-load-effect';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { ApiError } from '@/lib/api/errors';
 import type { Employee } from '@/lib/api/modules/employees';
 import * as performanceApi from '@/lib/api/modules/performance';
@@ -69,6 +78,7 @@ function cycleProgress(cycle: ReviewCycle): {
 
 export default function PerformanceIndexPage() {
     const { t } = useTranslation(['performance', 'common']);
+    const isMobile = useIsMobile();
     const [cycles, setCycles] = useState<ReviewCycle[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -186,159 +196,235 @@ export default function PerformanceIndexPage() {
         }
     }
 
+    const createFormFields = (
+        <div className="grid gap-4">
+            <div className="grid gap-1.5">
+                <Label htmlFor="cycle_name">{t('name')}</Label>
+                <Input
+                    id="cycle_name"
+                    value={form.name}
+                    onChange={(e) =>
+                        setForm((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                        }))
+                    }
+                    placeholder={t('name_placeholder')}
+                    required
+                    className="min-h-11 sm:min-h-9"
+                />
+            </div>
+            <div className="grid gap-1.5">
+                <Label htmlFor="cycle_framework">{t('framework')}</Label>
+                <select
+                    id="cycle_framework"
+                    className="h-11 rounded-md border border-input bg-background px-3 text-sm sm:h-9"
+                    value={form.framework}
+                    onChange={(e) =>
+                        setForm((prev) => ({
+                            ...prev,
+                            framework: e.target.value as ReviewCycleFramework,
+                        }))
+                    }
+                >
+                    {FRAMEWORKS.map((fw) => (
+                        <option key={fw} value={fw}>
+                            {t(`framework_option.${fw}`)}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <div className="grid gap-1.5">
+                <Label htmlFor="cycle_dates">
+                    {t('starts_on')}
+                    {' – '}
+                    {t('ends_on')}
+                </Label>
+                <DateRangePicker
+                    id="cycle_dates"
+                    from={form.startsOn}
+                    to={form.endsOn}
+                    onChange={({ from, to }) => {
+                        setForm((prev) => ({
+                            ...prev,
+                            startsOn: from,
+                            endsOn: to,
+                        }));
+                    }}
+                    numberOfMonths={1}
+                    className="w-full min-w-0"
+                />
+            </div>
+            <div className="grid gap-1.5">
+                <div className="flex items-center justify-between gap-2">
+                    <Label>{t('participants_label')}</Label>
+                    <span className="text-xs text-muted-foreground">
+                        {t('participants_selected', {
+                            count: form.participants.length,
+                        })}
+                    </span>
+                </div>
+                <div className="min-h-11 rounded-md border border-dashed border-border bg-muted/20 p-2">
+                    {form.participants.length === 0 ? (
+                        <p className="px-1 py-1.5 text-xs text-muted-foreground">
+                            {t('participants_help')}
+                        </p>
+                    ) : (
+                        <div className="flex flex-wrap gap-1.5">
+                            {form.participants.map((participant) => (
+                                <span
+                                    key={participant.id}
+                                    className="inline-flex max-w-full items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-xs"
+                                >
+                                    <span className="truncate">
+                                        {participant.label}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        className="rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                                        onClick={() =>
+                                            removeParticipant(participant.id)
+                                        }
+                                        aria-label={t('remove_participant')}
+                                    >
+                                        <XIcon className="size-3.5" />
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="min-h-9 w-full sm:w-fit"
+                    onClick={() => setPickerOpen(true)}
+                >
+                    <PlusIcon className="size-3.5" />
+                    {t('add_participant')}
+                </Button>
+            </div>
+        </div>
+    );
+
+    const createActions = (
+        <>
+            <Button
+                type="button"
+                variant="secondary"
+                className="min-h-11"
+                disabled={busy}
+                onClick={() => handleCreateOpenChange(false)}
+            >
+                {t('cancel', { ns: 'common' })}
+            </Button>
+            <Button
+                type="submit"
+                form="performance-create-form"
+                className="min-h-11"
+                disabled={busy || form.participants.length < 1}
+            >
+                {t('create', { ns: 'common' })}
+            </Button>
+        </>
+    );
+
     return (
         <AdminPageShell
             title={t('title')}
             description={t('description')}
             permission="can_view_performance"
             actions={
-                <PermissionGate permission="can_manage_review_cycles">
-                    <Button type="button" onClick={() => setCreateOpen(true)}>
-                        <PlusIcon className="size-4" />
-                        {t('create_title')}
-                    </Button>
-                </PermissionGate>
+                isMobile ? undefined : (
+                    <PermissionGate permission="can_manage_review_cycles">
+                        <Button
+                            type="button"
+                            onClick={() => setCreateOpen(true)}
+                        >
+                            <PlusIcon className="size-4" />
+                            {t('create_title')}
+                        </Button>
+                    </PermissionGate>
+                )
             }
         >
-            <Dialog open={createOpen} onOpenChange={handleCreateOpenChange}>
-                <DialogContent className="sm:max-w-xl">
-                    <DialogHeader>
-                        <DialogTitle>{t('create_title')}</DialogTitle>
-                        <DialogDescription>
-                            {t('create_description')}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleCreate} className="grid gap-4">
-                        <div className="grid gap-1.5">
-                            <Label htmlFor="cycle_name">{t('name')}</Label>
-                            <Input
-                                id="cycle_name"
-                                value={form.name}
-                                onChange={(e) =>
-                                    setForm((prev) => ({
-                                        ...prev,
-                                        name: e.target.value,
-                                    }))
-                                }
-                                placeholder={t('name_placeholder')}
-                                required
-                            />
-                        </div>
-                        <div className="grid gap-1.5">
-                            <Label htmlFor="cycle_framework">
-                                {t('framework')}
-                            </Label>
-                            <select
-                                id="cycle_framework"
-                                className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-                                value={form.framework}
-                                onChange={(e) =>
-                                    setForm((prev) => ({
-                                        ...prev,
-                                        framework: e.target
-                                            .value as ReviewCycleFramework,
-                                    }))
-                                }
-                            >
-                                {FRAMEWORKS.map((fw) => (
-                                    <option key={fw} value={fw}>
-                                        {t(`framework_option.${fw}`)}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="grid gap-1.5">
-                            <Label htmlFor="cycle_dates">
-                                {t('starts_on')}
-                                {' – '}
-                                {t('ends_on')}
-                            </Label>
-                            <DateRangePicker
-                                id="cycle_dates"
-                                from={form.startsOn}
-                                to={form.endsOn}
-                                onChange={({ from, to }) => {
-                                    setForm((prev) => ({
-                                        ...prev,
-                                        startsOn: from,
-                                        endsOn: to,
-                                    }));
-                                }}
-                                numberOfMonths={1}
-                            />
-                        </div>
-                        <div className="grid gap-1.5">
-                            <div className="flex items-center justify-between gap-2">
-                                <Label>{t('participants_label')}</Label>
-                                <span className="text-xs text-muted-foreground">
-                                    {t('participants_selected', {
-                                        count: form.participants.length,
-                                    })}
-                                </span>
-                            </div>
-                            <div className="min-h-11 rounded-md border border-dashed border-border bg-muted/20 p-2">
-                                {form.participants.length === 0 ? (
-                                    <p className="px-1 py-1.5 text-xs text-muted-foreground">
-                                        {t('participants_help')}
-                                    </p>
-                                ) : (
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {form.participants.map(
-                                            (participant) => (
-                                                <span
-                                                    key={participant.id}
-                                                    className="inline-flex max-w-full items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-xs"
-                                                >
-                                                    <span className="truncate">
-                                                        {participant.label}
-                                                    </span>
-                                                    <button
-                                                        type="button"
-                                                        className="rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-                                                        onClick={() =>
-                                                            removeParticipant(
-                                                                participant.id,
-                                                            )
-                                                        }
-                                                        aria-label={t(
-                                                            'remove_participant',
-                                                        )}
-                                                    >
-                                                        <XIcon className="size-3.5" />
-                                                    </button>
-                                                </span>
-                                            ),
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="w-fit"
-                                onClick={() => setPickerOpen(true)}
-                            >
-                                <PlusIcon className="size-3.5" />
-                                {t('add_participant')}
-                            </Button>
-                        </div>
+            {isMobile ? (
+                <PermissionGate permission="can_manage_review_cycles">
+                    <div className="mb-6">
+                        <Button
+                            type="button"
+                            size="lg"
+                            className="min-h-11 w-full"
+                            onClick={() => setCreateOpen(true)}
+                        >
+                            <PlusIcon className="size-4" />
+                            {t('create_title')}
+                        </Button>
+                    </div>
+                </PermissionGate>
+            ) : null}
+
+            {isMobile ? (
+                <Sheet open={createOpen} onOpenChange={handleCreateOpenChange}>
+                    <SheetContent
+                        side="bottom"
+                        className="flex max-h-[90vh] flex-col gap-0 overflow-hidden rounded-t-xl pb-[max(1rem,env(safe-area-inset-bottom))]"
+                    >
+                        <SheetHeader className="border-b border-border text-left">
+                            <SheetTitle>{t('create_title')}</SheetTitle>
+                            <SheetDescription>
+                                {t('create_description')}
+                            </SheetDescription>
+                        </SheetHeader>
+                        <form
+                            id="performance-create-form"
+                            onSubmit={handleCreate}
+                            className="flex-1 overflow-y-auto p-4"
+                        >
+                            {createFormFields}
+                        </form>
+                        <SheetFooter className="flex-row gap-2 border-t border-border">
+                            {createActions}
+                        </SheetFooter>
+                    </SheetContent>
+                </Sheet>
+            ) : (
+                <Dialog open={createOpen} onOpenChange={handleCreateOpenChange}>
+                    <DialogContent className="sm:max-w-xl">
+                        <DialogHeader>
+                            <DialogTitle>{t('create_title')}</DialogTitle>
+                            <DialogDescription>
+                                {t('create_description')}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form
+                            id="performance-create-form"
+                            onSubmit={handleCreate}
+                        >
+                            {createFormFields}
+                        </form>
                         <DialogFooter>
                             <DialogClose asChild>
-                                <Button type="button" variant="secondary">
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    disabled={busy}
+                                >
                                     {t('cancel', { ns: 'common' })}
                                 </Button>
                             </DialogClose>
                             <Button
                                 type="submit"
+                                form="performance-create-form"
                                 disabled={busy || form.participants.length < 1}
                             >
                                 {t('create', { ns: 'common' })}
                             </Button>
                         </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
+                    </DialogContent>
+                </Dialog>
+            )}
 
             <EmployeePickerDialog
                 open={pickerOpen}
@@ -356,6 +442,7 @@ export default function PerformanceIndexPage() {
                     <PermissionGate permission="can_manage_review_cycles">
                         <Button
                             type="button"
+                            className="min-h-11 w-full sm:w-auto"
                             onClick={() => setCreateOpen(true)}
                         >
                             <PlusIcon className="size-4" />
@@ -363,6 +450,103 @@ export default function PerformanceIndexPage() {
                         </Button>
                     </PermissionGate>
                 </div>
+            ) : isMobile ? (
+                <ul className="space-y-2">
+                    {cycles.map((cycle) => {
+                        const { evaluated, total } = cycleProgress(cycle);
+
+                        return (
+                            <li key={cycle.id}>
+                                <div className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
+                                    <Link
+                                        href={`/performance/cycles/${cycle.id}`}
+                                        className="block min-h-11 space-y-2"
+                                    >
+                                        <div className="flex flex-wrap items-center justify-between gap-2">
+                                            <span className="text-sm font-medium">
+                                                {cycle.name}
+                                            </span>
+                                            <CycleStatusBadge
+                                                status={cycle.status}
+                                            />
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            <Badge variant="outline">
+                                                {t(
+                                                    `framework_option.${cycle.framework}`,
+                                                    {
+                                                        defaultValue:
+                                                            cycle.framework,
+                                                    },
+                                                )}
+                                            </Badge>
+                                            <span className="text-xs text-muted-foreground">
+                                                {t('participants_count_short', {
+                                                    count:
+                                                        cycle.participants_count ??
+                                                        cycle
+                                                            .participant_employee_ids
+                                                            .length,
+                                                })}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            {cycle.starts_on ?? '—'}
+                                            {cycle.ends_on
+                                                ? ` → ${cycle.ends_on}`
+                                                : ''}
+                                        </p>
+                                        {cycle.status === 'draft' ? (
+                                            <p className="text-xs text-muted-foreground">
+                                                {t('progress_not_started')}
+                                            </p>
+                                        ) : (
+                                            <ProgressMeter
+                                                value={evaluated}
+                                                max={Math.max(total, 1)}
+                                                label={t(
+                                                    'progress_evaluated_short',
+                                                    { evaluated, total },
+                                                )}
+                                            />
+                                        )}
+                                    </Link>
+                                    <div className="mt-3 flex gap-2">
+                                        {cycle.status === 'draft' ? (
+                                            <PermissionGate permission="can_manage_review_cycles">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="min-h-11 flex-1 text-destructive hover:text-destructive"
+                                                    disabled={busy}
+                                                    onClick={() =>
+                                                        void handleDeleteCycle(
+                                                            cycle,
+                                                        )
+                                                    }
+                                                >
+                                                    {t('delete_cycle')}
+                                                </Button>
+                                            </PermissionGate>
+                                        ) : null}
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="min-h-11 flex-1"
+                                            asChild
+                                        >
+                                            <Link
+                                                href={`/performance/cycles/${cycle.id}`}
+                                            >
+                                                {t('open')}
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                </div>
+                            </li>
+                        );
+                    })}
+                </ul>
             ) : (
                 <div className="overflow-x-auto rounded-lg border border-border">
                     <table className="w-full min-w-[720px] text-left text-sm">

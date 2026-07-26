@@ -10,6 +10,7 @@ import {
 } from '@/components/shared/async-state';
 import { EmployeePickerField } from '@/components/shared/employee-picker-field';
 import { PermissionGate } from '@/components/shared/permission-gate';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -22,7 +23,16 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetFooter,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet';
 import { useLoadEffect } from '@/hooks/use-load-effect';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { ApiError } from '@/lib/api/errors';
 import * as documentsApi from '@/lib/api/modules/documents';
 import type {
@@ -52,6 +62,7 @@ function emptyUploadForm() {
 
 export default function DocumentsIndexPage() {
     const { t } = useTranslation(['documents', 'common']);
+    const isMobile = useIsMobile();
     const [documents, setDocuments] = useState<Document[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -167,6 +178,159 @@ export default function DocumentsIndexPage() {
         }
     }
 
+    const canSubmitUpload =
+        !busy &&
+        !(form.ownerType === 'employee' && form.ownerId === null) &&
+        !(form.ownerType === 'candidate' && !form.candidateOwnerId);
+
+    const uploadFormFields = (
+        <div className="grid gap-4">
+            <div className="grid gap-2">
+                <Label htmlFor="file">{t('index.file')}</Label>
+                <Input
+                    id="file"
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                    required
+                    className="min-h-11 sm:min-h-9"
+                />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-2">
+                    <Label htmlFor="owner_type">{t('index.owner_type')}</Label>
+                    <select
+                        id="owner_type"
+                        className="h-11 rounded-md border border-input bg-background px-3 text-sm sm:h-9"
+                        value={form.ownerType}
+                        onChange={(e) =>
+                            setForm((prev) => ({
+                                ...prev,
+                                ownerType: e.target.value as DocumentOwnerType,
+                                ownerId: null,
+                                candidateOwnerId: '',
+                            }))
+                        }
+                    >
+                        {OWNER_TYPES.map((type) => (
+                            <option key={type} value={type}>
+                                {t(`owner_type.${type}`)}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                {form.ownerType === 'employee' ? (
+                    <EmployeePickerField
+                        id="owner_id"
+                        label={t('index.owner_id')}
+                        value={form.ownerId}
+                        onChange={(id) =>
+                            setForm((prev) => ({
+                                ...prev,
+                                ownerId: id,
+                            }))
+                        }
+                        required
+                    />
+                ) : form.ownerType === 'candidate' ? (
+                    <div className="grid gap-2">
+                        <Label htmlFor="owner_id">{t('index.owner_id')}</Label>
+                        <Input
+                            id="owner_id"
+                            type="number"
+                            value={form.candidateOwnerId}
+                            onChange={(e) =>
+                                setForm((prev) => ({
+                                    ...prev,
+                                    candidateOwnerId: e.target.value,
+                                }))
+                            }
+                            required
+                            className="min-h-11 sm:min-h-9"
+                        />
+                    </div>
+                ) : null}
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-2">
+                    <Label htmlFor="category">{t('index.category')}</Label>
+                    <select
+                        id="category"
+                        className="h-11 rounded-md border border-input bg-background px-3 text-sm sm:h-9"
+                        value={form.category}
+                        onChange={(e) =>
+                            setForm((prev) => ({
+                                ...prev,
+                                category: e.target.value as DocumentCategory,
+                            }))
+                        }
+                    >
+                        {CATEGORIES.map((cat) => (
+                            <option key={cat} value={cat}>
+                                {t(`category.${cat}`)}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="title">{t('index.doc_title')}</Label>
+                    <Input
+                        id="title"
+                        value={form.title}
+                        onChange={(e) =>
+                            setForm((prev) => ({
+                                ...prev,
+                                title: e.target.value,
+                            }))
+                        }
+                        className="min-h-11 sm:min-h-9"
+                    />
+                </div>
+            </div>
+        </div>
+    );
+
+    const uploadActions = (
+        <>
+            <Button
+                type="button"
+                variant="secondary"
+                className="min-h-11"
+                disabled={busy}
+                onClick={() => handleUploadOpenChange(false)}
+            >
+                {t('cancel', { ns: 'common' })}
+            </Button>
+            <Button
+                type="submit"
+                form="documents-upload-form"
+                className="min-h-11"
+                disabled={!canSubmitUpload}
+            >
+                {t('index.upload')}
+            </Button>
+        </>
+    );
+
+    const uploadGate = (
+        <PermissionGate
+            any={[
+                'can_manage_company_documents',
+                'can_manage_employee_documents',
+                'can_upload_own_documents',
+            ]}
+        >
+            <Button
+                type="button"
+                size={isMobile ? 'lg' : 'default'}
+                className={isMobile ? 'min-h-11 w-full' : undefined}
+                onClick={() => setUploadOpen(true)}
+            >
+                {t('index.upload')}
+            </Button>
+        </PermissionGate>
+    );
+
     return (
         <AdminPageShell
             title={t('index.title')}
@@ -176,172 +340,79 @@ export default function DocumentsIndexPage() {
                 'can_view_employee_documents',
                 'can_upload_own_documents',
             ]}
-            actions={
-                <PermissionGate
-                    any={[
-                        'can_manage_company_documents',
-                        'can_manage_employee_documents',
-                        'can_upload_own_documents',
-                    ]}
-                >
-                    <Button type="button" onClick={() => setUploadOpen(true)}>
-                        {t('index.upload')}
-                    </Button>
-                </PermissionGate>
-            }
+            actions={isMobile ? undefined : uploadGate}
         >
-            <Dialog open={uploadOpen} onOpenChange={handleUploadOpenChange}>
-                <DialogContent className="sm:max-w-xl">
-                    <DialogHeader>
-                        <DialogTitle>{t('index.upload_title')}</DialogTitle>
-                        <DialogDescription>
-                            {t('index.description')}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleUpload} className="grid gap-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="file">{t('index.file')}</Label>
-                            <Input
-                                id="file"
-                                ref={fileInputRef}
-                                type="file"
-                                onChange={(e) =>
-                                    setFile(e.target.files?.[0] ?? null)
-                                }
-                                required
-                            />
-                        </div>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            <div className="grid gap-2">
-                                <Label htmlFor="owner_type">
-                                    {t('index.owner_type')}
-                                </Label>
-                                <select
-                                    id="owner_type"
-                                    className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-                                    value={form.ownerType}
-                                    onChange={(e) =>
-                                        setForm((prev) => ({
-                                            ...prev,
-                                            ownerType: e.target
-                                                .value as DocumentOwnerType,
-                                            ownerId: null,
-                                            candidateOwnerId: '',
-                                        }))
-                                    }
-                                >
-                                    {OWNER_TYPES.map((type) => (
-                                        <option key={type} value={type}>
-                                            {t(`owner_type.${type}`)}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            {form.ownerType === 'employee' ? (
-                                <EmployeePickerField
-                                    id="owner_id"
-                                    label={t('index.owner_id')}
-                                    value={form.ownerId}
-                                    onChange={(id) =>
-                                        setForm((prev) => ({
-                                            ...prev,
-                                            ownerId: id,
-                                        }))
-                                    }
-                                    required
-                                />
-                            ) : form.ownerType === 'candidate' ? (
-                                <div className="grid gap-2">
-                                    <Label htmlFor="owner_id">
-                                        {t('index.owner_id')}
-                                    </Label>
-                                    <Input
-                                        id="owner_id"
-                                        type="number"
-                                        value={form.candidateOwnerId}
-                                        onChange={(e) =>
-                                            setForm((prev) => ({
-                                                ...prev,
-                                                candidateOwnerId:
-                                                    e.target.value,
-                                            }))
-                                        }
-                                        required
-                                    />
-                                </div>
-                            ) : null}
-                        </div>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            <div className="grid gap-2">
-                                <Label htmlFor="category">
-                                    {t('index.category')}
-                                </Label>
-                                <select
-                                    id="category"
-                                    className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-                                    value={form.category}
-                                    onChange={(e) =>
-                                        setForm((prev) => ({
-                                            ...prev,
-                                            category: e.target
-                                                .value as DocumentCategory,
-                                        }))
-                                    }
-                                >
-                                    {CATEGORIES.map((cat) => (
-                                        <option key={cat} value={cat}>
-                                            {t(`category.${cat}`)}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="title">
-                                    {t('index.doc_title')}
-                                </Label>
-                                <Input
-                                    id="title"
-                                    value={form.title}
-                                    onChange={(e) =>
-                                        setForm((prev) => ({
-                                            ...prev,
-                                            title: e.target.value,
-                                        }))
-                                    }
-                                />
-                            </div>
-                        </div>
+            {isMobile ? <div className="mb-6">{uploadGate}</div> : null}
+
+            {isMobile ? (
+                <Sheet open={uploadOpen} onOpenChange={handleUploadOpenChange}>
+                    <SheetContent
+                        side="bottom"
+                        className="flex max-h-[90vh] flex-col gap-0 overflow-hidden rounded-t-xl pb-[max(1rem,env(safe-area-inset-bottom))]"
+                    >
+                        <SheetHeader className="border-b border-border text-left">
+                            <SheetTitle>{t('index.upload_title')}</SheetTitle>
+                            <SheetDescription>
+                                {t('index.description')}
+                            </SheetDescription>
+                        </SheetHeader>
+                        <form
+                            id="documents-upload-form"
+                            onSubmit={handleUpload}
+                            className="flex-1 overflow-y-auto p-4"
+                        >
+                            {uploadFormFields}
+                        </form>
+                        <SheetFooter className="flex-row gap-2 border-t border-border">
+                            {uploadActions}
+                        </SheetFooter>
+                    </SheetContent>
+                </Sheet>
+            ) : (
+                <Dialog open={uploadOpen} onOpenChange={handleUploadOpenChange}>
+                    <DialogContent className="sm:max-w-xl">
+                        <DialogHeader>
+                            <DialogTitle>{t('index.upload_title')}</DialogTitle>
+                            <DialogDescription>
+                                {t('index.description')}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form
+                            id="documents-upload-form"
+                            onSubmit={handleUpload}
+                        >
+                            {uploadFormFields}
+                        </form>
                         <DialogFooter>
                             <DialogClose asChild>
-                                <Button type="button" variant="secondary">
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    disabled={busy}
+                                >
                                     {t('cancel', { ns: 'common' })}
                                 </Button>
                             </DialogClose>
                             <Button
                                 type="submit"
-                                disabled={
-                                    busy ||
-                                    (form.ownerType === 'employee' &&
-                                        form.ownerId === null) ||
-                                    (form.ownerType === 'candidate' &&
-                                        !form.candidateOwnerId)
-                                }
+                                form="documents-upload-form"
+                                disabled={!canSubmitUpload}
                             >
                                 {t('index.upload')}
                             </Button>
                         </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
+                    </DialogContent>
+                </Dialog>
+            )}
 
-            <div className="mb-4 flex flex-wrap gap-3">
-                <div className="grid gap-1">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <div className="grid w-full gap-1 sm:w-auto">
                     <Label htmlFor="filter_owner">
                         {t('index.filter_owner')}
                     </Label>
                     <select
                         id="filter_owner"
-                        className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                        className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm sm:h-9 sm:min-w-[10rem]"
                         value={filterOwner}
                         onChange={(e) =>
                             setFilterOwner(
@@ -357,13 +428,13 @@ export default function DocumentsIndexPage() {
                         ))}
                     </select>
                 </div>
-                <div className="grid gap-1">
+                <div className="grid w-full gap-1 sm:w-auto">
                     <Label htmlFor="filter_category">
                         {t('index.filter_category')}
                     </Label>
                     <select
                         id="filter_category"
-                        className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                        className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm sm:h-9 sm:min-w-[10rem]"
                         value={filterCategory}
                         onChange={(e) => setFilterCategory(e.target.value)}
                     >
@@ -383,6 +454,67 @@ export default function DocumentsIndexPage() {
                 <ErrorState message={error} />
             ) : documents.length === 0 ? (
                 <EmptyState message={t('index.empty')} />
+            ) : isMobile ? (
+                <ul className="space-y-2">
+                    {documents.map((doc) => (
+                        <li key={doc.id}>
+                            <div className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
+                                <div className="space-y-1.5">
+                                    <p className="text-sm font-medium">
+                                        {doc.title}
+                                    </p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        <Badge variant="outline">
+                                            {t(`category.${doc.category}`, {
+                                                defaultValue: doc.category,
+                                            })}
+                                        </Badge>
+                                        <Badge variant="secondary">
+                                            {t(`owner_type.${doc.owner_type}`, {
+                                                defaultValue: doc.owner_type,
+                                            })}
+                                            {doc.owner_id
+                                                ? ` #${doc.owner_id}`
+                                                : ''}
+                                        </Badge>
+                                    </div>
+                                    <p className="truncate text-xs text-muted-foreground">
+                                        {doc.original_name}
+                                    </p>
+                                </div>
+                                <div className="mt-3 flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="min-h-11 flex-1"
+                                        onClick={() => void handleDownload(doc)}
+                                    >
+                                        {t('index.download')}
+                                    </Button>
+                                    <PermissionGate
+                                        any={[
+                                            'can_manage_company_documents',
+                                            'can_manage_employee_documents',
+                                            'can_upload_own_documents',
+                                        ]}
+                                    >
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="min-h-11 flex-1"
+                                            disabled={busy}
+                                            onClick={() =>
+                                                void handleDelete(doc)
+                                            }
+                                        >
+                                            {t('index.delete')}
+                                        </Button>
+                                    </PermissionGate>
+                                </div>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
             ) : (
                 <div className="overflow-x-auto rounded-lg border border-border">
                     <table className="min-w-full text-left text-sm">

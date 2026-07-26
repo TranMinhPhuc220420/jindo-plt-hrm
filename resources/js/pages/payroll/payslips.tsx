@@ -21,7 +21,16 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetFooter,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet';
 import { useLoadEffect } from '@/hooks/use-load-effect';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { ApiError } from '@/lib/api/errors';
 import * as payrollApi from '@/lib/api/modules/payroll';
 import type { Payslip } from '@/lib/api/modules/payroll';
@@ -43,6 +52,7 @@ import { cn } from '@/lib/utils';
 export default function PayrollPayslipsPage() {
     const { t, i18n } = useTranslation(['payroll', 'common']);
     const { can } = useAuth();
+    const isMobile = useIsMobile();
     const [payslips, setPayslips] = useState<Payslip[]>([]);
     const [selected, setSelected] = useState<Payslip | null>(null);
     const [detailOpen, setDetailOpen] = useState(false);
@@ -149,6 +159,121 @@ export default function PayrollPayslipsPage() {
         }
     }
 
+    const detailDescription = selected
+        ? `${employeeDisplayName(selected)} · ${formatPayslipPeriod(
+              selected.period_start,
+              selected.period_end,
+              i18n.language,
+          )}`
+        : t('payslips.loading_detail');
+
+    const detailBody = (
+        <div className="flex-1 space-y-6 overflow-y-auto px-4 py-4 sm:px-6">
+            {detailLoading ? (
+                <LoadingState label={t('payslips.loading_detail')} />
+            ) : selected && breakdown ? (
+                <>
+                    {canOpenRun && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="min-h-9 w-full sm:w-fit"
+                            asChild
+                        >
+                            <Link href={`/payroll/${selected.payroll_run_id}`}>
+                                {t('payslips.open_run')}
+                            </Link>
+                        </Button>
+                    )}
+
+                    <section aria-label={t('payslips.summary')}>
+                        <div className="grid grid-cols-1 gap-3 rounded-lg border border-border bg-muted/30 p-3 text-sm sm:grid-cols-3">
+                            <div>
+                                <p className="text-muted-foreground">
+                                    {t('payslips.col_gross')}
+                                </p>
+                                <p className="mt-1 tabular-nums">
+                                    {formatCurrency(
+                                        selected.gross,
+                                        companyCurrency,
+                                    )}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-muted-foreground">
+                                    {t('payslips.deductions_total')}
+                                </p>
+                                <p className="mt-1 text-destructive tabular-nums">
+                                    −
+                                    {formatCurrency(
+                                        breakdown.deductionTotal,
+                                        companyCurrency,
+                                    )}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-muted-foreground">
+                                    {t('payslips.col_net')}
+                                </p>
+                                <p className="mt-1 text-base font-semibold tabular-nums">
+                                    {formatCurrency(
+                                        selected.net,
+                                        companyCurrency,
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <ComponentSection
+                        title={t('payslips.earnings')}
+                        hint={t('payslips.earnings_hint')}
+                        empty={t('payslips.empty_earnings')}
+                        rows={breakdown.earnings}
+                        currency={companyCurrency}
+                        t={t}
+                    />
+
+                    <ComponentSection
+                        title={t('payslips.deductions')}
+                        hint={t('payslips.deductions_hint')}
+                        empty={t('payslips.empty_deductions')}
+                        rows={breakdown.deductions}
+                        currency={companyCurrency}
+                        t={t}
+                        deduction
+                    />
+                </>
+            ) : (
+                <EmptyState message={t('payslips.error_detail')} />
+            )}
+        </div>
+    );
+
+    const detailActions = (
+        <>
+            <Button
+                type="button"
+                variant="outline"
+                className="min-h-11"
+                onClick={() => handleDialogOpenChange(false)}
+            >
+                {t('payslips.close')}
+            </Button>
+            {selected ? (
+                <Button
+                    type="button"
+                    className="min-h-11"
+                    disabled={downloadingId === selected.id}
+                    onClick={() => void handleDownload(selected.id)}
+                >
+                    <Download className="size-4" />
+                    {t('payslips.download')}
+                </Button>
+            ) : null}
+        </>
+    );
+
     return (
         <AdminPageShell
             title={t('payslips.title')}
@@ -160,14 +285,18 @@ export default function PayrollPayslipsPage() {
             ]}
             actions={
                 canOpenRun ? (
-                    <Button variant="outline" asChild>
+                    <Button
+                        variant="outline"
+                        className={cn(isMobile && 'min-h-11')}
+                        asChild
+                    >
                         <Link href="/payroll">{t('payslips.back')}</Link>
                     </Button>
                 ) : undefined
             }
         >
             {canManageList && (
-                <div className="mb-6 max-w-md">
+                <div className="mb-6 w-full max-w-md">
                     <EmployeePickerField
                         value={employeeFilter}
                         onChange={(id) => setEmployeeFilter(id)}
@@ -183,6 +312,84 @@ export default function PayrollPayslipsPage() {
                 <ErrorState message={error} />
             ) : payslips.length === 0 ? (
                 <EmptyState message={t('payslips.empty')} />
+            ) : isMobile ? (
+                <ul className="space-y-2">
+                    {payslips.map((slip) => (
+                        <li key={slip.id}>
+                            <div className="rounded-lg border border-border bg-card px-3 py-3 shadow-sm">
+                                <button
+                                    type="button"
+                                    className="flex min-h-11 w-full flex-col gap-1.5 text-left"
+                                    onClick={() => void handleDetail(slip.id)}
+                                >
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <span className="text-sm font-medium">
+                                            {employeeDisplayName(slip)}
+                                        </span>
+                                        <Badge
+                                            variant={
+                                                slip.has_pdf
+                                                    ? 'secondary'
+                                                    : 'outline'
+                                            }
+                                        >
+                                            {slip.has_pdf
+                                                ? t('payslips.pdf_ready')
+                                                : t('payslips.pdf_generate')}
+                                        </Badge>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        {formatPayslipPeriod(
+                                            slip.period_start,
+                                            slip.period_end,
+                                            i18n.language,
+                                        )}
+                                    </p>
+                                    <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
+                                        <span className="text-muted-foreground tabular-nums">
+                                            {t('payslips.col_gross')}:{' '}
+                                            {formatCurrency(
+                                                slip.gross,
+                                                companyCurrency,
+                                            )}
+                                        </span>
+                                        <span className="font-semibold tabular-nums">
+                                            {formatCurrency(
+                                                slip.net,
+                                                companyCurrency,
+                                            )}
+                                        </span>
+                                    </div>
+                                </button>
+                                <div className="mt-3 flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="min-h-11 flex-1"
+                                        onClick={() =>
+                                            void handleDetail(slip.id)
+                                        }
+                                    >
+                                        <Eye className="size-4" />
+                                        {t('payslips.detail')}
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        className="min-h-11 flex-1"
+                                        disabled={downloadingId === slip.id}
+                                        onClick={() =>
+                                            void handleDownload(slip.id)
+                                        }
+                                    >
+                                        <Download className="size-4" />
+                                        {t('payslips.download')}
+                                    </Button>
+                                </div>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
             ) : (
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
@@ -285,125 +492,60 @@ export default function PayrollPayslipsPage() {
                 </div>
             )}
 
-            <Dialog open={detailOpen} onOpenChange={handleDialogOpenChange}>
-                <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
-                    <DialogHeader className="border-b border-border px-6 py-4 text-left">
-                        <DialogTitle>{t('payslips.detail_title')}</DialogTitle>
-                        <DialogDescription>
-                            {selected
-                                ? `${employeeDisplayName(selected)} · ${formatPayslipPeriod(
-                                      selected.period_start,
-                                      selected.period_end,
-                                      i18n.language,
-                                  )}`
-                                : t('payslips.loading_detail')}
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="flex-1 space-y-6 overflow-y-auto px-6 py-4">
-                        {detailLoading ? (
-                            <LoadingState
-                                label={t('payslips.loading_detail')}
-                            />
-                        ) : selected && breakdown ? (
-                            <>
-                                {canOpenRun && (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="w-fit"
-                                        asChild
-                                    >
-                                        <Link
-                                            href={`/payroll/${selected.payroll_run_id}`}
-                                        >
-                                            {t('payslips.open_run')}
-                                        </Link>
-                                    </Button>
-                                )}
-
-                                <section aria-label={t('payslips.summary')}>
-                                    <div className="grid grid-cols-3 gap-3 rounded-lg border border-border bg-muted/30 p-3 text-sm">
-                                        <div>
-                                            <p className="text-muted-foreground">
-                                                {t('payslips.col_gross')}
-                                            </p>
-                                            <p className="mt-1 tabular-nums">
-                                                {formatCurrency(
-                                                    selected.gross,
-                                                    companyCurrency,
-                                                )}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className="text-muted-foreground">
-                                                {t('payslips.deductions_total')}
-                                            </p>
-                                            <p className="mt-1 text-destructive tabular-nums">
-                                                −
-                                                {formatCurrency(
-                                                    breakdown.deductionTotal,
-                                                    companyCurrency,
-                                                )}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className="text-muted-foreground">
-                                                {t('payslips.col_net')}
-                                            </p>
-                                            <p className="mt-1 text-base font-semibold tabular-nums">
-                                                {formatCurrency(
-                                                    selected.net,
-                                                    companyCurrency,
-                                                )}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </section>
-
-                                <ComponentSection
-                                    title={t('payslips.earnings')}
-                                    hint={t('payslips.earnings_hint')}
-                                    empty={t('payslips.empty_earnings')}
-                                    rows={breakdown.earnings}
-                                    currency={companyCurrency}
-                                    t={t}
-                                />
-
-                                <ComponentSection
-                                    title={t('payslips.deductions')}
-                                    hint={t('payslips.deductions_hint')}
-                                    empty={t('payslips.empty_deductions')}
-                                    rows={breakdown.deductions}
-                                    currency={companyCurrency}
-                                    t={t}
-                                    deduction
-                                />
-                            </>
-                        ) : (
-                            <EmptyState message={t('payslips.error_detail')} />
-                        )}
-                    </div>
-
-                    <DialogFooter className="border-t border-border px-6 py-4 sm:justify-end">
-                        <DialogClose asChild>
-                            <Button type="button" variant="outline">
-                                {t('payslips.close')}
-                            </Button>
-                        </DialogClose>
-                        {selected && (
-                            <Button
-                                type="button"
-                                disabled={downloadingId === selected.id}
-                                onClick={() => void handleDownload(selected.id)}
-                            >
-                                <Download className="size-4" />
-                                {t('payslips.download')}
-                            </Button>
-                        )}
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            {isMobile ? (
+                <Sheet open={detailOpen} onOpenChange={handleDialogOpenChange}>
+                    <SheetContent
+                        side="bottom"
+                        className="flex max-h-[90vh] flex-col gap-0 overflow-hidden rounded-t-xl p-0 pb-[max(1rem,env(safe-area-inset-bottom))]"
+                    >
+                        <SheetHeader className="border-b border-border px-4 py-4 text-left">
+                            <SheetTitle>
+                                {t('payslips.detail_title')}
+                            </SheetTitle>
+                            <SheetDescription>
+                                {detailDescription}
+                            </SheetDescription>
+                        </SheetHeader>
+                        {detailBody}
+                        <SheetFooter className="flex-row gap-2 border-t border-border px-4 py-4">
+                            {detailActions}
+                        </SheetFooter>
+                    </SheetContent>
+                </Sheet>
+            ) : (
+                <Dialog open={detailOpen} onOpenChange={handleDialogOpenChange}>
+                    <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
+                        <DialogHeader className="border-b border-border px-6 py-4 text-left">
+                            <DialogTitle>
+                                {t('payslips.detail_title')}
+                            </DialogTitle>
+                            <DialogDescription>
+                                {detailDescription}
+                            </DialogDescription>
+                        </DialogHeader>
+                        {detailBody}
+                        <DialogFooter className="border-t border-border px-6 py-4 sm:justify-end">
+                            <DialogClose asChild>
+                                <Button type="button" variant="outline">
+                                    {t('payslips.close')}
+                                </Button>
+                            </DialogClose>
+                            {selected && (
+                                <Button
+                                    type="button"
+                                    disabled={downloadingId === selected.id}
+                                    onClick={() =>
+                                        void handleDownload(selected.id)
+                                    }
+                                >
+                                    <Download className="size-4" />
+                                    {t('payslips.download')}
+                                </Button>
+                            )}
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            )}
         </AdminPageShell>
     );
 }

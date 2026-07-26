@@ -102,6 +102,9 @@
         "attendance_late": "Muộn",
         "attendance_open": "Đang làm",
         "view_attendance": "Xem điểm danh",
-        "summary_error": "Không tải được tóm tắt điểm danh."
+        "summary_error": "Không tải được tóm tắt điểm danh.",
+        "agenda_title": "Sắp tới",
+        "day_detail_title": "Chi tiết ngày",
+        "no_upcoming": "Không còn ngày nào trong tháng này."
     }
 }

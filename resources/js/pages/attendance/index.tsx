@@ -6,6 +6,7 @@ import {
     rangeForPreset,
 } from '@/components/attendance/attendance-period-filter';
 import type { AttendancePeriodPreset } from '@/components/attendance/attendance-period-filter';
+import { AttendanceRecordSheet } from '@/components/attendance/attendance-record-sheet';
 import { AttendanceRecordsTable } from '@/components/attendance/attendance-records-table';
 import { MonthSummaryStrip } from '@/components/attendance/month-summary-strip';
 import { PunchEvidenceDialog } from '@/components/attendance/punch-evidence-dialog';
@@ -57,6 +58,9 @@ export default function AttendanceIndexPage() {
     const [summaryError, setSummaryError] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
     const [punchMode, setPunchMode] = useState<'check_in' | 'check_out' | null>(
+        null,
+    );
+    const [selectedRecordId, setSelectedRecordId] = useState<number | null>(
         null,
     );
 
@@ -275,8 +279,30 @@ export default function AttendanceIndexPage() {
                     records={records}
                     pendingCorrectionCounts={pendingCorrectionCounts}
                     onApprove={(id) => void handleApprove(id)}
+                    onSelectRecord={setSelectedRecordId}
                 />
             )}
+
+            <AttendanceRecordSheet
+                open={selectedRecordId !== null}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setSelectedRecordId(null);
+                    }
+                }}
+                record={
+                    selectedRecordId != null
+                        ? (records.find((row) => row.id === selectedRecordId) ??
+                          null)
+                        : null
+                }
+                pendingCount={
+                    selectedRecordId != null
+                        ? (pendingCorrectionCounts[selectedRecordId] ?? 0)
+                        : 0
+                }
+                onApprove={(id) => void handleApprove(id)}
+            />
         </AdminPageShell>
     );
 }

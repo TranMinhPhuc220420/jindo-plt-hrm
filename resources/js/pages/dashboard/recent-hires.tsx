@@ -13,14 +13,14 @@ export function RecentHires({ hires }: Props) {
     const locale = dateFnsLocale(i18n.language);
 
     return (
-        <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
             <div className="mb-4 flex items-center justify-between gap-2">
                 <h2 className="text-lg font-semibold">
                     {t('recent_hires_title')}
                 </h2>
                 <Link
                     href="/employees"
-                    className="text-sm font-medium text-primary hover:underline"
+                    className="inline-flex min-h-9 items-center text-sm font-medium text-primary hover:underline"
                 >
                     {t('view_employees')}
                 </Link>

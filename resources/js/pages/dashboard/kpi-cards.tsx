@@ -53,11 +53,11 @@ export function KpiCards({ summary }: Props) {
     };
 
     return (
-        <div className="grid auto-rows-min gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid auto-rows-min grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             {CARDS.map(({ key, label, icon: Icon, accent }) => (
                 <div
                     key={key}
-                    className="rounded-xl border border-border bg-card p-5 shadow-sm"
+                    className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"
                 >
                     <div className="mb-3 flex items-center justify-between">
                         <div
@@ -76,7 +76,7 @@ export function KpiCards({ summary }: Props) {
                         ) : null}
                     </div>
                     <p className="text-sm text-muted-foreground">{t(label)}</p>
-                    <p className="mt-1 text-3xl font-semibold tracking-tight">
+                    <p className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
                         {values[key]}
                     </p>
                 </div>

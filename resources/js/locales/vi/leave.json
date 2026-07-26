@@ -28,7 +28,8 @@
         "toast_approved": "Đã duyệt nghỉ",
         "toast_rejected": "Đã từ chối",
         "toast_cancelled": "Đã hủy yêu cầu",
-        "toast_error": "Thao tác thất bại"
+        "toast_error": "Thao tác thất bại",
+        "request_detail_title": "Chi tiết đơn nghỉ"
     },
     "types": {
         "title": "Loại nghỉ phép",

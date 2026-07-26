@@ -102,6 +102,9 @@
         "attendance_late": "Late",
         "attendance_open": "In progress",
         "view_attendance": "View attendance",
-        "summary_error": "Failed to load attendance summary."
+        "summary_error": "Failed to load attendance summary.",
+        "agenda_title": "Upcoming",
+        "day_detail_title": "Day details",
+        "no_upcoming": "No remaining days in this month."
     }
 }

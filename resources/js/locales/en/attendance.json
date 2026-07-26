@@ -42,7 +42,8 @@
         "summary_late": "Late",
         "summary_ot": "Overtime",
         "summary_loading": "Loading summary…",
-        "summary_error": "Could not load summary."
+        "summary_error": "Could not load summary.",
+        "record_detail_title": "Record details"
     },
     "evidence": {
         "title_in": "Check in with evidence",

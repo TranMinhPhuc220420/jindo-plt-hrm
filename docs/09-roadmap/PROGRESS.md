@@ -39,7 +39,7 @@
 | Field | Value |
 |-------|--------|
 | **Current phase** | ∞ Future |
-| **Current step** | `∞.employee-org-placement` |
+| **Current step** | `∞.dashboard-mobile` |
 | **Overall status** | Done |
 | **Last updated** | 2026-07-26 |
 | **Last updated by** | agent |
@@ -2239,6 +2239,146 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 - EmployeeApiTest asserts create/PATCH department_id + position_id
 ```
 
+### ∞.my-schedule-mobile — Hybrid mobile layout for My Schedule
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | [RESPONSIVE.md](../07-uiux/RESPONSIVE.md) |
+
+- [x] Compact month grid on mobile (no horizontal scroll)
+- [x] Agenda list for remaining days in visible month
+- [x] Bottom Sheet for day detail (calendar + agenda + table cards)
+- [x] Mobile card list for table view
+- [x] Toolbar + AdminPageShell mobile padding polish
+- [x] i18n en/vi + types:check
+
+**Notes:**
+
+```
+- Hybrid: compact calendar + upcoming agenda; desktop keeps rich calendar/table
+- Components: schedule-day-helpers, schedule-day-sheet, schedule-agenda-list
+- Breakpoint: useIsMobile (<768px); AdminPageShell card p-4 md:p-6
+- types:check green
+```
+
+### ∞.attendance-mobile — Mobile layout for Attendance index
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | [RESPONSIVE.md](../07-uiux/RESPONSIVE.md) |
+
+- [x] TodayStatusCard punch-first full-width CTAs on mobile
+- [x] PunchEvidenceDialog: bottom Sheet on mobile
+- [x] Mobile records card list + AttendanceRecordSheet
+- [x] Period filter chip scroll + full-width DateRangePicker
+- [x] i18n en/vi + types:check
+
+**Notes:**
+
+```
+- Scope: /attendance index; punch Sheet + record detail Sheet on mobile
+- Components: attendance-record-sheet; records table branches via useIsMobile
+- Period chips overflow-x-auto; desktop Dialog/table unchanged
+- types:check green
+```
+
+### ∞.leave-mobile — Mobile layout for Leave index
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | [RESPONSIVE.md](../07-uiux/RESPONSIVE.md) |
+
+- [x] Submit CTA primary on mobile; Types/Holidays secondary
+- [x] Create request: Sheet on mobile, Dialog on desktop
+- [x] Request card list + LeaveRequestSheet (approve/reject/cancel)
+- [x] i18n en/vi + types:check
+
+**Notes:**
+
+```
+- Scope: /leave index; types/holidays out of scope
+- Components: leave-request-form, leave-request-create, leave-requests-table, leave-request-sheet
+- Mobile: full-width Submit + card list + detail Sheet; desktop table/Dialog unchanged
+- types:check green
+```
+
+### ∞.payslips-performance-notifications-mobile — Mobile layouts for payslips, performance, notifications
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | [RESPONSIVE.md](../07-uiux/RESPONSIVE.md) |
+
+- [x] `/payroll/payslips`: card list + detail Sheet on mobile
+- [x] `/performance`: card list + create Sheet on mobile
+- [x] `/notifications`: toolbar + card action polish on mobile
+- [x] types:check
+
+**Notes:**
+
+```
+- Payslips: cards + bottom Sheet detail; desktop table/Dialog unchanged
+- Performance index: full-width create CTA + cards + create Sheet; cycle show out of scope
+- Notifications: stacked toolbar + full-width row actions; already card list
+- types:check green
+```
+
+### ∞.assets-documents-mobile — Mobile layouts for Assets and Documents
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | [RESPONSIVE.md](../07-uiux/RESPONSIVE.md) |
+
+- [x] `/assets`: card list + create Sheet on mobile
+- [x] `/documents`: card list + upload Sheet on mobile
+- [x] types:check
+
+**Notes:**
+
+```
+- Assets: full-width Create CTA + cards + create Sheet; desktop table/Dialog unchanged
+- Documents: full-width Upload CTA + cards + upload Sheet; filters stack on mobile
+- Asset show page out of scope
+- types:check green
+```
+
+### ∞.dashboard-mobile — Mobile polish for company + self dashboard
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | [RESPONSIVE.md](../07-uiux/RESPONSIVE.md) |
+
+- [x] KPI grids 2-col on mobile; denser card padding
+- [x] Self quick links full-width; pending actions earlier on mobile
+- [x] Charts + panel tap targets polish
+- [x] types:check
+
+**Notes:**
+
+```
+- Company + self: pending/upcoming/activity order-1 on mobile, charts order-2; lg restores side column
+- Self: Attendance/Leave/Schedule links full-width min-h-11
+- Charts h-52 sm:h-64; panels p-4 sm:p-5
+- types:check green
+```
+
 ---
 
 ## Activity log
@@ -2247,6 +2387,18 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-07-26 | `∞.dashboard-mobile` | Done: company+self dashboard mobile polish; types green | agent |
+| 2026-07-26 | `∞.dashboard-mobile` | Started: mobile polish for company + self dashboard | agent |
+| 2026-07-26 | `∞.assets-documents-mobile` | Done: assets + documents mobile cards/Sheets; types green | agent |
+| 2026-07-26 | `∞.assets-documents-mobile` | Started: mobile layouts for Assets and Documents | agent |
+| 2026-07-26 | `∞.payslips-performance-notifications-mobile` | Done: payslips/performance/notifications mobile; types green | agent |
+| 2026-07-26 | `∞.payslips-performance-notifications-mobile` | Started: mobile layouts for payslips, performance, notifications | agent |
+| 2026-07-26 | `∞.leave-mobile` | Done: create Sheet + request cards + detail Sheet; types green | agent |
+| 2026-07-26 | `∞.leave-mobile` | Started: mobile layout for Leave index | agent |
+| 2026-07-26 | `∞.attendance-mobile` | Done: punch Sheet + records cards + day sheet; types green | agent |
+| 2026-07-26 | `∞.attendance-mobile` | Started: mobile layout for Attendance index | agent |
+| 2026-07-26 | `∞.my-schedule-mobile` | Done: hybrid mobile calendar + agenda + day sheet; types green | agent |
+| 2026-07-26 | `∞.my-schedule-mobile` | Started: hybrid mobile layout for My Schedule | agent |
 | 2026-07-26 | `∞.employee-org-placement` | Done: dept/position UI on create + show; EmployeeApiTest + types green | agent |
 | 2026-07-26 | `∞.employee-org-placement` | Started: department/position assignment UI on employee create + show | agent |
 | 2026-07-26 | `∞.production-seed` | Follow-up: Makefile `seed-local` / `seed-admin` targets | agent |

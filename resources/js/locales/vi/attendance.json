@@ -42,7 +42,8 @@
         "summary_late": "Đi muộn",
         "summary_ot": "Tăng ca",
         "summary_loading": "Đang tải tổng hợp…",
-        "summary_error": "Không tải được tổng hợp."
+        "summary_error": "Không tải được tổng hợp.",
+        "record_detail_title": "Chi tiết điểm danh"
     },
     "evidence": {
         "title_in": "Vào ca kèm chứng cứ",

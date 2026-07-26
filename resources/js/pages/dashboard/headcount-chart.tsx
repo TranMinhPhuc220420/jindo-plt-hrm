@@ -55,7 +55,7 @@ export function HeadcountChart({ byStatus, byDepartment }: Props) {
     }));
 
     return (
-        <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+        <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
             <div className="mb-4">
                 <h2 className="text-lg font-semibold">
                     {t('headcount_chart_title')}
@@ -64,7 +64,7 @@ export function HeadcountChart({ byStatus, byDepartment }: Props) {
                     {t('headcount_chart_subtitle')}
                 </p>
             </div>
-            <div className="h-56 w-full">
+            <div className="h-48 w-full sm:h-56">
                 {data.length === 0 ? (
                     <p className="flex h-full items-center justify-center text-sm text-muted-foreground">
                         {t('recent_hires_empty')}

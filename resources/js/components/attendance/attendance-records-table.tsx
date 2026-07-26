@@ -5,7 +5,9 @@ import { AttendanceEvidencePhotoButton } from '@/components/attendance/attendanc
 import { AttendanceStatusBadge } from '@/components/attendance/attendance-status-badge';
 import { formatDuration } from '@/components/attendance/format-minutes';
 import { PermissionGate } from '@/components/shared/permission-gate';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 import type {
     AttendanceEvidence,
     AttendanceRecord,
@@ -17,6 +19,7 @@ type Props = {
     records: AttendanceRecord[];
     pendingCorrectionCounts: Record<number, number>;
     onApprove: (id: number) => void;
+    onSelectRecord?: (id: number) => void;
 };
 
 function EvidenceHint({
@@ -72,10 +75,115 @@ export function AttendanceRecordsTable({
     records,
     pendingCorrectionCounts,
     onApprove,
+    onSelectRecord,
 }: Props) {
     const { t, i18n } = useTranslation('attendance');
     const locale = dateFnsLocale(i18n.language);
     const today = new Date();
+    const isMobile = useIsMobile();
+
+    if (isMobile) {
+        return (
+            <ul className="space-y-2">
+                {records.map((row) => {
+                    const date = parseYmd(row.work_date);
+                    const isToday = date ? isSameDay(date, today) : false;
+                    const dateLabel = date
+                        ? format(date, 'EEE, d MMM yyyy', { locale })
+                        : row.work_date;
+                    const pendingCount = pendingCorrectionCounts[row.id] ?? 0;
+
+                    return (
+                        <li key={row.id}>
+                            <button
+                                type="button"
+                                onClick={() => onSelectRecord?.(row.id)}
+                                className={cn(
+                                    'flex min-h-11 w-full flex-col gap-2 rounded-lg border border-border bg-card px-3 py-3 text-left shadow-sm transition-colors active:bg-muted/50',
+                                    isToday && 'border-primary/40 bg-primary/5',
+                                    pendingCount > 0 &&
+                                        'border-destructive/30 bg-destructive/5',
+                                )}
+                            >
+                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <span className="text-sm font-medium capitalize">
+                                            {dateLabel}
+                                        </span>
+                                        {isToday ? (
+                                            <Badge variant="outline">
+                                                {t('index.today')}
+                                            </Badge>
+                                        ) : null}
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-1.5">
+                                        <AttendanceStatusBadge
+                                            status={row.status}
+                                        />
+                                        {pendingCount > 0 ? (
+                                            <span
+                                                className={cn(
+                                                    'inline-flex h-4 min-w-4 items-center justify-center rounded-full',
+                                                    'bg-destructive px-1 text-[10px] leading-none font-semibold text-white',
+                                                )}
+                                            >
+                                                {pendingCount > 99
+                                                    ? '99+'
+                                                    : pendingCount}
+                                            </span>
+                                        ) : null}
+                                    </div>
+                                </div>
+
+                                {row.employee ? (
+                                    <p className="truncate text-sm font-medium">
+                                        {row.employee.full_name}
+                                        <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                                            {row.employee.code}
+                                        </span>
+                                    </p>
+                                ) : null}
+
+                                <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
+                                    <p className="text-muted-foreground tabular-nums">
+                                        {punchTime(row.check_in_at)} →{' '}
+                                        {punchTime(row.check_out_at)}
+                                    </p>
+                                    <p className="font-medium tabular-nums">
+                                        {formatDuration(row.worked_minutes, t)}
+                                    </p>
+                                </div>
+
+                                {(row.late_minutes > 0 ||
+                                    row.overtime_minutes > 0) && (
+                                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                        {row.late_minutes > 0 ? (
+                                            <span>
+                                                {t('index.col_late')}:{' '}
+                                                {formatDuration(
+                                                    row.late_minutes,
+                                                    t,
+                                                )}
+                                            </span>
+                                        ) : null}
+                                        {row.overtime_minutes > 0 ? (
+                                            <span>
+                                                {t('index.col_ot')}:{' '}
+                                                {formatDuration(
+                                                    row.overtime_minutes,
+                                                    t,
+                                                )}
+                                            </span>
+                                        ) : null}
+                                    </div>
+                                )}
+                            </button>
+                        </li>
+                    );
+                })}
+            </ul>
+        );
+    }
 
     return (
         <div className="overflow-x-auto rounded-md border">

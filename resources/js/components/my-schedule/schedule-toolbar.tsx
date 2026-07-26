@@ -51,6 +51,7 @@ export function ScheduleToolbar({
                 <ToggleGroupItem
                     value="calendar"
                     aria-label={t('my_schedule.view_calendar')}
+                    className="min-h-9 min-w-9"
                 >
                     <CalendarDays className="size-4" />
                     <span className="hidden sm:inline">
@@ -60,6 +61,7 @@ export function ScheduleToolbar({
                 <ToggleGroupItem
                     value="table"
                     aria-label={t('my_schedule.view_table')}
+                    className="min-h-9 min-w-9"
                 >
                     <List className="size-4" />
                     <span className="hidden sm:inline">
@@ -69,32 +71,37 @@ export function ScheduleToolbar({
             </ToggleGroup>
 
             {view === 'calendar' ? (
-                <div className="flex flex-wrap items-center gap-2">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={onPrevMonth}
-                        aria-label={t('my_schedule.prev_month')}
-                    >
-                        <ChevronLeft className="size-4" />
-                    </Button>
-                    <p className="min-w-[10rem] text-center text-sm font-medium capitalize">
-                        {monthLabel}
-                    </p>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={onNextMonth}
-                        aria-label={t('my_schedule.next_month')}
-                    >
-                        <ChevronRight className="size-4" />
-                    </Button>
+                <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:w-auto sm:justify-start">
+                    <div className="flex items-center gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            className="size-9"
+                            onClick={onPrevMonth}
+                            aria-label={t('my_schedule.prev_month')}
+                        >
+                            <ChevronLeft className="size-4" />
+                        </Button>
+                        <p className="min-w-[8rem] text-center text-sm font-medium capitalize sm:min-w-[10rem]">
+                            {monthLabel}
+                        </p>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            className="size-9"
+                            onClick={onNextMonth}
+                            aria-label={t('my_schedule.next_month')}
+                        >
+                            <ChevronRight className="size-4" />
+                        </Button>
+                    </div>
                     <Button
                         type="button"
                         variant="secondary"
                         size="sm"
+                        className="min-h-9"
                         onClick={onGoToday}
                     >
                         {t('my_schedule.today')}
@@ -102,13 +109,13 @@ export function ScheduleToolbar({
                 </div>
             ) : (
                 <form
-                    className="flex flex-wrap items-end gap-3"
+                    className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-end"
                     onSubmit={(event) => {
                         event.preventDefault();
                         onSearch();
                     }}
                 >
-                    <div className="space-y-1">
+                    <div className="w-full space-y-1 sm:w-auto">
                         <Label htmlFor="schedule_range">
                             {t('my_schedule.date_from')}
                             {' – '}
@@ -120,10 +127,14 @@ export function ScheduleToolbar({
                             to={dateTo}
                             onChange={onRangeChange}
                             numberOfMonths={1}
-                            className="min-w-[16rem]"
+                            className="w-full min-w-0 sm:min-w-[16rem]"
                         />
                     </div>
-                    <Button type="submit" variant="secondary">
+                    <Button
+                        type="submit"
+                        variant="secondary"
+                        className="min-h-9 w-full sm:w-auto"
+                    >
                         {t('search', { ns: 'common' })}
                     </Button>
                 </form>

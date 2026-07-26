@@ -68,11 +68,11 @@ export function SelfKpiCards({ summary }: Props) {
     ];
 
     return (
-        <div className="grid auto-rows-min gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid auto-rows-min grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             {cards.map(({ key, label, value, icon: Icon, accent, badge }) => (
                 <div
                     key={key}
-                    className="rounded-xl border border-border bg-card p-5 shadow-sm"
+                    className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5"
                 >
                     <div className="mb-3 flex items-center justify-between">
                         <div
@@ -84,36 +84,38 @@ export function SelfKpiCards({ summary }: Props) {
                             <Icon className="size-5" />
                         </div>
                         {badge ? (
-                            <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground sm:text-xs">
                                 {badge}
                             </span>
                         ) : null}
                     </div>
-                    <p className="text-sm text-muted-foreground">{label}</p>
-                    <p className="mt-1 text-3xl font-semibold tracking-tight">
+                    <p className="text-xs text-muted-foreground sm:text-sm">
+                        {label}
+                    </p>
+                    <p className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
                         {value}
                     </p>
                 </div>
             ))}
-            <div className="sm:col-span-2 lg:col-span-4">
-                <div className="flex flex-wrap gap-2">
+            <div className="col-span-2 lg:col-span-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                     <Link
                         href="/attendance"
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                        className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 sm:justify-start"
                     >
                         <ClipboardCheck className="size-4" />
                         {t('self_link_attendance')}
                     </Link>
                     <Link
                         href="/leave"
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-muted/50"
+                        className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-muted/50 sm:justify-start"
                     >
                         <CalendarOff className="size-4" />
                         {t('self_link_leave')}
                     </Link>
                     <Link
                         href="/my-schedule"
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-muted/50"
+                        className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-muted/50 sm:justify-start"
                     >
                         <CalendarDays className="size-4" />
                         {t('self_link_schedule')}

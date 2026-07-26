@@ -42,7 +42,7 @@ export default function AdminPageShell({
                         </div>
                     }
                 >
-                    <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+                    <div className="rounded-xl border border-border bg-card p-4 shadow-sm md:p-6">
                         {children}
                     </div>
                 </PermissionGate>
