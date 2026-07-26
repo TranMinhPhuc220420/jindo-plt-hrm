@@ -34,12 +34,16 @@ Each environment has its own `.env` secrets — never share production credentia
 
 ## Required Config (high level)
 
-- `APP_KEY`, `APP_ENV`, `APP_URL`
+- `APP_KEY`, `APP_ENV`, `APP_URL` (must be the public HTTPS origin, e.g. `https://hrm.example.com`)
 - Database connection
 - Queue connection + worker processes
 - Mailer (or log/trap in non-prod)
 - Filesystem disk (private for employee docs)
-- Session/cookie security (`SESSION_SECURE_COOKIE` in HTTPS envs)
+- Session/cookie security (`SESSION_SECURE_COOKIE=true` in HTTPS envs)
+- Sanctum SPA auth (required for login — missing values cause `Session store not set on request`):
+  - `SANCTUM_STATEFUL_DOMAINS` — comma-separated hosts **without** scheme (e.g. `hrm.example.com`). `APP_URL` host is always merged by `config/sanctum.php`, but set this explicitly for any extra SPA hosts.
+  - `CORS_ALLOWED_ORIGINS` — full origins with scheme if the SPA is cross-origin; same-origin deploys are fine with defaults.
+- After changing these: `php artisan config:clear` (or rebuild `config:cache`)
 
 Align auth mode with [AUTHENTICATION.md](../01-architecture/AUTHENTICATION.md).
 

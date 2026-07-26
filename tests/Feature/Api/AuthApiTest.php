@@ -46,6 +46,38 @@ test('users can login via api and fetch me', function () {
         ->assertJsonPath('data.company_locale', 'vi');
 });
 
+test('spa login works for production Origin when APP_URL host is in stateful domains', function () {
+    // Regression: production Origin not in SANCTUM_STATEFUL_DOMAINS → StartSession skipped
+    // → AuthService session()->regenerate() throws "Session store not set on request".
+    // config/sanctum.php always merges APP_URL host so same-origin prod SPA stays stateful.
+    config([
+        'sanctum.stateful' => ['localhost', 'hrm.plt.pro.vn'],
+    ]);
+
+    $user = User::factory()->create();
+
+    $login = $this->withHeaders([
+        'Origin' => 'https://hrm.plt.pro.vn',
+        'Referer' => 'https://hrm.plt.pro.vn/login',
+    ])->postJson('/api/auth/login', [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
+
+    $login->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('data.user.id', $user->id);
+
+    $this->assertAuthenticated();
+});
+
+test('sanctum stateful domains include APP_URL host', function () {
+    $host = parse_url((string) config('app.url'), PHP_URL_HOST);
+
+    expect($host)->not->toBeNull()
+        ->and(config('sanctum.stateful'))->toContain($host);
+});
+
 test('users can update personal locale preference', function () {
     $company = Company::factory()->create();
     app(SettingsService::class)->seedDefaultsForCompany($company->id);

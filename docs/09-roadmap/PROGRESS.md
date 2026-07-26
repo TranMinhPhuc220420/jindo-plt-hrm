@@ -39,9 +39,9 @@
 | Field | Value |
 |-------|--------|
 | **Current phase** | ∞ Future |
-| **Current step** | `∞.payroll-run-edit-delete` |
+| **Current step** | `∞.sanctum-prod-session` |
 | **Overall status** | Done |
-| **Last updated** | 2026-07-19 |
+| **Last updated** | 2026-07-26 |
 | **Last updated by** | agent |
 | **Next action** | Future backlog / discuss `v1.0.0` readiness |
 | **Blockers** | None |
@@ -1975,6 +1975,27 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 - Docs: SHIFT_API, leave/attendance business READMEs
 ```
 
+### ∞.sanctum-prod-session — Production SPA login session store
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+
+- [x] `config/sanctum.php` always merges `APP_URL` host into stateful domains
+- [x] `.env.example` + `DEPLOYMENT.md` document prod Sanctum / CORS / session
+- [x] AuthApiTest regression for production Origin + APP_URL host assert
+- [x] Document production `.env` checklist for deployers
+
+**Notes:**
+
+```
+- Symptom: RuntimeException "Session store not set on request" on POST /api/auth/login
+- Cause: SANCTUM_STATEFUL_DOMAINS left as localhost-only → Sanctum skips StartSession
+- Fix: always merge APP_URL host; set APP_URL + clear config cache on prod
+```
+
 ---
 
 ## Activity log
@@ -1983,6 +2004,8 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-07-26 | `∞.sanctum-prod-session` | Done: merge APP_URL into Sanctum stateful; AuthApiTest green | agent |
+| 2026-07-26 | `∞.sanctum-prod-session` | Started: fix prod login Session store not set | agent |
 | 2026-07-19 | `∞.i18n-leave-types` | Leave types: localize by code on request form/list/balances; shared leave-labels helper | agent |
 | 2026-07-19 | `∞.my-schedule-ux` | My Schedule: add missing leave label i18n keys (am/pm/hours/paid/on_leave/legend) | agent |
 | 2026-07-19 | `∞.leave-schedule-attendance-payroll` | Done: leave overlay + attendance + payroll proration | agent |
