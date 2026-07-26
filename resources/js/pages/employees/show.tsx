@@ -4,8 +4,8 @@ import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
-import { AvatarEditor } from '@/components/shared/avatar-editor';
 import { ErrorState, LoadingState } from '@/components/shared/async-state';
+import { AvatarEditor } from '@/components/shared/avatar-editor';
 import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -300,6 +300,7 @@ export default function EmployeeShowPage({ id }: Props) {
                                             file,
                                         );
                                     setEmployee(updated);
+
                                     if (employeeId === employee.id) {
                                         await refreshMe();
                                         router.reload({ only: ['auth'] });
@@ -311,6 +312,7 @@ export default function EmployeeShowPage({ id }: Props) {
                                             id,
                                         );
                                     setEmployee(updated);
+
                                     if (employeeId === employee.id) {
                                         await refreshMe();
                                         router.reload({ only: ['auth'] });

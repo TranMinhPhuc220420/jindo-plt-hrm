@@ -56,6 +56,7 @@ export function AvatarEditor({
         } finally {
             URL.revokeObjectURL(localPreview);
             setBusy(false);
+
             if (inputRef.current) {
                 inputRef.current.value = '';
             }
