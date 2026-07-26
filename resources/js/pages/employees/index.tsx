@@ -11,6 +11,11 @@ import {
 } from '@/components/shared/async-state';
 import { DatePicker } from '@/components/shared/date-picker';
 import { PermissionGate } from '@/components/shared/permission-gate';
+import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+} from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -23,6 +28,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useInitials } from '@/hooks/use-initials';
 import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import * as employeeApi from '@/lib/api/modules/employees';
@@ -42,6 +48,7 @@ function emptyCreateForm() {
 
 export default function EmployeesIndexPage() {
     const { t } = useTranslation(['employees', 'common']);
+    const getInitials = useInitials();
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState('');
@@ -370,7 +377,23 @@ export default function EmployeesIndexPage() {
                                         </Link>
                                     </td>
                                     <td className="px-3 py-2">
-                                        {employee.full_name}
+                                        <div className="flex items-center gap-2">
+                                            <Avatar className="size-8 overflow-hidden rounded-full">
+                                                <AvatarImage
+                                                    src={
+                                                        employee.avatar_url ??
+                                                        undefined
+                                                    }
+                                                    alt={employee.full_name}
+                                                />
+                                                <AvatarFallback className="rounded-full bg-neutral-200 text-xs text-black dark:bg-neutral-700 dark:text-white">
+                                                    {getInitials(
+                                                        employee.full_name,
+                                                    )}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <span>{employee.full_name}</span>
+                                        </div>
                                     </td>
                                     <td className="px-3 py-2 text-muted-foreground">
                                         {employee.department?.name ??

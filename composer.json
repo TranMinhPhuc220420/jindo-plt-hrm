@@ -1,11 +1,11 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/react-starter-kit",
+    "name": "plt-solutions/jindo-plt-hrm",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "HRM application for PLT Solutions.",
     "keywords": [
-        "laravel",
-        "framework"
+        "hrm",
+        "laravel"
     ],
     "license": "MIT",
     "require": {

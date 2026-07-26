@@ -2,8 +2,10 @@
 
 use App\Exceptions\DomainException;
 use App\Jobs\GenerateReportExportJob;
+use App\Models\AttendanceRecord;
 use App\Models\Company;
 use App\Models\Employee;
+use App\Models\Notification;
 use App\Models\Permission;
 use App\Models\ReportExport;
 use App\Models\User;
@@ -144,19 +146,112 @@ test('ReportExportService::create defensively rejects an unknown report type', f
     }
 });
 
-test('dashboard summary returns expected keys', function () {
-    Company::factory()->create();
+test('dashboard summary returns company scope for report viewers', function () {
+    $company = Company::factory()->create();
     $user = reportUser(['can_view_employee_reports']);
+
+    $active = Employee::factory()->create([
+        'company_id' => $company->id,
+        'status' => 'active',
+        'hired_at' => now()->toDateString(),
+    ]);
+    Employee::factory()->create([
+        'company_id' => $company->id,
+        'status' => 'active',
+        'hired_at' => now()->subMonths(2)->toDateString(),
+    ]);
+
+    AttendanceRecord::factory()->create([
+        'company_id' => $company->id,
+        'employee_id' => $active->id,
+        'work_date' => now()->toDateString(),
+        'check_in_at' => now()->setTime(8, 0),
+    ]);
+
+    Notification::factory()->create([
+        'company_id' => $company->id,
+        'user_id' => $user->id,
+        'read_at' => null,
+    ]);
 
     $this->actingAs($user)->withHeaders(spaJsonHeaders())
         ->getJson('/api/dashboard/summary')
         ->assertOk()
+        ->assertJsonPath('data.scope', 'company')
         ->assertJsonStructure([
             'data' => [
+                'scope',
                 'active_employees',
+                'attendance_today_rate',
                 'pending_leave_requests',
+                'new_hires_month',
                 'open_payroll_runs',
                 'unread_notifications',
+                'attendance_last_7_days',
+                'employees_by_status',
+                'employees_by_department',
+                'recent_hires',
+                'pending_actions',
+                'upcoming',
+                'recent_activity',
+            ],
+        ])
+        ->assertJsonPath('data.active_employees', 2)
+        ->assertJsonPath('data.new_hires_month', 1)
+        ->assertJsonPath('data.unread_notifications', 1)
+        ->assertJsonPath('data.attendance_today_rate', 0.5);
+
+    expect(count($this->actingAs($user)->withHeaders(spaJsonHeaders())
+        ->getJson('/api/dashboard/summary')
+        ->json('data.attendance_last_7_days')))->toBe(7);
+});
+
+test('dashboard summary returns self scope without company aggregates', function () {
+    $company = Company::factory()->create();
+    $employee = Employee::factory()->create([
+        'company_id' => $company->id,
+        'status' => 'active',
+    ]);
+    // Another employee must not leak into self dashboard aggregates.
+    Employee::factory()->create([
+        'company_id' => $company->id,
+        'status' => 'active',
+    ]);
+
+    $user = actingUser(['can_view_own_notifications', 'can_view_attendance'], $employee, 'dash_emp');
+
+    AttendanceRecord::factory()->create([
+        'company_id' => $company->id,
+        'employee_id' => $employee->id,
+        'work_date' => now()->toDateString(),
+        'check_in_at' => now()->setTime(8, 0),
+    ]);
+
+    $this->actingAs($user)->withHeaders(spaJsonHeaders())
+        ->getJson('/api/dashboard/summary')
+        ->assertOk()
+        ->assertJsonPath('data.scope', 'self')
+        ->assertJsonPath('data.employee.id', $employee->id)
+        ->assertJsonPath('data.checked_in_today', true)
+        ->assertJsonMissingPath('data.active_employees')
+        ->assertJsonMissingPath('data.recent_hires')
+        ->assertJsonStructure([
+            'data' => [
+                'scope',
+                'employee',
+                'unread_notifications',
+                'today_attendance',
+                'checked_in_today',
+                'pending_leave_requests',
+                'leave_balances',
+                'my_attendance_last_7_days',
+                'upcoming',
+                'pending_actions',
+                'recent_activity',
             ],
         ]);
+
+    expect(count($this->actingAs($user)->withHeaders(spaJsonHeaders())
+        ->getJson('/api/dashboard/summary')
+        ->json('data.my_attendance_last_7_days')))->toBe(7);
 });

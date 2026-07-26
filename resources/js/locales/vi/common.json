@@ -62,5 +62,12 @@
         "time": "Giờ",
         "done": "Xong",
         "clear": "Xóa"
+    },
+    "avatar": {
+        "upload": "Tải ảnh lên",
+        "remove": "Xóa ảnh",
+        "toast_updated": "Đã cập nhật ảnh đại diện",
+        "toast_removed": "Đã xóa ảnh đại diện",
+        "toast_failed": "Không thể cập nhật ảnh đại diện"
     }
 }

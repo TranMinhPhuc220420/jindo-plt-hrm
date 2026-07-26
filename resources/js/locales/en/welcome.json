@@ -1,0 +1,12 @@
+{
+    "head_title": "Welcome",
+    "headline": "People operations, clearly organized",
+    "tagline": "Human resource management for {{company}}.",
+    "sign_in": "Sign in",
+    "go_dashboard": "Go to dashboard",
+    "log_in": "Log in",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "copyright": "© {{year}} {{company}}",
+    "hero_alt": "Team collaborating in a modern workplace"
+}

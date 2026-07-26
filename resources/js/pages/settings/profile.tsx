@@ -1,13 +1,15 @@
-import { Form, Head, usePage } from '@inertiajs/react';
+import { Form, Head, router, usePage } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
-import DeleteUser from '@/components/delete-user';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import { AvatarEditor } from '@/components/shared/avatar-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import * as authApi from '@/lib/api/modules/auth';
+import { useAuth } from '@/lib/auth/auth-context';
 import i18n from '@/lib/i18n';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
@@ -26,6 +28,22 @@ export default function Profile({
 }) {
     const { t } = useTranslation(['settings', 'common']);
     const { auth } = usePage<PageProps>().props;
+    const { employeeId, setSession, user: sessionUser } = useAuth();
+
+    const avatarUrl =
+        sessionUser?.avatar ?? auth.user.avatar ?? null;
+
+    async function handleAvatarUpload(file: File) {
+        const payload = await authApi.uploadMyAvatar(file);
+        setSession(payload);
+        router.reload({ only: ['auth'] });
+    }
+
+    async function handleAvatarRemove() {
+        const payload = await authApi.deleteMyAvatar();
+        setSession(payload);
+        router.reload({ only: ['auth'] });
+    }
 
     return (
         <>
@@ -39,6 +57,28 @@ export default function Profile({
                     title={t('profile.title')}
                     description={t('profile.settings_description')}
                 />
+
+                <div className="space-y-3 border-b border-border pb-6">
+                    <div>
+                        <h2 className="text-sm font-semibold">
+                            {t('profile.avatar_title')}
+                        </h2>
+                        <p className="text-sm text-muted-foreground">
+                            {employeeId
+                                ? t('profile.avatar_description')
+                                : t('profile.avatar_no_employee')}
+                        </p>
+                    </div>
+
+                    {employeeId ? (
+                        <AvatarEditor
+                            name={auth.user.name}
+                            avatarUrl={avatarUrl}
+                            onUpload={handleAvatarUpload}
+                            onRemove={handleAvatarRemove}
+                        />
+                    ) : null}
+                </div>
 
                 <Form
                     {...ProfileController.update.form()}
@@ -136,8 +176,6 @@ export default function Profile({
                     )}
                 </Form>
             </div>
-
-            <DeleteUser />
         </>
     );
 }

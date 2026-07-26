@@ -227,6 +227,7 @@ class AuthService
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'avatar' => $user->employee?->avatarUrl(),
             ],
             'permissions' => $user->permissionKeys(),
             'employee_id' => $user->employee?->id,

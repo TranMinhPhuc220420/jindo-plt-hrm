@@ -21,6 +21,7 @@ import enReports from '@/locales/en/reports.json';
 import enRoles from '@/locales/en/roles.json';
 import enSettings from '@/locales/en/settings.json';
 import enShifts from '@/locales/en/shifts.json';
+import enWelcome from '@/locales/en/welcome.json';
 import viAssets from '@/locales/vi/assets.json';
 import viAttendance from '@/locales/vi/attendance.json';
 import viAudit from '@/locales/vi/audit.json';
@@ -42,6 +43,7 @@ import viReports from '@/locales/vi/reports.json';
 import viRoles from '@/locales/vi/roles.json';
 import viSettings from '@/locales/vi/settings.json';
 import viShifts from '@/locales/vi/shifts.json';
+import viWelcome from '@/locales/vi/welcome.json';
 
 export const SUPPORTED_LOCALES = ['vi', 'en'] as const;
 export type AppLocale = (typeof SUPPORTED_LOCALES)[number];
@@ -70,6 +72,7 @@ const resources = {
         reports: viReports,
         performance: viPerformance,
         dashboard: viDashboard,
+        welcome: viWelcome,
     },
     en: {
         common: enCommon,
@@ -93,6 +96,7 @@ const resources = {
         reports: enReports,
         performance: enPerformance,
         dashboard: enDashboard,
+        welcome: enWelcome,
     },
 };
 
@@ -123,6 +127,7 @@ void i18n.use(initReactI18next).init({
         'reports',
         'performance',
         'dashboard',
+        'welcome',
     ],
     interpolation: {
         escapeValue: false,

@@ -1,9 +1,10 @@
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { useCallback, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
+import { AvatarEditor } from '@/components/shared/avatar-editor';
 import { ErrorState, LoadingState } from '@/components/shared/async-state';
 import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
@@ -24,7 +25,7 @@ type Props = {
 
 export default function EmployeeShowPage({ id }: Props) {
     const { t } = useTranslation(['employees', 'common']);
-    const { can } = useAuth();
+    const { can, employeeId, refreshMe } = useAuth();
     const [employee, setEmployee] = useState<Employee | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -283,6 +284,42 @@ export default function EmployeeShowPage({ id }: Props) {
 
             {!loading && !error && employee && (
                 <div className="space-y-8">
+                    {(can('can_update_employee') ||
+                        employeeId === employee.id) && (
+                        <div className="grid max-w-xl gap-3 border-b border-border pb-6">
+                            <h3 className="text-sm font-semibold">
+                                {t('show.section_avatar')}
+                            </h3>
+                            <AvatarEditor
+                                name={employee.full_name}
+                                avatarUrl={employee.avatar_url}
+                                onUpload={async (file) => {
+                                    const updated =
+                                        await employeeApi.uploadEmployeeAvatar(
+                                            id,
+                                            file,
+                                        );
+                                    setEmployee(updated);
+                                    if (employeeId === employee.id) {
+                                        await refreshMe();
+                                        router.reload({ only: ['auth'] });
+                                    }
+                                }}
+                                onRemove={async () => {
+                                    const updated =
+                                        await employeeApi.deleteEmployeeAvatar(
+                                            id,
+                                        );
+                                    setEmployee(updated);
+                                    if (employeeId === employee.id) {
+                                        await refreshMe();
+                                        router.reload({ only: ['auth'] });
+                                    }
+                                }}
+                            />
+                        </div>
+                    )}
+
                     <PermissionGate permission="can_update_employee">
                         <form
                             onSubmit={handleSaveProfile}

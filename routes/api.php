@@ -6,12 +6,14 @@ use App\Http\Controllers\Api\Attendance\AttendanceRecordController;
 use App\Http\Controllers\Api\Attendance\AttendanceSummaryController;
 use App\Http\Controllers\Api\Audit\AuditLogController;
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\Auth\MeAvatarController;
 use App\Http\Controllers\Api\Auth\MeController;
 use App\Http\Controllers\Api\Auth\MeLocaleController;
 use App\Http\Controllers\Api\Authorization\PermissionController;
 use App\Http\Controllers\Api\Authorization\RoleController;
 use App\Http\Controllers\Api\Authorization\UserRoleController;
 use App\Http\Controllers\Api\Document\DocumentController;
+use App\Http\Controllers\Api\Employee\EmployeeAvatarController;
 use App\Http\Controllers\Api\Employee\EmployeeContractController;
 use App\Http\Controllers\Api\Employee\EmployeeController;
 use App\Http\Controllers\Api\Employee\EmployeeEducationController;
@@ -102,6 +104,14 @@ Route::put('/me/locale', MeLocaleController::class)
     ->middleware('auth:sanctum')
     ->name('api.me.locale');
 
+Route::post('/me/avatar', [MeAvatarController::class, 'store'])
+    ->middleware('auth:sanctum')
+    ->name('api.me.avatar.store');
+
+Route::delete('/me/avatar', [MeAvatarController::class, 'destroy'])
+    ->middleware('auth:sanctum')
+    ->name('api.me.avatar.destroy');
+
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/permissions', [PermissionController::class, 'index'])
         ->name('api.permissions.index');
@@ -165,6 +175,11 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->name('api.employees.status');
     Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])
         ->name('api.employees.destroy');
+
+    Route::post('/employees/{employee}/avatar', [EmployeeAvatarController::class, 'store'])
+        ->name('api.employees.avatar.store');
+    Route::delete('/employees/{employee}/avatar', [EmployeeAvatarController::class, 'destroy'])
+        ->name('api.employees.avatar.destroy');
 
     Route::get('/employees/{employee}/emergency-contacts', [EmployeeEmergencyContactController::class, 'index'])
         ->name('api.employees.emergency-contacts.index');

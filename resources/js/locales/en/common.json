@@ -62,5 +62,12 @@
         "time": "Time",
         "done": "Done",
         "clear": "Clear"
+    },
+    "avatar": {
+        "upload": "Upload photo",
+        "remove": "Remove",
+        "toast_updated": "Avatar updated",
+        "toast_removed": "Avatar removed",
+        "toast_failed": "Could not update avatar"
     }
 }

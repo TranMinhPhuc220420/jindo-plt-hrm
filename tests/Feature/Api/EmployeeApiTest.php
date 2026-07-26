@@ -8,7 +8,9 @@ use App\Models\Department;
 use App\Models\Employee;
 use App\Models\User;
 use App\Services\Employee\EmployeeAccountService;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 function seedEmployeeAuth(): void
 {
@@ -290,4 +292,143 @@ test('password update requires linked user and can_update_employee', function ()
         ])
         ->assertStatus(422)
         ->assertJsonPath('error_code', 'EMPLOYEE_NO_USER_ACCOUNT');
+});
+
+test('hr can upload replace and delete employee avatar', function () {
+    Storage::fake('public');
+    $company = Company::factory()->create();
+    $hr = employeeUser(['can_view_employee', 'can_update_employee']);
+    $employee = Employee::factory()->create([
+        'company_id' => $company->id,
+        'status' => 'active',
+    ]);
+
+    $upload = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->post("/api/employees/{$employee->id}/avatar", [
+            'avatar' => UploadedFile::fake()->image('photo.jpg', 200, 200),
+        ])
+        ->assertOk()
+        ->assertJsonPath('success', true);
+
+    $path = $employee->fresh()->avatar_path;
+    expect($path)->not->toBeNull();
+    Storage::disk('public')->assertExists($path);
+    expect($upload->json('data.avatar_url'))->not->toBeNull();
+    expect(AuditLog::query()->where('action', 'employee.avatar_updated')->count())->toBe(1);
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->post("/api/employees/{$employee->id}/avatar", [
+            'avatar' => UploadedFile::fake()->image('photo2.png', 180, 180),
+        ])
+        ->assertOk();
+
+    Storage::disk('public')->assertMissing($path);
+    $replacement = $employee->fresh()->avatar_path;
+    expect($replacement)->not->toBeNull()
+        ->and($replacement)->not->toBe($path);
+    Storage::disk('public')->assertExists($replacement);
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->deleteJson("/api/employees/{$employee->id}/avatar")
+        ->assertOk()
+        ->assertJsonPath('data.avatar_url', null);
+
+    expect($employee->fresh()->avatar_path)->toBeNull();
+    Storage::disk('public')->assertMissing($replacement);
+    expect(AuditLog::query()->where('action', 'employee.avatar_deleted')->count())->toBe(1);
+});
+
+test('employee can upload own avatar without can_update_employee', function () {
+    Storage::fake('public');
+    $company = Company::factory()->create();
+    $user = employeeUser([]);
+    $employee = Employee::factory()->create([
+        'company_id' => $company->id,
+        'user_id' => $user->id,
+        'status' => 'active',
+    ]);
+
+    $this->actingAs($user->fresh('roles.permissions'))
+        ->withHeaders(spaJsonHeaders())
+        ->post("/api/employees/{$employee->id}/avatar", [
+            'avatar' => UploadedFile::fake()->image('me.webp', 120, 120),
+        ])
+        ->assertOk()
+        ->assertJsonPath('success', true);
+
+    $this->actingAs($user->fresh(['roles.permissions', 'employee']))
+        ->withHeaders(spaJsonHeaders())
+        ->getJson('/api/me')
+        ->assertOk()
+        ->assertJsonPath('data.employee_id', $employee->id);
+
+    expect($this->actingAs($user->fresh(['roles.permissions', 'employee']))
+        ->withHeaders(spaJsonHeaders())
+        ->getJson('/api/me')
+        ->json('data.user.avatar'))->not->toBeNull();
+});
+
+test('cannot upload another employees avatar without permission', function () {
+    Storage::fake('public');
+    $company = Company::factory()->create();
+    $user = employeeUser([]);
+    Employee::factory()->create([
+        'company_id' => $company->id,
+        'user_id' => $user->id,
+        'status' => 'active',
+    ]);
+    $other = Employee::factory()->create([
+        'company_id' => $company->id,
+        'status' => 'active',
+    ]);
+
+    $this->actingAs($user->fresh('roles.permissions'))
+        ->withHeaders(spaJsonHeaders())
+        ->post("/api/employees/{$other->id}/avatar", [
+            'avatar' => UploadedFile::fake()->image('other.jpg', 100, 100),
+        ])
+        ->assertForbidden();
+});
+
+test('me avatar requires linked employee', function () {
+    Storage::fake('public');
+    Company::factory()->create();
+    $user = employeeUser([]);
+
+    $this->actingAs($user)
+        ->withHeaders(spaJsonHeaders())
+        ->post('/api/me/avatar', [
+            'avatar' => UploadedFile::fake()->image('me.jpg', 100, 100),
+        ])
+        ->assertStatus(422)
+        ->assertJsonPath('error_code', 'EMPLOYEE_NOT_LINKED');
+});
+
+test('me avatar upload and delete sync auth payload', function () {
+    Storage::fake('public');
+    $company = Company::factory()->create();
+    $user = employeeUser([]);
+    Employee::factory()->create([
+        'company_id' => $company->id,
+        'user_id' => $user->id,
+        'status' => 'active',
+    ]);
+
+    $upload = $this->actingAs($user->fresh(['roles.permissions', 'employee']))
+        ->withHeaders(spaJsonHeaders())
+        ->post('/api/me/avatar', [
+            'avatar' => UploadedFile::fake()->image('self.jpg', 140, 140),
+        ])
+        ->assertOk();
+
+    expect($upload->json('data.user.avatar'))->not->toBeNull();
+
+    $this->actingAs($user->fresh(['roles.permissions', 'employee']))
+        ->withHeaders(spaJsonHeaders())
+        ->deleteJson('/api/me/avatar')
+        ->assertOk()
+        ->assertJsonPath('data.user.avatar', null);
 });

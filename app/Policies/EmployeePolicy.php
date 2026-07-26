@@ -36,4 +36,15 @@ class EmployeePolicy
     {
         return $user->can('can_manage_employee_sensitive');
     }
+
+    public function updateAvatar(User $user, Employee $employee): bool
+    {
+        $user->loadMissing('employee');
+
+        if ($user->employee?->id === $employee->id) {
+            return true;
+        }
+
+        return $user->can('can_update_employee');
+    }
 }

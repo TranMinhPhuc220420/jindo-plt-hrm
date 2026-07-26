@@ -1,4 +1,5 @@
-import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '../client';
+import { apiDelete, apiGet, apiPatch, apiPost, apiPut, ensureCsrfCookie } from '../client';
+import { normalizeError } from '../errors';
 import type { PaginationMeta } from '../types';
 
 export type EmployeeStatus =
@@ -21,6 +22,7 @@ export type Employee = {
     manager_id: number | null;
     hired_at: string | null;
     status: EmployeeStatus;
+    avatar_url?: string | null;
     department?: { id: number; name: string; code: string } | null;
     position?: { id: number; name: string; code: string } | null;
     branch?: { id: number; name: string; code: string } | null;
@@ -210,6 +212,47 @@ export async function createContract(
         `/api/employees/${id}/contracts`,
         payload,
     );
+
+    return res.data;
+}
+
+export async function uploadEmployeeAvatar(
+    id: number,
+    file: File,
+): Promise<Employee> {
+    await ensureCsrfCookie();
+
+    const form = new FormData();
+    form.append('avatar', file);
+
+    const xsrf = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]*)/);
+    const headers: Record<string, string> = {
+        Accept: 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+    };
+
+    if (xsrf) {
+        headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf[1]);
+    }
+
+    const response = await fetch(`/api/employees/${id}/avatar`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers,
+        body: form,
+    });
+
+    const body = await response.json().catch(() => null);
+
+    if (!response.ok) {
+        throw normalizeError(response.status, body);
+    }
+
+    return (body as { data: Employee }).data;
+}
+
+export async function deleteEmployeeAvatar(id: number): Promise<Employee> {
+    const res = await apiDelete<Employee>(`/api/employees/${id}/avatar`);
 
     return res.data;
 }

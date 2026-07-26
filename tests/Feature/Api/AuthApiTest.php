@@ -26,7 +26,7 @@ test('users can login via api and fetch me', function () {
         ->assertJsonStructure([
             'success',
             'data' => [
-                'user' => ['id', 'name', 'email'],
+                'user' => ['id', 'name', 'email', 'avatar'],
                 'permissions',
                 'employee_id',
                 'two_factor_required',

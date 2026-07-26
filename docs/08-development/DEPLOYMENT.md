@@ -57,6 +57,7 @@ Align auth mode with [AUTHENTICATION.md](../01-architecture/AUTHENTICATION.md).
 3. Install PHP/Node deps (CI-built artifact preferred)
 4. Build frontend assets (vite build)
 5. Run php artisan migrate --force
+5b. Ensure `php artisan storage:link` exists (avatars on public disk)
 6. Cache config/routes/views as appropriate
 7. Restart PHP-FPM / Octane / container
 8. Restart queue workers (restart signal)
@@ -92,7 +93,8 @@ Queues used: `default`, `notifications`, `payroll`, `exports` (see [QUEUES.md](.
 ## File Storage
 
 - Private disk for employee/company documents
-- Ensure web server cannot serve storage raw without auth
+- Public disk for employee avatars (`storage/app/public` → run `php artisan storage:link` once per environment)
+- Ensure web server cannot serve private storage raw without auth
 - Object storage credentials via env
 
 ---

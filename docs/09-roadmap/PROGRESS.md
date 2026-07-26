@@ -39,7 +39,7 @@
 | Field | Value |
 |-------|--------|
 | **Current phase** | ∞ Future |
-| **Current step** | `∞.sanctum-prod-session` |
+| **Current step** | `∞.disable-self-delete-account` |
 | **Overall status** | Done |
 | **Last updated** | 2026-07-26 |
 | **Last updated by** | agent |
@@ -1996,6 +1996,135 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 - Fix: always merge APP_URL host; set APP_URL + clear config cache on prod
 ```
 
+### ∞.richer-dashboard — Stitch-aligned richer dashboard
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | [REPORT_API.md](../06-api/REPORT_API.md), [DESIGN_SYSTEM.md](../07-uiux/DESIGN_SYSTEM.md) |
+
+- [x] Expand `GET /api/dashboard/summary` (KPIs, series, lists)
+- [x] Frontend: Recharts + widgets (attendance, headcount, pending, upcoming, hires, activity)
+- [x] i18n en/vi + types
+- [x] ReportApiTest + types:check green
+
+**Notes:**
+
+```
+- DashboardService: attendance rate, 7-day series, status/dept breakdowns, recent hires,
+  pending actions, upcoming holidays/leave, notification activity
+- FE: recharts BarChart + PieChart; components under pages/dashboard/
+- ReportApiTest + InsightApiTest dashboard keys; types:check clean
+```
+
+### ∞.dashboard-role-views — Company vs employee dashboard
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | [REPORT_API.md](../06-api/REPORT_API.md) |
+
+- [x] `scope: company|self` on dashboard summary (`can_view_employee_reports` gate)
+- [x] Self view: own attendance, leave balances, upcoming, activity
+- [x] FE branch + i18n; tests green
+
+**Notes:**
+
+```
+- Gate: can_view_employee_reports → company overview; else → self
+- Self: today punch, leave balances, 7-day personal chart, own upcoming/actions
+- ReportApiTest company + self; InsightApiTest; types:check clean
+```
+
+### ∞.branding-plt-hrm — Product brand HRM + PLT Solutions
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | — |
+
+- [x] App logo two-line brand + HR monogram icon
+- [x] Auth layouts + welcome landing rebranded
+- [x] Remove starter-kit header links; APP_NAME / composer defaults
+- [x] types:check clean
+
+**Notes:**
+
+```
+- Product HRM + company PLT Solutions (lib/brand.ts); APP_NAME=HRM defaults
+- Welcome landing simplified; auth layouts show brand; starter-kit header links removed
+- composer: plt-solutions/jindo-plt-hrm; types:check clean
+```
+
+### ∞.employee-avatar — Employee avatar upload & display
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | [EMPLOYEE_API.md](../06-api/EMPLOYEE_API.md), [DEPLOYMENT.md](../08-development/DEPLOYMENT.md) |
+
+- [x] `employees.avatar_path` + public-disk storage service
+- [x] POST/DELETE `/api/employees/{id}/avatar` and `/api/me/avatar`
+- [x] Expose `avatar_url` / auth `avatar`; Settings + employee list/show UI
+- [x] Feature tests + `storage:link` note
+
+**Notes:**
+
+```
+- Employee source of truth; auth.user.avatar from linked employee
+- Public disk opaque paths; self or can_update_employee
+- EmployeeApiTest avatar cases + AuthApiTest structure; types:check clean
+```
+
+### ∞.welcome-landing — Full-bleed welcome hero
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | — |
+
+- [x] Local hero image at `public/images/welcome-hero.jpg`
+- [x] Full-bleed welcome page with brand + CTA + scrim
+- [x] en/vi `welcome` i18n namespace
+- [x] types:check clean
+
+**Notes:**
+
+```
+- Unsplash workplace photo (photo-1522071820081) stored locally; no CDN hotlink
+- Single-composition login gate; LanguageSwitcher on hero header
+```
+
+### ∞.disable-self-delete-account — No self-service account deletion
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | — |
+
+- [x] Remove Delete account UI from Settings → Profile
+- [x] Remove `profile.destroy` self-delete endpoint
+- [x] Update ProfileUpdateTest; employee archive stays permission-gated
+
+**Notes:**
+
+```
+- Employees cannot delete their own login account (UI + route removed)
+- Employee archive remains behind can_change_employee_status (admin/HR)
+```
+
 ---
 
 ## Activity log
@@ -2004,6 +2133,17 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-07-26 | `∞.disable-self-delete-account` | Done: removed self-delete UI/route; ProfileUpdateTest green | agent |
+| 2026-07-26 | `∞.disable-self-delete-account` | Started: block self-service account deletion | agent |
+| 2026-07-26 | `∞.employee-avatar` | Done: avatar upload/display API + UI; tests + types green | agent |
+| 2026-07-26 | `∞.welcome-landing` | Done: full-bleed welcome hero + i18n; types:check clean | agent |
+| 2026-07-26 | `∞.employee-avatar` | Started: employee avatar upload & display | agent |
+| 2026-07-26 | `∞.branding-plt-hrm` | Done: HRM + PLT Solutions brand; types:check clean | agent |
+| 2026-07-26 | `∞.branding-plt-hrm` | Started: rebrand Laravel Starter Kit → HRM + PLT Solutions | agent |
+| 2026-07-26 | `∞.dashboard-role-views` | Done: company vs self dashboard scopes; tests + types green | agent |
+| 2026-07-26 | `∞.dashboard-role-views` | Started: company vs employee dashboard views | agent |
+| 2026-07-26 | `∞.richer-dashboard` | Done: expanded summary API + Stitch charts/widgets; tests + types green | agent |
+| 2026-07-26 | `∞.richer-dashboard` | Started: Stitch-aligned richer dashboard | agent |
 | 2026-07-26 | `∞.sanctum-prod-session` | Done: merge APP_URL into Sanctum stateful; AuthApiTest green | agent |
 | 2026-07-26 | `∞.sanctum-prod-session` | Started: fix prod login Session store not set | agent |
 | 2026-07-19 | `∞.i18n-leave-types` | Leave types: localize by code on request form/list/balances; shared leave-labels helper | agent |

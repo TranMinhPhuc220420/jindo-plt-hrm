@@ -97,8 +97,21 @@ test('insight exit criteria: cycle, inbox, export, dashboard, audit', function (
         ->getJson('/api/dashboard/summary')
         ->assertOk()
         ->assertJsonStructure(['data' => [
-            'active_employees', 'pending_leave_requests', 'open_payroll_runs', 'unread_notifications',
-        ]]);
+            'scope',
+            'active_employees',
+            'attendance_today_rate',
+            'pending_leave_requests',
+            'new_hires_month',
+            'open_payroll_runs',
+            'unread_notifications',
+            'attendance_last_7_days',
+            'employees_by_status',
+            'recent_hires',
+            'pending_actions',
+            'upcoming',
+            'recent_activity',
+        ]])
+        ->assertJsonPath('data.scope', 'company');
 
     // --- Audit visibility for critical actions ---
     $this->actingAs($admin)->withHeaders(spaJsonHeaders())

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Employee extends Model
 {
@@ -41,6 +42,7 @@ class Employee extends Model
         'user_id',
         'hired_at',
         'status',
+        'avatar_path',
     ];
 
     /**
@@ -195,5 +197,14 @@ class Employee extends Model
     public function attendanceCorrections(): HasMany
     {
         return $this->hasMany(AttendanceCorrection::class);
+    }
+
+    public function avatarUrl(): ?string
+    {
+        if ($this->avatar_path === null || $this->avatar_path === '') {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->avatar_path);
     }
 }

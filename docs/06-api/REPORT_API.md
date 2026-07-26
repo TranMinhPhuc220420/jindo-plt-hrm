@@ -115,19 +115,106 @@ Large result sets should paginate or force export.
 
 `GET /api/dashboard/summary`
 
-Supports Stitch Overview KPIs (illustrative):
+Authenticated home dashboard. Scope depends on permissions:
+
+| Gate | `scope` | Meaning |
+|------|---------|---------|
+| Has `can_view_employee_reports` | `company` | Admin / HR / Manager company overview |
+| Otherwise | `self` | Employee personal dashboard only |
+
+Does not include payroll money totals. No separate report permission is required beyond the gate above.
+
+### Company scope (`scope: "company"`)
 
 ```json
 {
   "success": true,
   "data": {
-    "total_employees": 1248,
-    "attendance_today_rate": 0.98,
-    "pending_requests": 12,
-    "new_hires_month": 24
+    "scope": "company",
+    "active_employees": 42,
+    "attendance_today_rate": 0.95,
+    "pending_leave_requests": 3,
+    "new_hires_month": 2,
+    "open_payroll_runs": 1,
+    "unread_notifications": 4,
+    "attendance_last_7_days": [
+      { "date": "2026-07-20", "label": "Mon", "present": 40, "expected": 42, "rate": 0.9524 }
+    ],
+    "employees_by_status": [
+      { "status": "active", "count": 42 }
+    ],
+    "employees_by_department": [
+      { "department_id": 1, "name": "Engineering", "count": 20 }
+    ],
+    "recent_hires": [],
+    "pending_actions": [
+      { "key": "pending_leave", "count": 3, "href": "/leave" }
+    ],
+    "upcoming": [
+      { "kind": "holiday", "date": "2026-07-28", "title": "Company Day" }
+    ],
+    "recent_activity": []
   }
 }
 ```
+
+### Self scope (`scope: "self"`)
+
+```json
+{
+  "success": true,
+  "data": {
+    "scope": "self",
+    "employee": {
+      "id": 3,
+      "code": "E-0003",
+      "full_name": "Jane Doe",
+      "department_name": "Engineering",
+      "status": "active"
+    },
+    "unread_notifications": 2,
+    "today_attendance": {
+      "id": 10,
+      "work_date": "2026-07-26",
+      "check_in_at": "2026-07-26T01:00:00+00:00",
+      "check_out_at": null,
+      "worked_minutes": null,
+      "status": "open"
+    },
+    "checked_in_today": true,
+    "pending_leave_requests": 1,
+    "leave_balances": [
+      {
+        "leave_type_id": 1,
+        "leave_type_code": "AL",
+        "leave_type_name": "Annual leave",
+        "remaining": 10.0,
+        "entitled": 12.0,
+        "used": 1.0,
+        "pending": 1.0
+      }
+    ],
+    "my_attendance_last_7_days": [
+      { "date": "2026-07-20", "label": "Mon", "present": 1, "worked_minutes": 480 }
+    ],
+    "upcoming": [
+      { "kind": "leave", "date": "2026-07-29", "title": "Annual leave" }
+    ],
+    "pending_actions": [
+      { "key": "my_pending_leave", "count": 1, "href": "/leave" }
+    ],
+    "recent_activity": []
+  }
+}
+```
+
+| Field | Notes |
+|-------|--------|
+| `attendance_today_rate` | Company only — present today / active headcount |
+| `my_attendance_last_7_days` | Self only — personal check-in presence |
+| `leave_balances` | Self only — current year period |
+| `upcoming` | Company: all holidays + approved leave; Self: holidays + own leave |
+| `recent_activity` | Actor’s latest notifications |
 
 ---
 

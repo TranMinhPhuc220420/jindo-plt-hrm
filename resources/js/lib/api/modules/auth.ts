@@ -1,4 +1,5 @@
-import { apiGet, apiPost, apiPut } from '../client';
+import { apiDelete, apiGet, apiPost, apiPut, ensureCsrfCookie } from '../client';
+import { normalizeError } from '../errors';
 import type { AuthPayload, LoginPayload } from '../types';
 
 export type LoginInput = {
@@ -60,6 +61,44 @@ export async function challengeTwoFactor(input: {
         '/api/auth/two-factor/challenge',
         input,
     );
+
+    return response.data;
+}
+
+export async function uploadMyAvatar(file: File): Promise<AuthPayload> {
+    await ensureCsrfCookie();
+
+    const form = new FormData();
+    form.append('avatar', file);
+
+    const xsrf = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]*)/);
+    const headers: Record<string, string> = {
+        Accept: 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+    };
+
+    if (xsrf) {
+        headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf[1]);
+    }
+
+    const response = await fetch('/api/me/avatar', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers,
+        body: form,
+    });
+
+    const body = await response.json().catch(() => null);
+
+    if (!response.ok) {
+        throw normalizeError(response.status, body);
+    }
+
+    return (body as { data: AuthPayload }).data;
+}
+
+export async function deleteMyAvatar(): Promise<AuthPayload> {
+    const response = await apiDelete<AuthPayload>('/api/me/avatar');
 
     return response.data;
 }

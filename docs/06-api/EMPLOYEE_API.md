@@ -49,6 +49,12 @@
 | `GET` | `/api/employees/{id}/tax-profile` | Tax (sensitive) |
 | `PUT` | `/api/employees/{id}/tax-profile` | Update tax (sensitive) |
 | `PUT` | `/api/employees/{id}/password` | Set or reset linked user password |
+| `POST` | `/api/employees/{id}/avatar` | Upload / replace avatar (multipart) |
+| `DELETE` | `/api/employees/{id}/avatar` | Remove avatar |
+| `POST` | `/api/me/avatar` | Self-service upload (linked employee required) |
+| `DELETE` | `/api/me/avatar` | Self-service remove |
+
+Avatar authorization: linked employee (self) **or** `can_update_employee`. Stored on the `public` disk; run `php artisan storage:link` so `/storage/...` URLs resolve.
 
 ---
 
@@ -139,6 +145,20 @@ Never returns the password value. Audited as `employee.password_reset_to_default
 
 ---
 
+## Avatar
+
+`POST /api/employees/{id}/avatar` — multipart field `avatar` (JPEG/PNG/WebP, max 2MB).  
+`DELETE /api/employees/{id}/avatar`
+
+Self-service (requires linked employee, else `422` + `EMPLOYEE_NOT_LINKED`):
+
+- `POST /api/me/avatar`
+- `DELETE /api/me/avatar`
+
+Response includes `avatar_url`. `/api/me` and Inertia `auth.user` expose the same URL as `user.avatar`. Audited as `employee.avatar_updated` / `employee.avatar_deleted`.
+
+---
+
 ## Sensitive Fields
 
 Bank/tax/insurance omitted from default show unless permitted.  
@@ -154,6 +174,8 @@ Salary belongs to Payroll API — do not embed payslip math here.
 | `EMPLOYEE_INVALID_STATUS_TRANSITION` | Illegal status change |
 | `EMPLOYEE_NO_USER_ACCOUNT` | Password change without linked user |
 | `EMPLOYEE_DEFAULT_PASSWORD_MISSING` | Default password env not configured |
+| `EMPLOYEE_NOT_LINKED` | Self avatar without linked employee |
+| `AVATAR_INVALID_TYPE` / `AVATAR_TOO_LARGE` | Invalid avatar file |
 | `COMPANY_SCOPE_MISMATCH` | Cross-company reference |
 
 ---

@@ -1,35 +1,27 @@
 import { Head } from '@inertiajs/react';
-import { CalendarOff, Users, Wallet, Bell } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ErrorState, LoadingState } from '@/components/shared/async-state';
 import { ApiError } from '@/lib/api/errors';
 import * as dashboardApi from '@/lib/api/modules/dashboard';
 import type { DashboardSummary } from '@/lib/api/modules/dashboard';
+import { useAuth } from '@/lib/auth/auth-context';
 import i18n from '@/lib/i18n';
 import { dashboard } from '@/routes';
-
-const KPI_META: Array<{
-    key: keyof DashboardSummary;
-    label: string;
-    icon: typeof Users;
-}> = [
-    { key: 'active_employees', label: 'kpi_active_employees', icon: Users },
-    {
-        key: 'pending_leave_requests',
-        label: 'kpi_pending_leave',
-        icon: CalendarOff,
-    },
-    { key: 'open_payroll_runs', label: 'kpi_open_payroll', icon: Wallet },
-    {
-        key: 'unread_notifications',
-        label: 'kpi_unread_notifications',
-        icon: Bell,
-    },
-];
+import { AttendanceChart } from './dashboard/attendance-chart';
+import { HeadcountChart } from './dashboard/headcount-chart';
+import { KpiCards } from './dashboard/kpi-cards';
+import { LeaveBalancesPanel } from './dashboard/leave-balances-panel';
+import { MyAttendanceChart } from './dashboard/my-attendance-chart';
+import { PendingActions } from './dashboard/pending-actions';
+import { RecentActivity } from './dashboard/recent-activity';
+import { RecentHires } from './dashboard/recent-hires';
+import { SelfKpiCards } from './dashboard/self-kpi-cards';
+import { UpcomingPanel } from './dashboard/upcoming-panel';
 
 export default function Dashboard() {
-    const { t } = useTranslation(['dashboard', 'nav']);
+    const { t } = useTranslation(['dashboard', 'nav', 'common']);
+    const { user } = useAuth();
     const [summary, setSummary] = useState<DashboardSummary | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -65,40 +57,99 @@ export default function Dashboard() {
         };
     }, [t]);
 
+    const isSelf = summary?.scope === 'self';
+    const subtitle = isSelf ? t('self_subtitle') : t('subtitle');
+
     return (
         <>
             <Head title={t('title')} />
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4 md:p-6">
                 <div>
-                    <h1 className="text-xl font-semibold">{t('title')}</h1>
-                    <p className="text-sm text-muted-foreground">
-                        {t('description')}
+                    <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
+                        {user?.name
+                            ? t('welcome', { name: user.name })
+                            : t('welcome_fallback')}
+                    </h1>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        {subtitle}
                     </p>
+                    {summary?.scope === 'self' && summary.employee ? (
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            {summary.employee.code}
+                            {summary.employee.department_name
+                                ? ` · ${summary.employee.department_name}`
+                                : ''}
+                            {' · '}
+                            {t(`status_${summary.employee.status}`, {
+                                ns: 'common',
+                                defaultValue: summary.employee.status,
+                            })}
+                        </p>
+                    ) : null}
                 </div>
 
                 {loading ? (
                     <LoadingState label={t('loading')} />
                 ) : error ? (
                     <ErrorState message={error} />
-                ) : summary ? (
-                    <div className="grid auto-rows-min gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        {KPI_META.map(({ key, label, icon: Icon }) => (
-                            <div
-                                key={key}
-                                className="rounded-xl border border-border bg-card p-5 shadow-sm"
-                            >
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm text-muted-foreground">
-                                        {t(label)}
-                                    </span>
-                                    <Icon className="size-5 text-muted-foreground" />
+                ) : summary?.scope === 'company' ? (
+                    <>
+                        <KpiCards summary={summary} />
+
+                        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3">
+                            <div className="space-y-4 lg:col-span-2">
+                                <AttendanceChart
+                                    series={summary.attendance_last_7_days}
+                                />
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    <HeadcountChart
+                                        byStatus={summary.employees_by_status}
+                                        byDepartment={
+                                            summary.employees_by_department
+                                        }
+                                    />
+                                    <RecentHires hires={summary.recent_hires} />
                                 </div>
-                                <p className="mt-3 text-3xl font-semibold">
-                                    {summary[key]}
-                                </p>
                             </div>
-                        ))}
-                    </div>
+                            <div className="space-y-4">
+                                <PendingActions
+                                    actions={summary.pending_actions}
+                                />
+                                <UpcomingPanel items={summary.upcoming} />
+                                <RecentActivity
+                                    items={summary.recent_activity}
+                                />
+                            </div>
+                        </div>
+                    </>
+                ) : summary?.scope === 'self' ? (
+                    <>
+                        {!summary.employee ? (
+                            <ErrorState message={t('self_no_employee')} />
+                        ) : (
+                            <SelfKpiCards summary={summary} />
+                        )}
+
+                        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3">
+                            <div className="space-y-4 lg:col-span-2">
+                                <MyAttendanceChart
+                                    series={summary.my_attendance_last_7_days}
+                                />
+                                <LeaveBalancesPanel
+                                    balances={summary.leave_balances}
+                                />
+                            </div>
+                            <div className="space-y-4">
+                                <PendingActions
+                                    actions={summary.pending_actions}
+                                />
+                                <UpcomingPanel items={summary.upcoming} />
+                                <RecentActivity
+                                    items={summary.recent_activity}
+                                />
+                            </div>
+                        </div>
+                    </>
                 ) : null}
             </div>
         </>

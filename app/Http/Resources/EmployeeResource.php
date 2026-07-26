@@ -35,6 +35,7 @@ class EmployeeResource extends JsonResource
             'user_id' => $this->user_id,
             'hired_at' => $this->hired_at?->toDateString(),
             'status' => $this->status,
+            'avatar_url' => $this->avatarUrl(),
             'department' => $this->whenLoaded('department', fn () => $this->department ? [
                 'id' => $this->department->id,
                 'name' => $this->department->name,
