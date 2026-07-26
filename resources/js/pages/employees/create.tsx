@@ -151,7 +151,10 @@ export default function EmployeeCreatePage() {
                     departmentId={departmentId}
                     positionId={positionId}
                     disabled={saving}
-                    onChange={({ departmentId: nextDept, positionId: nextPos }) => {
+                    onChange={({
+                        departmentId: nextDept,
+                        positionId: nextPos,
+                    }) => {
                         setDepartmentId(nextDept);
                         setPositionId(nextPos);
                     }}

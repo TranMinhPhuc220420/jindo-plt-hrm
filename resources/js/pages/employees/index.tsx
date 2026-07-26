@@ -271,10 +271,7 @@ export default function EmployeesIndexPage() {
                             departmentId={form.departmentId}
                             positionId={form.positionId}
                             disabled={saving}
-                            onChange={({
-                                departmentId,
-                                positionId,
-                            }) =>
+                            onChange={({ departmentId, positionId }) =>
                                 setForm((prev) => ({
                                     ...prev,
                                     departmentId,

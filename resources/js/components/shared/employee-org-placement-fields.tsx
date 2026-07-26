@@ -11,10 +11,7 @@ type OrgOption = {
 type Props = {
     departmentId: string;
     positionId: string;
-    onChange: (next: {
-        departmentId: string;
-        positionId: string;
-    }) => void;
+    onChange: (next: { departmentId: string; positionId: string }) => void;
     disabled?: boolean;
     idPrefix?: string;
 };
