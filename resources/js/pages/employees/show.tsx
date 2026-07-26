@@ -6,6 +6,9 @@ import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
 import { ErrorState, LoadingState } from '@/components/shared/async-state';
 import { AvatarEditor } from '@/components/shared/avatar-editor';
+import EmployeeOrgPlacementFields, {
+    orgIdOrNull,
+} from '@/components/shared/employee-org-placement-fields';
 import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +36,8 @@ export default function EmployeeShowPage({ id }: Props) {
 
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
+    const [departmentId, setDepartmentId] = useState('');
+    const [positionId, setPositionId] = useState('');
     const [status, setStatus] = useState<EmployeeStatus>('active');
     const [statusReason, setStatusReason] = useState('');
 
@@ -60,6 +65,12 @@ export default function EmployeeShowPage({ id }: Props) {
             setEmployee(data);
             setPhone(data.phone ?? '');
             setEmail(data.email ?? '');
+            setDepartmentId(
+                data.department_id != null ? String(data.department_id) : '',
+            );
+            setPositionId(
+                data.position_id != null ? String(data.position_id) : '',
+            );
             setStatus(data.status);
 
             const emergency = await employeeApi.listEmergencyContacts(id);
@@ -118,8 +129,18 @@ export default function EmployeeShowPage({ id }: Props) {
             const updated = await employeeApi.updateEmployee(id, {
                 phone: phone || null,
                 email: email || null,
+                department_id: orgIdOrNull(departmentId),
+                position_id: orgIdOrNull(positionId),
             });
             setEmployee(updated);
+            setDepartmentId(
+                updated.department_id != null
+                    ? String(updated.department_id)
+                    : '',
+            );
+            setPositionId(
+                updated.position_id != null ? String(updated.position_id) : '',
+            );
             toast.success(t('show.toast_profile_updated'));
         } catch (err) {
             toast.error(
@@ -357,11 +378,41 @@ export default function EmployeeShowPage({ id }: Props) {
                                     />
                                 </div>
                             </div>
+                            <EmployeeOrgPlacementFields
+                                idPrefix="show"
+                                departmentId={departmentId}
+                                positionId={positionId}
+                                disabled={saving}
+                                onChange={({
+                                    departmentId: nextDept,
+                                    positionId: nextPos,
+                                }) => {
+                                    setDepartmentId(nextDept);
+                                    setPositionId(nextPos);
+                                }}
+                            />
                             <Button type="submit" disabled={saving} size="sm">
                                 {t('show.save_profile')}
                             </Button>
                         </form>
                     </PermissionGate>
+
+                    {!can('can_update_employee') && (
+                        <div className="grid max-w-xl gap-2 border-b border-border pb-6">
+                            <h3 className="text-sm font-semibold">
+                                {t('show.section_org')}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                                {t('placement.department')}:{' '}
+                                {employee.department?.name ??
+                                    t('placement.none')}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                                {t('placement.position')}:{' '}
+                                {employee.position?.name ?? t('placement.none')}
+                            </p>
+                        </div>
+                    )}
 
                     <PermissionGate permission="can_view_shifts">
                         <div className="grid max-w-xl gap-3 border-b border-border pb-6">

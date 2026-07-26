@@ -39,7 +39,7 @@
 | Field | Value |
 |-------|--------|
 | **Current phase** | ∞ Future |
-| **Current step** | `∞.production-seed` |
+| **Current step** | `∞.employee-org-placement` |
 | **Overall status** | Done |
 | **Last updated** | 2026-07-26 |
 | **Last updated by** | agent |
@@ -2217,6 +2217,28 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 - ProductionBootstrapSeederTest: missing admin throws; happy path + idempotent
 ```
 
+### ∞.employee-org-placement — Assign department & position on employees
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | [EMPLOYEE_API.md](../06-api/EMPLOYEE_API.md) |
+
+- [x] Shared `EmployeeOrgPlacementFields` from org tree
+- [x] Create page + list create dialog send `department_id` / `position_id`
+- [x] Show profile edit under `can_update_employee`
+- [x] i18n en/vi + PATCH API assertion
+
+**Notes:**
+
+```
+- Flat department + position selects via getOrganizationTree()
+- Read-only org names on show when lacking can_update_employee
+- EmployeeApiTest asserts create/PATCH department_id + position_id
+```
+
 ---
 
 ## Activity log
@@ -2225,6 +2247,8 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-07-26 | `∞.employee-org-placement` | Done: dept/position UI on create + show; EmployeeApiTest + types green | agent |
+| 2026-07-26 | `∞.employee-org-placement` | Started: department/position assignment UI on employee create + show | agent |
 | 2026-07-26 | `∞.production-seed` | Follow-up: Makefile `seed-local` / `seed-admin` targets | agent |
 | 2026-07-26 | `∞.production-seed` | Done: ProductionBootstrapSeeder + env admin/company; tests green | agent |
 | 2026-07-26 | `∞.production-seed` | Started: production bootstrap seeder (admin, roles, company, settings, shifts) | agent |

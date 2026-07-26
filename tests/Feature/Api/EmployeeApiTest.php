@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Models\Company;
 use App\Models\Department;
 use App\Models\Employee;
+use App\Models\Position;
 use App\Models\User;
 use App\Services\Employee\EmployeeAccountService;
 use Illuminate\Http\UploadedFile;
@@ -62,6 +63,11 @@ test('hr can create list filter and update employees', function () {
         'company_id' => $company->id,
         'branch_id' => $branch->id,
     ]);
+    $position = Position::factory()->create(['company_id' => $company->id]);
+    $otherDepartment = Department::factory()->create([
+        'company_id' => $company->id,
+        'branch_id' => $branch->id,
+    ]);
 
     $hr = employeeUser([
         'can_view_employee',
@@ -79,13 +85,16 @@ test('hr can create list filter and update employees', function () {
             'last_name' => 'Doe',
             'email' => 'jane@example.test',
             'department_id' => $department->id,
+            'position_id' => $position->id,
             'status' => 'probation',
         ]);
 
     $created->assertCreated()
         ->assertJsonPath('data.code', 'E-100')
         ->assertJsonPath('data.full_name', 'Jane Doe')
-        ->assertJsonPath('data.status', 'probation');
+        ->assertJsonPath('data.status', 'probation')
+        ->assertJsonPath('data.department_id', $department->id)
+        ->assertJsonPath('data.position_id', $position->id);
 
     $id = $created->json('data.id');
 
@@ -101,9 +110,13 @@ test('hr can create list filter and update employees', function () {
         ->withHeaders(spaJsonHeaders())
         ->patchJson("/api/employees/{$id}", [
             'phone' => '0900000000',
+            'department_id' => $otherDepartment->id,
+            'position_id' => $position->id,
         ])
         ->assertOk()
-        ->assertJsonPath('data.phone', '0900000000');
+        ->assertJsonPath('data.phone', '0900000000')
+        ->assertJsonPath('data.department_id', $otherDepartment->id)
+        ->assertJsonPath('data.position_id', $position->id);
 });
 
 test('duplicate employee code returns EMPLOYEE_CODE_DUPLICATE', function () {

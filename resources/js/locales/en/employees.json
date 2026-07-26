@@ -22,6 +22,13 @@
         "toast_success": "Employee created",
         "toast_error": "Could not create employee"
     },
+    "placement": {
+        "department": "Department",
+        "position": "Position",
+        "select_department": "No department",
+        "select_position": "No position",
+        "none": "—"
+    },
     "show": {
         "fallback_title": "Employee",
         "fallback_description": "Employee detail",
@@ -30,6 +37,7 @@
         "error_load": "Failed to load employee.",
         "section_profile": "Profile",
         "section_avatar": "Photo",
+        "section_org": "Organization",
         "save_profile": "Save profile",
         "toast_profile_updated": "Profile updated",
         "toast_update_failed": "Update failed",

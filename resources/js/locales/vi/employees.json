@@ -22,6 +22,13 @@
         "toast_success": "Đã tạo nhân viên",
         "toast_error": "Không thể tạo nhân viên"
     },
+    "placement": {
+        "department": "Phòng ban",
+        "position": "Vị trí",
+        "select_department": "Không chọn phòng ban",
+        "select_position": "Không chọn vị trí",
+        "none": "—"
+    },
     "show": {
         "fallback_title": "Nhân viên",
         "fallback_description": "Chi tiết nhân viên",
@@ -30,6 +37,7 @@
         "error_load": "Không tải được nhân viên.",
         "section_profile": "Hồ sơ",
         "section_avatar": "Ảnh",
+        "section_org": "Tổ chức",
         "save_profile": "Lưu hồ sơ",
         "toast_profile_updated": "Đã cập nhật hồ sơ",
         "toast_update_failed": "Cập nhật thất bại",

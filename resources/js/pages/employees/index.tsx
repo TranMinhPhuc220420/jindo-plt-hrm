@@ -10,6 +10,9 @@ import {
     LoadingState,
 } from '@/components/shared/async-state';
 import { DatePicker } from '@/components/shared/date-picker';
+import EmployeeOrgPlacementFields, {
+    orgIdOrNull,
+} from '@/components/shared/employee-org-placement-fields';
 import { PermissionGate } from '@/components/shared/permission-gate';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -39,6 +42,8 @@ function emptyCreateForm() {
         phone: '',
         status: 'probation',
         hiredAt: '',
+        departmentId: '',
+        positionId: '',
     };
 }
 
@@ -102,6 +107,8 @@ export default function EmployeesIndexPage() {
                 phone: form.phone || null,
                 status: form.status,
                 hired_at: form.hiredAt || null,
+                department_id: orgIdOrNull(form.departmentId),
+                position_id: orgIdOrNull(form.positionId),
             });
             toast.success(t('create.toast_success'));
             handleCreateOpenChange(false);
@@ -259,6 +266,22 @@ export default function EmployeesIndexPage() {
                                 }
                             />
                         </div>
+                        <EmployeeOrgPlacementFields
+                            idPrefix="dialog"
+                            departmentId={form.departmentId}
+                            positionId={form.positionId}
+                            disabled={saving}
+                            onChange={({
+                                departmentId,
+                                positionId,
+                            }) =>
+                                setForm((prev) => ({
+                                    ...prev,
+                                    departmentId,
+                                    positionId,
+                                }))
+                            }
+                        />
                         <DialogFooter>
                             <DialogClose asChild>
                                 <Button type="button" variant="secondary">

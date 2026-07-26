@@ -5,6 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
 import { DatePicker } from '@/components/shared/date-picker';
+import EmployeeOrgPlacementFields, {
+    orgIdOrNull,
+} from '@/components/shared/employee-org-placement-fields';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,6 +24,8 @@ export default function EmployeeCreatePage() {
     const [phone, setPhone] = useState('');
     const [status, setStatus] = useState('probation');
     const [hiredAt, setHiredAt] = useState('');
+    const [departmentId, setDepartmentId] = useState('');
+    const [positionId, setPositionId] = useState('');
 
     async function handleSubmit(event: FormEvent) {
         event.preventDefault();
@@ -35,6 +40,8 @@ export default function EmployeeCreatePage() {
                 phone: phone || null,
                 status,
                 hired_at: hiredAt || null,
+                department_id: orgIdOrNull(departmentId),
+                position_id: orgIdOrNull(positionId),
             });
             toast.success(t('create.toast_success'));
             router.visit(`/employees/${employee.id}`);
@@ -139,6 +146,16 @@ export default function EmployeeCreatePage() {
                         onChange={setHiredAt}
                     />
                 </div>
+                <EmployeeOrgPlacementFields
+                    idPrefix="create"
+                    departmentId={departmentId}
+                    positionId={positionId}
+                    disabled={saving}
+                    onChange={({ departmentId: nextDept, positionId: nextPos }) => {
+                        setDepartmentId(nextDept);
+                        setPositionId(nextPos);
+                    }}
+                />
                 <div className="flex gap-2">
                     <Button type="submit" disabled={saving}>
                         {t('create', { ns: 'common' })}
