@@ -30,7 +30,7 @@
         "employee": "Nhân viên",
         "shift": "Ca làm",
         "overtime_rules": "Làm thêm giờ",
-        "attendance": "Chấm công",
+        "attendance": "Điểm danh",
         "leave": "Nghỉ phép",
         "payroll": "Lương",
         "document": "Tài liệu",
@@ -122,13 +122,13 @@
             "updated": "Cập nhật quy tắc làm thêm giờ"
         },
         "attendance": {
-            "checked_in": "Chấm công vào",
-            "checked_out": "Chấm công ra",
-            "record_approved": "Duyệt bản ghi chấm công",
-            "period_locked": "Khóa kỳ chấm công",
-            "correction_requested": "Yêu cầu sửa chấm công",
-            "correction_approved": "Duyệt sửa chấm công",
-            "correction_rejected": "Từ chối sửa chấm công"
+            "checked_in": "Điểm danh vào",
+            "checked_out": "Điểm danh ra",
+            "record_approved": "Duyệt bản ghi điểm danh",
+            "period_locked": "Khóa kỳ điểm danh",
+            "correction_requested": "Yêu cầu sửa điểm danh",
+            "correction_approved": "Duyệt sửa điểm danh",
+            "correction_rejected": "Từ chối sửa điểm danh"
         },
         "leave": {
             "requested": "Xin nghỉ phép",
@@ -225,8 +225,8 @@
         "Shift": "Ca làm",
         "ShiftAssignment": "Phân ca",
         "OvertimeRule": "Quy tắc làm thêm giờ",
-        "AttendanceRecord": "Bản ghi chấm công",
-        "AttendanceCorrection": "Yêu cầu sửa chấm công",
+        "AttendanceRecord": "Bản ghi điểm danh",
+        "AttendanceCorrection": "Yêu cầu sửa điểm danh",
         "PayrollRun": "Kỳ lương",
         "EmployeeSalary": "Lương nhân viên",
         "Document": "Tài liệu",

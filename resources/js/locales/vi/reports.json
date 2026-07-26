@@ -18,7 +18,7 @@
     "export_ready": "Bản xuất đã sẵn sàng để tải.",
     "export_failed": "Xuất thất bại.",
     "type": {
-        "attendance": "Chấm công",
+        "attendance": "Điểm danh",
         "payroll": "Bảng lương",
         "leave": "Nghỉ phép",
         "employees": "Nhân viên",

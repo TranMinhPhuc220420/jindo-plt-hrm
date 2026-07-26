@@ -29,16 +29,16 @@ return [
     ],
     'attendance' => [
         'correction_requested' => [
-            'title' => 'Yêu cầu hiệu chỉnh chấm công',
-            'body' => 'Có yêu cầu hiệu chỉnh chấm công cần bạn xem xét.',
+            'title' => 'Yêu cầu hiệu chỉnh điểm danh',
+            'body' => 'Có yêu cầu hiệu chỉnh điểm danh cần bạn xem xét.',
         ],
         'correction_approved' => [
-            'title' => 'Hiệu chỉnh chấm công đã được duyệt',
-            'body' => 'Yêu cầu hiệu chỉnh chấm công của bạn đã được phê duyệt.',
+            'title' => 'Hiệu chỉnh điểm danh đã được duyệt',
+            'body' => 'Yêu cầu hiệu chỉnh điểm danh của bạn đã được phê duyệt.',
         ],
         'correction_rejected' => [
-            'title' => 'Hiệu chỉnh chấm công bị từ chối',
-            'body' => 'Yêu cầu hiệu chỉnh chấm công của bạn đã bị từ chối.',
+            'title' => 'Hiệu chỉnh điểm danh bị từ chối',
+            'body' => 'Yêu cầu hiệu chỉnh điểm danh của bạn đã bị từ chối.',
         ],
     ],
     'shift' => [

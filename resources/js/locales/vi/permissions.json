@@ -80,24 +80,24 @@
         "description": "Xem lịch làm việc của chính người đang đăng nhập."
     },
     "can_check_in_out": {
-        "name": "Chấm công vào/ra",
+        "name": "Điểm danh vào/ra",
         "description": "Ghi nhận giờ vào ca và ra ca của chính người đang đăng nhập."
     },
     "can_view_attendance": {
-        "name": "Xem chấm công",
-        "description": "Xem danh sách và tổng hợp chấm công trong phạm vi được phép."
+        "name": "Xem điểm danh",
+        "description": "Xem danh sách và tổng hợp điểm danh trong phạm vi được phép."
     },
     "can_request_attendance_correction": {
-        "name": "Yêu cầu sửa chấm công",
-        "description": "Gửi yêu cầu chỉnh sửa bản ghi chấm công."
+        "name": "Yêu cầu sửa điểm danh",
+        "description": "Gửi yêu cầu chỉnh sửa bản ghi điểm danh."
     },
     "can_approve_attendance": {
-        "name": "Duyệt chấm công",
-        "description": "Phê duyệt hoặc từ chối bản ghi chấm công và yêu cầu chỉnh sửa."
+        "name": "Duyệt điểm danh",
+        "description": "Phê duyệt hoặc từ chối bản ghi điểm danh và yêu cầu chỉnh sửa."
     },
     "can_manage_attendance": {
-        "name": "Quản lý chấm công",
-        "description": "Thực hiện thao tác HR như khóa kỳ hoặc điều chỉnh dữ liệu chấm công."
+        "name": "Quản lý điểm danh",
+        "description": "Thực hiện thao tác HR như khóa kỳ hoặc điều chỉnh dữ liệu điểm danh."
     },
     "can_request_leave": {
         "name": "Xin nghỉ phép",
@@ -268,8 +268,8 @@
         "description": "Cấu hình khung đánh giá hiệu suất của công ty."
     },
     "can_view_attendance_reports": {
-        "name": "Xem báo cáo chấm công",
-        "description": "Chạy và xem báo cáo chấm công."
+        "name": "Xem báo cáo điểm danh",
+        "description": "Chạy và xem báo cáo điểm danh."
     },
     "can_view_payroll_reports": {
         "name": "Xem báo cáo lương",

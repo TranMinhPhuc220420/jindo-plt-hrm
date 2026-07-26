@@ -65,7 +65,7 @@
     },
     "my_schedule": {
         "title": "Lịch của tôi",
-        "description": "Ca làm, ngày nghỉ, phép và kết quả chấm công trong khoảng đã chọn.",
+        "description": "Ca làm, ngày nghỉ, phép và kết quả điểm danh trong khoảng đã chọn.",
         "loading": "Đang tải lịch…",
         "empty": "Không có ca trong khoảng này.",
         "error_load": "Không tải được lịch.",
@@ -76,7 +76,7 @@
         "col_shift": "Ca",
         "col_time": "Giờ",
         "col_status": "Trạng thái",
-        "col_attendance": "Chấm công",
+        "col_attendance": "Điểm danh",
         "view_calendar": "Lịch",
         "view_table": "Bảng",
         "holiday": "Ngày lễ",
@@ -92,7 +92,7 @@
         "legend_shift": "Có ca làm",
         "legend_leave": "Nghỉ phép",
         "legend_late": "Đi muộn",
-        "legend_present": "Đã chấm công",
+        "legend_present": "Đã điểm danh",
         "on_leave": "Nghỉ phép",
         "leave_am": "Buổi sáng",
         "leave_pm": "Buổi chiều",
@@ -101,7 +101,7 @@
         "leave_unpaid": "Không lương",
         "attendance_late": "Muộn",
         "attendance_open": "Đang làm",
-        "view_attendance": "Xem chấm công",
-        "summary_error": "Không tải được tóm tắt chấm công."
+        "view_attendance": "Xem điểm danh",
+        "summary_error": "Không tải được tóm tắt điểm danh."
     }
 }
