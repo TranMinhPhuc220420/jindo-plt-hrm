@@ -12,8 +12,8 @@ import {
 import {
     getCurrentPunchLocation,
     mapGeolocationError,
-    type PunchLocation,
 } from '@/lib/attendance/geolocation';
+import type { PunchLocation } from '@/lib/attendance/geolocation';
 
 export type PunchEvidencePayload = {
     latitude: number;
@@ -74,11 +74,18 @@ export function PunchEvidenceDialog({
 
             try {
                 const loc = await getCurrentPunchLocation(abort.signal);
+
                 if (!cancelled) {
                     setLocation(loc);
                 }
             } catch (error) {
-                if (!cancelled && !(error instanceof DOMException && error.name === 'AbortError')) {
+                if (
+                    !cancelled &&
+                    !(
+                        error instanceof DOMException &&
+                        error.name === 'AbortError'
+                    )
+                ) {
                     setLocationError(mapGeolocationError(error));
                 }
             } finally {
@@ -104,6 +111,7 @@ export function PunchEvidenceDialog({
                 }
 
                 streamRef.current = stream;
+
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;
                     await videoRef.current.play().catch(() => undefined);

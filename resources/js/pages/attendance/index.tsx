@@ -4,14 +4,12 @@ import { toast } from 'sonner';
 import {
     AttendancePeriodFilter,
     rangeForPreset,
-    type AttendancePeriodPreset,
 } from '@/components/attendance/attendance-period-filter';
+import type { AttendancePeriodPreset } from '@/components/attendance/attendance-period-filter';
 import { AttendanceRecordsTable } from '@/components/attendance/attendance-records-table';
 import { MonthSummaryStrip } from '@/components/attendance/month-summary-strip';
-import {
-    PunchEvidenceDialog,
-    type PunchEvidencePayload,
-} from '@/components/attendance/punch-evidence-dialog';
+import { PunchEvidenceDialog } from '@/components/attendance/punch-evidence-dialog';
+import type { PunchEvidencePayload } from '@/components/attendance/punch-evidence-dialog';
 import { TodayStatusCard } from '@/components/attendance/today-status-card';
 import AdminPageShell from '@/components/shared/admin-page-shell';
 import {

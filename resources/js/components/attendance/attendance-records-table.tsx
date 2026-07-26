@@ -1,8 +1,8 @@
 import { Link } from '@inertiajs/react';
 import { format, isSameDay, isValid, parse } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-import { AttendanceStatusBadge } from '@/components/attendance/attendance-status-badge';
 import { AttendanceEvidencePhotoButton } from '@/components/attendance/attendance-evidence-photo-button';
+import { AttendanceStatusBadge } from '@/components/attendance/attendance-status-badge';
 import { formatDuration } from '@/components/attendance/format-minutes';
 import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
