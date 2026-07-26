@@ -9,7 +9,7 @@ export default function AppLogoIcon({ className, alt = '', ...props }: Props) {
         <img
             src={LOGO_SRC}
             alt={alt}
-            className={cn('object-contain', className)}
+            className={cn('object-cover', className)}
             draggable={false}
             {...props}
         />
