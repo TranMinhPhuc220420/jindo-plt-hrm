@@ -262,7 +262,7 @@ class DashboardService
      */
     private function leaveBalances(int $companyId, int $employeeId, string $year): array
     {
-        return LeaveBalance::query()
+        return array_values(LeaveBalance::query()
             ->with('leaveType:id,code,name')
             ->where('company_id', $companyId)
             ->where('employee_id', $employeeId)
@@ -278,8 +278,7 @@ class DashboardService
                 'used' => (float) $b->used,
                 'pending' => (float) $b->pending,
             ])
-            ->values()
-            ->all();
+            ->all());
     }
 
     /**
@@ -287,18 +286,18 @@ class DashboardService
      */
     private function employeesByStatus(int $companyId): array
     {
-        return Employee::query()
+        return array_values(Employee::query()
             ->where('company_id', $companyId)
+            ->toBase()
             ->selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
             ->orderByDesc('count')
             ->get()
-            ->map(fn ($row) => [
+            ->map(fn (object $row) => [
                 'status' => (string) $row->status,
                 'count' => (int) $row->count,
             ])
-            ->values()
-            ->all();
+            ->all());
     }
 
     /**
@@ -309,6 +308,7 @@ class DashboardService
         $rows = Employee::query()
             ->where('company_id', $companyId)
             ->where('status', 'active')
+            ->toBase()
             ->selectRaw('department_id, COUNT(*) as count')
             ->groupBy('department_id')
             ->orderByDesc('count')
@@ -352,7 +352,7 @@ class DashboardService
      */
     private function recentHires(int $companyId): array
     {
-        return Employee::query()
+        return array_values(Employee::query()
             ->with('department:id,name')
             ->where('company_id', $companyId)
             ->whereNotNull('hired_at')
@@ -367,7 +367,7 @@ class DashboardService
                 'hired_at' => $e->hired_at?->toDateString(),
                 'status' => $e->status,
             ])
-            ->all();
+            ->all());
     }
 
     /**
@@ -469,7 +469,7 @@ class DashboardService
             ->take(self::LIST_LIMIT)
             ->values();
 
-        return $merged->all();
+        return array_values($merged->all());
     }
 
     /**
@@ -510,7 +510,7 @@ class DashboardService
             ->take(self::LIST_LIMIT)
             ->values();
 
-        return $merged->all();
+        return array_values($merged->all());
     }
 
     /**
@@ -528,7 +528,7 @@ class DashboardService
      */
     private function holidayItems(int $companyId, string $from, string $to): array
     {
-        return Holiday::query()
+        return array_values(Holiday::query()
             ->where('company_id', $companyId)
             ->whereBetween('date', [$from, $to])
             ->orderBy('date')
@@ -539,7 +539,7 @@ class DashboardService
                 'date' => $h->date->toDateString(),
                 'title' => $h->name,
             ])
-            ->all();
+            ->all());
     }
 
     /**
@@ -547,7 +547,7 @@ class DashboardService
      */
     private function recentActivity(User $actor): array
     {
-        return Notification::query()
+        return array_values(Notification::query()
             ->where('user_id', $actor->id)
             ->orderByDesc('created_at')
             ->limit(self::LIST_LIMIT)
@@ -560,7 +560,7 @@ class DashboardService
                 'created_at' => $n->created_at?->toIso8601String() ?? '',
                 'read_at' => $n->read_at?->toIso8601String(),
             ])
-            ->all();
+            ->all());
     }
 
     private function unreadCount(User $actor): int
