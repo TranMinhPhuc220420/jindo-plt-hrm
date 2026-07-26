@@ -33,13 +33,19 @@ test:
 migrate:
 	php artisan migrate
 
-# Seed the database
-seed:
+# Seed — default is local full demo
+seed: seed-local
+
+# Local / non-production: full demo (DatabaseSeeder)
+seed-local:
 	php artisan db:seed
+
+seed-admin:
+	php artisan db:seed --class=ProductionBootstrapSeeder --force
 
 migrate_and_seed:
 	make clear
-	php artisan migrate:refresh --seed 
+	php artisan migrate:refresh --seed
 
 # Deploy the application
 deploy:

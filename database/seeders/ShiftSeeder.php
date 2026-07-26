@@ -4,13 +4,15 @@ namespace Database\Seeders;
 
 use App\Models\Company;
 use App\Models\Employee;
-use App\Models\OvertimeRule;
 use App\Models\Shift;
 use App\Models\ShiftAssignment;
+use Database\Seeders\Concerns\SeedsShiftDefinitions;
 use Illuminate\Database\Seeder;
 
 class ShiftSeeder extends Seeder
 {
+    use SeedsShiftDefinitions;
+
     public function run(): void
     {
         if (app()->environment('production')) {
@@ -23,51 +25,19 @@ class ShiftSeeder extends Seeder
             return;
         }
 
-        $morning = Shift::query()->updateOrCreate(
-            ['company_id' => $company->id, 'code' => 'MORNING'],
-            [
-                'name' => 'Morning',
-                'start_time' => '08:00:00',
-                'end_time' => '17:00:00',
-                'break_minutes' => 60,
-                'kind' => 'standard',
-                'is_night' => false,
-                'is_flexible' => false,
-                'is_active' => true,
-            ],
-        );
+        $this->seedShiftDefinitions($company->id);
 
-        Shift::query()->updateOrCreate(
-            ['company_id' => $company->id, 'code' => 'NIGHT'],
-            [
-                'name' => 'Night',
-                'start_time' => '22:00:00',
-                'end_time' => '06:00:00',
-                'break_minutes' => 45,
-                'kind' => 'night',
-                'is_night' => true,
-                'is_flexible' => false,
-                'is_active' => true,
-            ],
-        );
-
-        OvertimeRule::query()->updateOrCreate(
-            ['company_id' => $company->id, 'code' => 'STANDARD'],
-            [
-                'name' => 'Standard overtime',
-                'applies_after_minutes' => 0,
-                'allow_before_shift' => false,
-                'night_ot_enabled' => true,
-                'is_active' => true,
-            ],
-        );
+        $morning = Shift::query()
+            ->where('company_id', $company->id)
+            ->where('code', 'MORNING')
+            ->first();
 
         $employee = Employee::query()
             ->where('company_id', $company->id)
             ->where('code', 'E-0001')
             ->first();
 
-        if ($employee !== null) {
+        if ($morning !== null && $employee !== null) {
             ShiftAssignment::query()->updateOrCreate(
                 [
                     'company_id' => $company->id,

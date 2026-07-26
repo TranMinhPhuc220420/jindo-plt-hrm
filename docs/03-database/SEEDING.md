@@ -70,10 +70,41 @@ Align with roadmap phases; do not require full HRM demo data before foundation e
 
 ---
 
+## Commands by environment
+
+| Environment | Command |
+|-------------|---------|
+| Local / staging demo | `php artisan db:seed` or `make seed` / `make seed-local` → [`DatabaseSeeder`](../../database/seeders/DatabaseSeeder.php) (full demo) |
+| Production bootstrap | `php artisan db:seed --class=ProductionBootstrapSeeder --force` or `make seed-admin` |
+| Production via `db:seed` | When `APP_ENV=production`, `DatabaseSeeder` delegates to `ProductionBootstrapSeeder` only |
+
+### Production bootstrap (`ProductionBootstrapSeeder`)
+
+Curated, idempotent reference data — **not** a data wipe:
+
+| Seeds | Notes |
+|-------|--------|
+| Permissions + system roles | Same `PermissionSeeder` / `RoleSeeder` as local |
+| Company | `SEED_COMPANY_CODE` / `SEED_COMPANY_NAME` (defaults `JINDO` / `Jindo`) |
+| Settings defaults | Via `SettingsService::seedDefaultsForCompany` |
+| Shift definitions + `STANDARD` OT | MORNING / NIGHT — **no** assignments or employees |
+| Admin user | Requires `SEED_ADMIN_EMAIL` + `SEED_ADMIN_PASSWORD`; assigns Admin role |
+
+Does **not** seed demo employees, org tree, attendance, leave, payroll, hire/ops, or insight samples.
+
+Env (see `.env.example` / `config/hrm.php`):
+
+- `SEED_COMPANY_CODE`, `SEED_COMPANY_NAME` — optional (defaults above)
+- `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` — **required** or the seeder throws
+
+Safe to run on staging with the same class for smoke tests.
+
+---
+
 ## Production Rules
 
 1. **No `migrate:fresh --seed` on production.**
-2. Production bootstrap, if any, is an explicit curated seeder (permissions/roles/settings only).
+2. Production bootstrap is `ProductionBootstrapSeeder` (permissions, roles, company, settings, shifts, admin) — never demo transactional data.
 3. Never seed fake attendance/payroll into production.
 4. Never commit real employee PII into seed files.
 5. Environment guards:
@@ -84,6 +115,8 @@ if (app()->environment('production')) {
     return;
 }
 ```
+
+6. If production already contains local demo junk, clean it operationally — the bootstrap seeder does not delete rows.
 
 ---
 

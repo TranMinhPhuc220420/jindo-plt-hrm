@@ -39,7 +39,7 @@
 | Field | Value |
 |-------|--------|
 | **Current phase** | ∞ Future |
-| **Current step** | `∞.my-schedule-calendar-info` |
+| **Current step** | `∞.production-seed` |
 | **Overall status** | Done |
 | **Last updated** | 2026-07-26 |
 | **Last updated by** | agent |
@@ -2195,6 +2195,28 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 - Backlog: day detail sheet, absent marker, pending leave style, legend filters, week/agenda, ICS
 ```
 
+### ∞.production-seed — Production bootstrap seeder
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | [SEEDING.md](../03-database/SEEDING.md), [DEPLOYMENT.md](../08-development/DEPLOYMENT.md) |
+
+- [x] `ProductionBootstrapSeeder`: permissions, roles, company, settings, shifts+OT, admin
+- [x] Env: `SEED_COMPANY_*` (defaults) + required `SEED_ADMIN_*`
+- [x] `DatabaseSeeder` production → bootstrap only; local demo unchanged
+- [x] Docs + Feature test
+
+**Notes:**
+
+```
+- Shared SeedsShiftDefinitions trait for MORNING/NIGHT/STANDARD
+- config/hrm.php seed.*; .env.example commented SEED_* vars
+- ProductionBootstrapSeederTest: missing admin throws; happy path + idempotent
+```
+
 ---
 
 ## Activity log
@@ -2203,6 +2225,9 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-07-26 | `∞.production-seed` | Follow-up: Makefile `seed-local` / `seed-admin` targets | agent |
+| 2026-07-26 | `∞.production-seed` | Done: ProductionBootstrapSeeder + env admin/company; tests green | agent |
+| 2026-07-26 | `∞.production-seed` | Started: production bootstrap seeder (admin, roles, company, settings, shifts) | agent |
 | 2026-07-26 | `∞.my-schedule-calendar-info` | Done: rest_kind/holiday + attendance on calendar; ShiftApiTest + types green | agent |
 | 2026-07-26 | `∞.my-schedule-calendar-info` | Started: attendance + rest-day clarity on My Schedule calendar | agent |
 | 2026-07-26 | `∞.performance-cycle-ux` | Scope view + cascade goals on remove + delete draft; tests green | agent |

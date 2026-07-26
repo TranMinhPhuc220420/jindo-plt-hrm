@@ -58,6 +58,7 @@ Align auth mode with [AUTHENTICATION.md](../01-architecture/AUTHENTICATION.md).
 4. Build frontend assets (vite build)
 5. Run php artisan migrate --force
 5b. Ensure `php artisan storage:link` exists (avatars on public disk)
+5c. One-time (or idempotent re-run) production bootstrap — see below
 6. Cache config/routes/views as appropriate
 7. Restart PHP-FPM / Octane / container
 8. Restart queue workers (restart signal)
@@ -66,6 +67,22 @@ Align auth mode with [AUTHENTICATION.md](../01-architecture/AUTHENTICATION.md).
 ```
 
 Exact commands depend on hosting (VPS, container, Forge, etc.) — keep a runbook per environment.
+
+### Production database bootstrap
+
+After migrations on a new production database (or to ensure reference data exists):
+
+1. Set in production `.env` (required before seed):
+   - `SEED_ADMIN_EMAIL`
+   - `SEED_ADMIN_PASSWORD`
+   - Optionally `SEED_COMPANY_CODE` / `SEED_COMPANY_NAME` (defaults `JINDO` / `Jindo`)
+2. Run:
+
+```
+php artisan db:seed --class=ProductionBootstrapSeeder --force
+```
+
+This seeds permissions, roles, company, settings defaults, MORNING/NIGHT shifts + STANDARD OT, and the admin account. It is **idempotent** and does **not** wipe existing business data. If the DB still has local demo junk from an earlier mistaken seed, clean that operationally (out of scope for the seeder). Details: [SEEDING.md](../03-database/SEEDING.md).
 
 ---
 
