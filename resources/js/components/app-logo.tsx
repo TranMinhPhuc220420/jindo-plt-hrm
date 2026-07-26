@@ -9,7 +9,7 @@ export default function AppLogo() {
     return (
         <>
             <div className="flex aspect-square items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-                <AppLogoIcon className="w-[60px] h-[50px]" />
+                <AppLogoIcon className="h-[50px] w-[60px]" />
             </div>
             <div className="ml-1 grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{productName}</span>

@@ -1,5 +1,7 @@
 # Makefile
 
+.PHONY: start build clear test migrate seed seed-local seed-admin migrate_and_seed deploy run_xampp format pre-commit ci-check
+
 # Start the development server
 start:
 	cp .env.example .env
@@ -53,3 +55,22 @@ deploy:
 
 run_xampp:
 	sudo /opt/lampp/lampp start
+
+# ---------------------------------------------------------------------------
+# Pre-commit / CI helpers
+# ---------------------------------------------------------------------------
+
+# Auto-fix Prettier, ESLint, and Pint (fixes the usual format:check CI failure)
+format:
+	npm run format
+	npm run lint
+	composer lint
+
+# Fix style, then run the same checks GitHub Actions runs via `composer ci:check`
+# Usage: make pre-commit
+pre-commit: format
+	composer ci:check
+
+# Run CI checks only (no auto-fix) — same as GitHub Actions
+ci-check:
+	composer ci:check
