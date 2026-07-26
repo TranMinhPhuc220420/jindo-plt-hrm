@@ -1,34 +1,40 @@
-name: Deploy to cPanel
+name: CI / Deploy
 
 on:
   push:
     branches:
       - main
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
-  test:
+  ci:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
           php-version: "8.4"
+          tools: composer:v2
           extensions: mbstring, pdo_sqlite, sqlite3
           coverage: none
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: "22"
           cache: npm
 
       - name: Prepare environment
-        run: |
-          cp .env.example .env
+        run: cp .env.example .env
 
       - name: Install dependencies and build
         run: |
@@ -41,26 +47,30 @@ jobs:
 
       # Runs lint:check, format:check, types:check (ESLint/Prettier/tsc + Pint/PHPStan) and the Pest suite.
       # Requires no secrets beyond what's already in .env.example (SQLite test DB).
-      - name: Run full CI check
+      - name: Run CI Checks
         run: composer ci:check
 
   deploy:
-    needs: [test]
+    needs: [ci]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
           php-version: "8.4"
+          tools: composer:v2
           extensions: mbstring, pdo_mysql
           coverage: none
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: "22"
           cache: npm

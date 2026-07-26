@@ -16,7 +16,23 @@ export default function Welcome() {
 
     return (
         <>
-            <Head title={t('head_title')} />
+            <Head title={t('head_title')}>
+                <meta
+                    head-key="description"
+                    name="description"
+                    content={t('tagline', { company: COMPANY_NAME })}
+                />
+                <meta
+                    head-key="og:title"
+                    property="og:title"
+                    content={`${productName} — ${COMPANY_NAME}`}
+                />
+                <meta
+                    head-key="og:description"
+                    property="og:description"
+                    content={t('tagline', { company: COMPANY_NAME })}
+                />
+            </Head>
             <div className="relative flex min-h-svh flex-col overflow-hidden text-white">
                 <img
                     src={HERO_SRC}

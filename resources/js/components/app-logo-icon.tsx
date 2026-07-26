@@ -1,25 +1,17 @@
-import type { SVGAttributes } from 'react';
+import type { ImgHTMLAttributes } from 'react';
+import { LOGO_SRC } from '@/lib/brand';
+import { cn } from '@/lib/utils';
 
-export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
+type Props = ImgHTMLAttributes<HTMLImageElement>;
+
+export default function AppLogoIcon({ className, alt = '', ...props }: Props) {
     return (
-        <svg
+        <img
+            src={LOGO_SRC}
+            alt={alt}
+            className={cn('object-contain', className)}
+            draggable={false}
             {...props}
-            viewBox="0 0 40 40"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden
-        >
-            <text
-                x="20"
-                y="26"
-                textAnchor="middle"
-                fontSize="16"
-                fontWeight="700"
-                fontFamily="ui-sans-serif, system-ui, sans-serif"
-                letterSpacing="-0.5"
-                fill="currentColor"
-            >
-                HR
-            </text>
-        </svg>
+        />
     );
 }

@@ -2136,6 +2136,7 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 | 2026-07-26 | `∞.disable-self-delete-account` | Done: removed self-delete UI/route; ProfileUpdateTest green | agent |
 | 2026-07-26 | `∞.disable-self-delete-account` | Started: block self-service account deletion | agent |
 | 2026-07-26 | `∞.employee-avatar` | Done: avatar upload/display API + UI; tests + types green | agent |
+| 2026-07-26 | `∞.welcome-landing` | Follow-up: favicon.svg logo + OG/SEO meta for social share | agent |
 | 2026-07-26 | `∞.welcome-landing` | Done: full-bleed welcome hero + i18n; types:check clean | agent |
 | 2026-07-26 | `∞.employee-avatar` | Started: employee avatar upload & display | agent |
 | 2026-07-26 | `∞.branding-plt-hrm` | Done: HRM + PLT Solutions brand; types:check clean | agent |

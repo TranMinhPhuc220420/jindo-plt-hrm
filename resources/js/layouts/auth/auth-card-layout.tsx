@@ -31,7 +31,7 @@ export default function AuthCardLayout({
                     className="flex flex-col items-center gap-1 self-center font-medium"
                 >
                     <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                        <AppLogoIcon className="size-6 fill-current" />
+                        <AppLogoIcon className="size-6" />
                     </div>
                     <span className="text-sm font-semibold">{productName}</span>
                     <span className="text-xs text-muted-foreground">
