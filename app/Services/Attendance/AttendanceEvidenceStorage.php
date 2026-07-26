@@ -6,6 +6,7 @@ use App\Exceptions\DomainException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AttendanceEvidenceStorage
 {
@@ -68,7 +69,7 @@ class AttendanceEvidenceStorage
         Storage::disk(self::DISK)->delete($path);
     }
 
-    public function stream(string $path, ?string $mime = null): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function stream(string $path, ?string $mime = null): StreamedResponse
     {
         if (! Storage::disk(self::DISK)->exists($path)) {
             throw new DomainException(

@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Attendance;
 
+use App\Exceptions\DomainException;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CheckOutRequest extends FormRequest
@@ -41,9 +43,9 @@ class CheckOutRequest extends FormRequest
         ];
     }
 
-    protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator): void
+    protected function failedValidation(Validator $validator): void
     {
-        throw new \App\Exceptions\DomainException(
+        throw new DomainException(
             message: 'Location and camera photo are required to record attendance.',
             errorCode: 'ATTENDANCE_EVIDENCE_REQUIRED',
             status: 422,
