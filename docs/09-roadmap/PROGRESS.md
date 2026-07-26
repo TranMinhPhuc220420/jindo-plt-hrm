@@ -39,7 +39,7 @@
 | Field | Value |
 |-------|--------|
 | **Current phase** | ∞ Future |
-| **Current step** | `∞.disable-self-delete-account` |
+| **Current step** | `∞.my-schedule-calendar-info` |
 | **Overall status** | Done |
 | **Last updated** | 2026-07-26 |
 | **Last updated by** | agent |
@@ -2125,6 +2125,76 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 - Employee archive remains behind can_change_employee_status (admin/HR)
 ```
 
+### ∞.attendance-evidence — GPS + camera evidence for punches
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | [ATTENDANCE_API.md](../06-api/ATTENDANCE_API.md), [attendance/README.md](../02-business/attendance/README.md), [FILE_STORAGE.md](../01-architecture/FILE_STORAGE.md) |
+
+- [x] `attendance_evidences` migration + model (lat/lng/address/photo per punch)
+- [x] Check-in/out require multipart evidence; reject without write (`ATTENDANCE_EVIDENCE_REQUIRED`)
+- [x] Private photo storage + authorized download endpoint
+- [x] Punch evidence dialog (geolocation + reverse geocode + camera)
+- [x] Show address/photo on today card + records table; en/vi i18n
+- [x] AttendanceApiTest + types:check green
+
+**Notes:**
+
+```
+- Location policy: record only (no geofence)
+- Photo: evidence capture only (no face AI)
+- Required for both check-in and check-out
+```
+
+### ∞.performance-cycle-ux — Complete review cycle UX
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | [PERFORMANCE_API.md](../06-api/PERFORMANCE_API.md), [performance/README.md](../02-business/performance/README.md) |
+
+- [x] Sync participants on draft cycles; start requires ≥1 participant
+- [x] Goal scoped to cycle participants; cycle progress counts; promotion filter by cycle
+- [x] Create dialog + cycle show: participants, goal progress, scoped pickers, finalize warn
+- [x] en/vi i18n + PerformanceApiTest + types:check
+
+**Notes:**
+
+```
+- Participants are the center of the cycle workflow
+- Finalize warns when evaluations incomplete (no hard block)
+- UX polish: status badges, progress meters, clearer cycle list/detail hierarchy
+- Non-participants cannot view cycles; removing a participant deletes their goals; draft cycles can be deleted
+```
+
+### ∞.my-schedule-calendar-info — Attendance + rest-day clarity on My Schedule
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-26 |
+| Completed | 2026-07-26 |
+| Docs | [SHIFT_API.md](../06-api/SHIFT_API.md) |
+
+- [x] Working-calendar: `rest_kind`, `holiday_name`, rest-only days (keep `resolve()` for domain)
+- [x] FE: merge attendance records + month summary on My Schedule
+- [x] Calendar/table cells: weekend vs holiday vs leave vs punch results
+- [x] i18n en/vi + ShiftApiTest + types:check
+
+**Notes:**
+
+```
+- API: rest_kind none|weekend|holiday; holiday_name; rest-only rows with null shift fields
+- resolve() still assigned-only for Attendance/Leave; controller merges unassignedRestDays
+- FE: listRecords + getSummary best-effort; calendar cells show in/out + late; link to /attendance
+- Backlog: day detail sheet, absent marker, pending leave style, legend filters, week/agenda, ICS
+```
+
 ---
 
 ## Activity log
@@ -2133,6 +2203,14 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-07-26 | `∞.my-schedule-calendar-info` | Done: rest_kind/holiday + attendance on calendar; ShiftApiTest + types green | agent |
+| 2026-07-26 | `∞.my-schedule-calendar-info` | Started: attendance + rest-day clarity on My Schedule calendar | agent |
+| 2026-07-26 | `∞.performance-cycle-ux` | Scope view + cascade goals on remove + delete draft; tests green | agent |
+| 2026-07-26 | `∞.performance-cycle-ux` | UX polish: badges, progress meters, list/detail hierarchy; types green | agent |
+| 2026-07-26 | `∞.performance-cycle-ux` | Done: cycle participants + goal progress UX; tests + types green | agent |
+| 2026-07-26 | `∞.performance-cycle-ux` | Started: complete review cycle UX + participant guards | agent |
+| 2026-07-26 | `∞.attendance-evidence` | Done: GPS+camera evidence gate; tests + types green | agent |
+| 2026-07-26 | `∞.attendance-evidence` | Started: require location + photo for check-in/out | agent |
 | 2026-07-26 | `∞.disable-self-delete-account` | Done: removed self-delete UI/route; ProfileUpdateTest green | agent |
 | 2026-07-26 | `∞.disable-self-delete-account` | Started: block self-service account deletion | agent |
 | 2026-07-26 | `∞.employee-avatar` | Done: avatar upload/display API + UI; tests + types green | agent |

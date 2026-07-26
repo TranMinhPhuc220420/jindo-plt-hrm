@@ -1,8 +1,14 @@
-import { apiGet, apiPatch, apiPost } from '../client';
+import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '../client';
 import type { PaginationMeta } from '../types';
 
 export type ReviewCycleStatus = 'draft' | 'active' | 'finalized';
 export type ReviewCycleFramework = 'goal' | 'kpi' | 'okr' | 'mixed';
+
+export type ReviewCycleParticipant = {
+    employee_id: number;
+    employee_name?: string | null;
+    employee_code?: string | null;
+};
 
 export type ReviewCycle = {
     id: number;
@@ -14,6 +20,10 @@ export type ReviewCycle = {
     ends_on: string | null;
     participant_employee_ids: number[];
     participants_count?: number;
+    evaluations_count?: number;
+    goals_active_count?: number;
+    goals_completed_count?: number;
+    participants?: ReviewCycleParticipant[];
     started_at: string | null;
     finalized_at: string | null;
     created_at: string | null;
@@ -120,6 +130,18 @@ export async function createCycle(payload: {
     return res.data;
 }
 
+export async function syncCycleParticipants(
+    id: number,
+    participantEmployeeIds: number[],
+) {
+    const res = await apiPut<ReviewCycle>(
+        `/api/performance/review-cycles/${id}/participants`,
+        { participant_employee_ids: participantEmployeeIds },
+    );
+
+    return res.data;
+}
+
 export async function startCycle(id: number) {
     const res = await apiPost<ReviewCycle>(
         `/api/performance/review-cycles/${id}/start`,
@@ -134,6 +156,10 @@ export async function finalizeCycle(id: number) {
     );
 
     return res.data;
+}
+
+export async function deleteCycle(id: number) {
+    await apiDelete(`/api/performance/review-cycles/${id}`);
 }
 
 // Goals
@@ -185,6 +211,7 @@ export async function createGoal(payload: {
     target?: string;
     weight?: number;
     progress?: number;
+    status?: GoalStatus;
 }) {
     const res = await apiPost<PerformanceGoal>(
         '/api/performance/goals',
@@ -267,7 +294,12 @@ export async function submitEvaluation(payload: {
 // Promotion suggestions
 
 export async function listPromotionSuggestions(
-    params: { status?: string; employee_id?: number; per_page?: number } = {},
+    params: {
+        status?: string;
+        employee_id?: number;
+        review_cycle_id?: number;
+        per_page?: number;
+    } = {},
 ) {
     const query = new URLSearchParams();
 
@@ -277,6 +309,10 @@ export async function listPromotionSuggestions(
 
     if (params.employee_id) {
         query.set('employee_id', String(params.employee_id));
+    }
+
+    if (params.review_cycle_id) {
+        query.set('review_cycle_id', String(params.review_cycle_id));
     }
 
     if (params.per_page) {

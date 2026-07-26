@@ -10,22 +10,25 @@ import {
 } from 'date-fns';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatDuration } from '@/components/attendance/format-minutes';
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import type { AttendanceRecord } from '@/lib/api/modules/attendance';
 import type {
     WorkingCalendarDay,
     WorkingCalendarLeave,
 } from '@/lib/api/modules/shifts';
-import { dateFnsLocale } from '@/lib/datetime';
+import { dateFnsLocale, formatPunchTime } from '@/lib/datetime';
 import { cn } from '@/lib/utils';
 
 type Props = {
     month: Date;
     days: WorkingCalendarDay[];
+    attendanceByDate: Map<string, AttendanceRecord>;
 };
 
 function indexByDate(
@@ -34,7 +37,7 @@ function indexByDate(
     return new Map(days.map((day) => [day.date, day]));
 }
 
-function leaveLabel(
+function leaveCoverageLabel(
     leave: WorkingCalendarLeave,
     t: (key: string) => string,
 ): string {
@@ -55,8 +58,27 @@ function leaveLabel(
         : t('my_schedule.leave_unpaid');
 }
 
-export function ScheduleMonthCalendar({ month, days }: Props) {
-    const { t, i18n } = useTranslation('shifts');
+function restLabel(
+    entry: WorkingCalendarDay,
+    t: (key: string) => string,
+): string | null {
+    if (entry.rest_kind === 'holiday') {
+        return entry.holiday_name || t('my_schedule.holiday');
+    }
+
+    if (entry.rest_kind === 'weekend') {
+        return t('my_schedule.weekend');
+    }
+
+    return null;
+}
+
+export function ScheduleMonthCalendar({
+    month,
+    days,
+    attendanceByDate,
+}: Props) {
+    const { t, i18n } = useTranslation(['shifts', 'attendance']);
     const locale = dateFnsLocale(i18n.language);
     const weekStartsOn = locale.options?.weekStartsOn ?? 1;
     const byDate = useMemo(() => indexByDate(days), [days]);
@@ -90,7 +112,11 @@ export function ScheduleMonthCalendar({ month, days }: Props) {
                     {t('my_schedule.legend_today')}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                    <span className="size-2.5 rounded-sm bg-muted" />
+                    <span className="size-2.5 rounded-sm border border-dashed border-slate-400 bg-slate-500/15" />
+                    {t('my_schedule.legend_weekend')}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                    <span className="size-2.5 rounded-sm bg-rose-500/25 ring-1 ring-rose-500/40" />
                     {t('my_schedule.legend_holiday')}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
@@ -100,6 +126,14 @@ export function ScheduleMonthCalendar({ month, days }: Props) {
                 <span className="inline-flex items-center gap-1.5">
                     <span className="size-2.5 rounded-sm bg-amber-500/25" />
                     {t('my_schedule.legend_leave')}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                    <span className="size-2.5 rounded-sm bg-emerald-500/30" />
+                    {t('my_schedule.legend_present')}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                    <span className="size-2.5 rounded-sm bg-orange-500/40" />
+                    {t('my_schedule.legend_late')}
                 </span>
             </div>
 
@@ -118,10 +152,16 @@ export function ScheduleMonthCalendar({ month, days }: Props) {
                             {gridDays.map((date, index) => {
                                 const key = format(date, 'yyyy-MM-dd');
                                 const entry = byDate.get(key);
+                                const attendance = attendanceByDate.get(key);
                                 const inMonth = isSameMonth(date, month);
                                 const today = isToday(date);
                                 const isLastCol = (index + 1) % 7 === 0;
                                 const onLeave = Boolean(entry?.leave);
+                                const rest = entry ? restLabel(entry, t) : null;
+                                const isLate = Boolean(
+                                    attendance && attendance.late_minutes > 0,
+                                );
+                                const hasPunch = Boolean(attendance);
 
                                 const content = (
                                     <>
@@ -135,9 +175,18 @@ export function ScheduleMonthCalendar({ month, days }: Props) {
                                             >
                                                 {format(date, 'd')}
                                             </span>
-                                            {entry?.is_holiday && inMonth ? (
-                                                <span className="truncate text-[10px] font-medium text-muted-foreground">
-                                                    {t('my_schedule.holiday')}
+                                            {rest && inMonth ? (
+                                                <span
+                                                    className={cn(
+                                                        'truncate text-[10px] font-medium',
+                                                        entry?.rest_kind ===
+                                                            'holiday'
+                                                            ? 'text-rose-700 dark:text-rose-300'
+                                                            : 'text-slate-600 dark:text-slate-300',
+                                                    )}
+                                                    title={rest}
+                                                >
+                                                    {rest}
                                                 </span>
                                             ) : null}
                                         </div>
@@ -147,24 +196,97 @@ export function ScheduleMonthCalendar({ month, days }: Props) {
                                                 className={cn(
                                                     'space-y-1 rounded-md px-1.5 py-1 text-left text-foreground',
                                                     onLeave
-                                                        ? 'bg-amber-500/15'
-                                                        : 'bg-primary/10',
+                                                        ? 'bg-amber-500/15 ring-1 ring-amber-500/30'
+                                                        : entry.rest_kind ===
+                                                            'holiday'
+                                                          ? 'bg-rose-500/10 ring-1 ring-rose-500/25'
+                                                          : entry.rest_kind ===
+                                                              'weekend'
+                                                            ? 'border border-dashed border-slate-400/50 bg-slate-500/10'
+                                                            : entry.shift_id
+                                                              ? 'bg-primary/10'
+                                                              : 'bg-muted/40',
                                                 )}
                                             >
-                                                <p className="truncate text-xs leading-tight font-medium">
-                                                    {entry.shift_name}
-                                                </p>
-                                                <p className="mt-0.5 text-[10px] text-muted-foreground tabular-nums sm:text-xs">
-                                                    {entry.start_time}–
-                                                    {entry.end_time}
-                                                </p>
+                                                {entry.shift_name ? (
+                                                    <>
+                                                        <p className="truncate text-xs leading-tight font-medium">
+                                                            {entry.shift_name}
+                                                        </p>
+                                                        {entry.start_time &&
+                                                        entry.end_time ? (
+                                                            <p className="text-[10px] text-muted-foreground tabular-nums sm:text-xs">
+                                                                {
+                                                                    entry.start_time
+                                                                }
+                                                                –
+                                                                {
+                                                                    entry.end_time
+                                                                }
+                                                            </p>
+                                                        ) : null}
+                                                    </>
+                                                ) : rest ? (
+                                                    <p className="truncate text-[10px] font-medium text-muted-foreground">
+                                                        {t(
+                                                            'my_schedule.rest_day',
+                                                        )}
+                                                    </p>
+                                                ) : (
+                                                    <p className="text-[10px] text-muted-foreground/70">
+                                                        {t(
+                                                            'my_schedule.no_shift',
+                                                        )}
+                                                    </p>
+                                                )}
                                                 {entry.leave ? (
                                                     <p className="truncate text-[10px] font-medium text-amber-800 dark:text-amber-200">
-                                                        {leaveLabel(
+                                                        {entry.leave
+                                                            .leave_type_name ||
+                                                            t(
+                                                                'my_schedule.on_leave',
+                                                            )}
+                                                        {' · '}
+                                                        {leaveCoverageLabel(
                                                             entry.leave,
                                                             t,
                                                         )}
                                                     </p>
+                                                ) : null}
+                                                {attendance ? (
+                                                    <div
+                                                        className={cn(
+                                                            'rounded px-1 py-0.5 text-[10px] tabular-nums',
+                                                            isLate
+                                                                ? 'bg-orange-500/20 font-medium text-orange-900 dark:text-orange-200'
+                                                                : 'bg-emerald-500/15 text-emerald-900 dark:text-emerald-200',
+                                                        )}
+                                                    >
+                                                        <p>
+                                                            {formatPunchTime(
+                                                                attendance.check_in_at,
+                                                            )}
+                                                            –
+                                                            {attendance.check_out_at
+                                                                ? formatPunchTime(
+                                                                      attendance.check_out_at,
+                                                                  )
+                                                                : t(
+                                                                      'my_schedule.attendance_open',
+                                                                  )}
+                                                        </p>
+                                                        {isLate ? (
+                                                            <p>
+                                                                {t(
+                                                                    'my_schedule.attendance_late',
+                                                                )}{' '}
+                                                                {formatDuration(
+                                                                    attendance.late_minutes,
+                                                                    t,
+                                                                )}
+                                                            </p>
+                                                        ) : null}
+                                                    </div>
                                                 ) : null}
                                             </div>
                                         ) : inMonth ? (
@@ -176,17 +298,27 @@ export function ScheduleMonthCalendar({ month, days }: Props) {
                                 );
 
                                 const cellClass = cn(
-                                    'flex min-h-[5.5rem] w-full flex-col border-b p-1.5 text-left sm:min-h-[6.5rem] sm:p-2',
+                                    'flex min-h-[6.5rem] w-full flex-col border-b p-1.5 text-left sm:min-h-[7.5rem] sm:p-2',
                                     !isLastCol && 'border-r',
                                     !inMonth &&
                                         'bg-muted/20 text-muted-foreground/60',
                                     inMonth &&
-                                        entry?.is_holiday &&
-                                        'bg-muted/40',
+                                        entry?.rest_kind === 'holiday' &&
+                                        'bg-rose-500/5',
+                                    inMonth &&
+                                        entry?.rest_kind === 'weekend' &&
+                                        'bg-slate-500/5',
                                     today && 'ring-2 ring-primary ring-inset',
+                                    hasPunch &&
+                                        !today &&
+                                        'border-b-emerald-500/40',
                                 );
 
-                                if (!entry || !inMonth) {
+                                const interactive =
+                                    Boolean(entry && inMonth) ||
+                                    Boolean(attendance && inMonth);
+
+                                if (!interactive) {
                                     return (
                                         <div key={key} className={cellClass}>
                                             {content}
@@ -206,23 +338,40 @@ export function ScheduleMonthCalendar({ month, days }: Props) {
                                         </TooltipTrigger>
                                         <TooltipContent
                                             side="top"
-                                            className="max-w-xs"
+                                            className="max-w-xs space-y-1"
                                         >
-                                            <p className="font-medium">
-                                                {entry.shift_name}
-                                            </p>
-                                            <p className="tabular-nums opacity-90">
-                                                {entry.start_time} –{' '}
-                                                {entry.end_time}
-                                            </p>
-                                            {entry.is_holiday ? (
-                                                <p className="mt-1 opacity-90">
-                                                    {t('my_schedule.holiday')}
+                                            {entry?.shift_name ? (
+                                                <>
+                                                    <p className="font-medium">
+                                                        {entry.shift_name}
+                                                    </p>
+                                                    {entry.start_time &&
+                                                    entry.end_time ? (
+                                                        <p className="tabular-nums opacity-90">
+                                                            {entry.start_time} –{' '}
+                                                            {entry.end_time}
+                                                        </p>
+                                                    ) : null}
+                                                </>
+                                            ) : null}
+                                            {rest ? (
+                                                <p className="opacity-90">
+                                                    {entry?.rest_kind ===
+                                                    'holiday'
+                                                        ? t(
+                                                              'my_schedule.holiday',
+                                                          )
+                                                        : t(
+                                                              'my_schedule.weekend',
+                                                          )}
+                                                    {entry?.holiday_name
+                                                        ? `: ${entry.holiday_name}`
+                                                        : ''}
                                                 </p>
                                             ) : null}
-                                            {entry.leave ? (
+                                            {entry?.leave ? (
                                                 <>
-                                                    <p className="mt-1 font-medium opacity-90">
+                                                    <p className="font-medium opacity-90">
                                                         {entry.leave
                                                             .leave_type_name ||
                                                             t(
@@ -230,15 +379,68 @@ export function ScheduleMonthCalendar({ month, days }: Props) {
                                                             )}
                                                     </p>
                                                     <p className="opacity-90">
-                                                        {leaveLabel(
+                                                        {leaveCoverageLabel(
                                                             entry.leave,
                                                             t,
                                                         )}
                                                     </p>
                                                 </>
                                             ) : null}
+                                            {attendance ? (
+                                                <>
+                                                    <p className="font-medium opacity-90">
+                                                        {t(
+                                                            'my_schedule.col_attendance',
+                                                        )}
+                                                    </p>
+                                                    <p className="tabular-nums opacity-90">
+                                                        {formatPunchTime(
+                                                            attendance.check_in_at,
+                                                        )}{' '}
+                                                        –{' '}
+                                                        {attendance.check_out_at
+                                                            ? formatPunchTime(
+                                                                  attendance.check_out_at,
+                                                              )
+                                                            : t(
+                                                                  'my_schedule.attendance_open',
+                                                              )}
+                                                    </p>
+                                                    {attendance.worked_minutes >
+                                                    0 ? (
+                                                        <p className="opacity-90">
+                                                            {formatDuration(
+                                                                attendance.worked_minutes,
+                                                                t,
+                                                            )}
+                                                        </p>
+                                                    ) : null}
+                                                    {isLate ? (
+                                                        <p className="opacity-90">
+                                                            {t(
+                                                                'my_schedule.attendance_late',
+                                                            )}
+                                                            :{' '}
+                                                            {formatDuration(
+                                                                attendance.late_minutes,
+                                                                t,
+                                                            )}
+                                                        </p>
+                                                    ) : null}
+                                                    {attendance.overtime_minutes >
+                                                    0 ? (
+                                                        <p className="opacity-90">
+                                                            OT:{' '}
+                                                            {formatDuration(
+                                                                attendance.overtime_minutes,
+                                                                t,
+                                                            )}
+                                                        </p>
+                                                    ) : null}
+                                                </>
+                                            ) : null}
                                             {today ? (
-                                                <p className="mt-1 opacity-90">
+                                                <p className="opacity-90">
                                                     {t('my_schedule.today')}
                                                 </p>
                                             ) : null}

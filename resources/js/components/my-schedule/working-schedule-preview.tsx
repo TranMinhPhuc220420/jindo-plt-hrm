@@ -1,3 +1,4 @@
+import { Link } from '@inertiajs/react';
 import {
     addMonths,
     endOfMonth,
@@ -7,6 +8,7 @@ import {
 } from 'date-fns';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { MonthSummaryStrip } from '@/components/attendance/month-summary-strip';
 import { ScheduleMonthCalendar } from '@/components/my-schedule/schedule-month-calendar';
 import { ScheduleTable } from '@/components/my-schedule/schedule-table';
 import { ScheduleToolbar } from '@/components/my-schedule/schedule-toolbar';
@@ -22,6 +24,11 @@ import {
 } from '@/components/shared/async-state';
 import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
+import * as attendanceApi from '@/lib/api/modules/attendance';
+import type {
+    AttendanceRecord,
+    AttendanceSummary,
+} from '@/lib/api/modules/attendance';
 import * as shiftApi from '@/lib/api/modules/shifts';
 import type { WorkingCalendarDay } from '@/lib/api/modules/shifts';
 import { dateFnsLocale, formatDateString } from '@/lib/datetime';
@@ -71,6 +78,12 @@ export function WorkingSchedulePreview({
     const [dateFrom, setDateFrom] = useState(weekInitial.from);
     const [dateTo, setDateTo] = useState(weekInitial.to);
     const [days, setDays] = useState<WorkingCalendarDay[]>([]);
+    const [attendanceByDate, setAttendanceByDate] = useState<
+        Map<string, AttendanceRecord>
+    >(() => new Map());
+    const [summary, setSummary] = useState<AttendanceSummary | null>(null);
+    const [summaryLoading, setSummaryLoading] = useState(false);
+    const [summaryError, setSummaryError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -85,22 +98,65 @@ export function WorkingSchedulePreview({
     const load = useCallback(async () => {
         setLoading(true);
         setError(null);
+        setSummaryLoading(true);
+        setSummaryError(null);
 
         try {
-            const data = await shiftApi.getWorkingCalendar({
+            const calendarDays = await shiftApi.getWorkingCalendar({
                 employee_id: employeeId,
                 date_from: queryRange.from,
                 date_to: queryRange.to,
             });
-            setDays(data);
+            setDays(calendarDays);
+
+            const [attendanceResult, summaryResult] = await Promise.allSettled([
+                attendanceApi.listRecords({
+                    employee_id: employeeId,
+                    date_from: queryRange.from,
+                    date_to: queryRange.to,
+                    per_page: 100,
+                }),
+                attendanceApi.getSummary({
+                    employee_id: employeeId,
+                    period_start: queryRange.from,
+                    period_end: queryRange.to,
+                }),
+            ]);
+
+            if (attendanceResult.status === 'fulfilled') {
+                const map = new Map<string, AttendanceRecord>();
+
+                for (const row of attendanceResult.value.data) {
+                    if (!map.has(row.work_date)) {
+                        map.set(row.work_date, row);
+                    }
+                }
+
+                setAttendanceByDate(map);
+            } else {
+                setAttendanceByDate(new Map());
+            }
+
+            if (summaryResult.status === 'fulfilled') {
+                setSummary(summaryResult.value);
+                setSummaryError(null);
+            } else {
+                setSummary(null);
+                setSummaryError(t('my_schedule.summary_error'));
+            }
         } catch (err) {
             setError(
                 err instanceof ApiError
                     ? err.message
                     : t('my_schedule.error_load'),
             );
+            setDays([]);
+            setAttendanceByDate(new Map());
+            setSummary(null);
+            setSummaryError(null);
         } finally {
             setLoading(false);
+            setSummaryLoading(false);
         }
     }, [employeeId, queryRange.from, queryRange.to, t]);
 
@@ -118,7 +174,22 @@ export function WorkingSchedulePreview({
     const monthLabel = format(visibleMonth, 'MMMM yyyy', { locale });
 
     return (
-        <div>
+        <div className="space-y-4">
+            <div className="flex justify-end">
+                <Link
+                    href="/attendance"
+                    className="text-sm text-primary underline-offset-4 hover:underline"
+                >
+                    {t('my_schedule.view_attendance')}
+                </Link>
+            </div>
+
+            <MonthSummaryStrip
+                summary={summary}
+                loading={summaryLoading}
+                error={summaryError}
+            />
+
             <ScheduleToolbar
                 view={view}
                 onViewChange={handleViewChange}
@@ -144,11 +215,18 @@ export function WorkingSchedulePreview({
             ) : error ? (
                 <ErrorState message={error} />
             ) : view === 'calendar' ? (
-                <ScheduleMonthCalendar month={visibleMonth} days={days} />
+                <ScheduleMonthCalendar
+                    month={visibleMonth}
+                    days={days}
+                    attendanceByDate={attendanceByDate}
+                />
             ) : days.length === 0 ? (
                 <EmptyState message={emptyMessage ?? t('my_schedule.empty')} />
             ) : (
-                <ScheduleTable days={days} />
+                <ScheduleTable
+                    days={days}
+                    attendanceByDate={attendanceByDate}
+                />
             )}
         </div>
     );

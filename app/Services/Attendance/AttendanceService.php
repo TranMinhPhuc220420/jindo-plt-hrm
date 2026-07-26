@@ -7,6 +7,7 @@ use App\Events\AttendanceCorrectionRejected;
 use App\Events\AttendanceCorrectionRequested;
 use App\Exceptions\DomainException;
 use App\Models\AttendanceCorrection;
+use App\Models\AttendanceEvidence;
 use App\Models\AttendanceRecord;
 use App\Models\Employee;
 use App\Models\Setting;
@@ -15,8 +16,11 @@ use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
 use App\Support\SettingsDefaults;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AttendanceService
 {
@@ -24,13 +28,25 @@ class AttendanceService
         private readonly CompanyContext $companyContext,
         private readonly AuditLogger $audit,
         private readonly AttendanceMetricsCalculator $metrics,
+        private readonly AttendanceEvidenceStorage $evidenceStorage,
     ) {}
 
     /**
-     * @param  array{worked_at?: string, note?: string, source?: string}  $data
+     * @param  array{
+     *     worked_at?: string,
+     *     note?: string,
+     *     source?: string,
+     *     latitude: float|int|string,
+     *     longitude: float|int|string,
+     *     accuracy_meters?: float|int|string|null,
+     *     address: string,
+     *     captured_at?: string|null,
+     *     photo: UploadedFile
+     * }  $data
      */
-    public function checkIn(array $data = []): AttendanceRecord
+    public function checkIn(array $data): AttendanceRecord
     {
+        $this->assertEvidencePresent($data);
         $employee = $this->requireLinkedEmployee();
         $companyId = $this->companyContext->id();
         $workedAt = $this->parseWorkedAt($data['worked_at'] ?? null);
@@ -60,35 +76,84 @@ class AttendanceService
             }
         }
 
-        $record = $existing ?? new AttendanceRecord([
-            'company_id' => $companyId,
-            'employee_id' => $employee->id,
-            'work_date' => $workDate,
-            'source' => $data['source'] ?? 'manual',
-            'status' => 'open',
-        ]);
+        $storedPath = null;
 
-        $record->check_in_at = $workedAt;
-        $record->note = $data['note'] ?? $record->note;
-        $record->source = $data['source'] ?? $record->source ?? 'manual';
-        $record->status = 'open';
-        $this->applyMetrics($record);
-        $record->save();
+        try {
+            $record = DB::transaction(function () use (
+                $data,
+                $existing,
+                $companyId,
+                $employee,
+                $workDate,
+                $workedAt,
+                &$storedPath,
+            ): AttendanceRecord {
+                $record = $existing ?? new AttendanceRecord([
+                    'company_id' => $companyId,
+                    'employee_id' => $employee->id,
+                    'work_date' => $workDate,
+                    'source' => $data['source'] ?? 'manual',
+                    'status' => 'open',
+                ]);
 
-        $this->audit->write(
-            action: 'attendance.checked_in',
-            subject: $record,
-            payload: ['work_date' => $workDate, 'employee_id' => $employee->id],
-        );
+                $record->check_in_at = $workedAt;
+                $record->note = $data['note'] ?? $record->note;
+                $record->source = $data['source'] ?? $record->source ?? 'manual';
+                $record->status = 'open';
+                $this->applyMetrics($record);
+                $record->save();
 
-        return $record->fresh(['employee']);
+                $stored = $this->evidenceStorage->store(
+                    $companyId,
+                    $record->id,
+                    AttendanceEvidence::PUNCH_CHECK_IN,
+                    $data['photo'],
+                );
+                $storedPath = $stored['photo_path'];
+
+                $evidence = $this->createEvidence(
+                    $record,
+                    AttendanceEvidence::PUNCH_CHECK_IN,
+                    $data,
+                    $stored,
+                );
+
+                $this->audit->write(
+                    action: 'attendance.checked_in',
+                    subject: $record,
+                    payload: [
+                        'work_date' => $workDate,
+                        'employee_id' => $employee->id,
+                        'evidence_id' => $evidence->id,
+                    ],
+                );
+
+                return $record;
+            });
+        } catch (\Throwable $e) {
+            $this->evidenceStorage->delete($storedPath);
+
+            throw $e;
+        }
+
+        return $record->fresh(['employee', 'evidences']) ?? $record;
     }
 
     /**
-     * @param  array{worked_at?: string, note?: string}  $data
+     * @param  array{
+     *     worked_at?: string,
+     *     note?: string,
+     *     latitude: float|int|string,
+     *     longitude: float|int|string,
+     *     accuracy_meters?: float|int|string|null,
+     *     address: string,
+     *     captured_at?: string|null,
+     *     photo: UploadedFile
+     * }  $data
      */
-    public function checkOut(array $data = []): AttendanceRecord
+    public function checkOut(array $data): AttendanceRecord
     {
+        $this->assertEvidencePresent($data);
         $employee = $this->requireLinkedEmployee();
         $companyId = $this->companyContext->id();
         $workedAt = $this->parseWorkedAt($data['worked_at'] ?? null);
@@ -124,21 +189,91 @@ class AttendanceService
             );
         }
 
-        $record->check_out_at = $workedAt;
-        if (isset($data['note'])) {
-            $record->note = $data['note'];
+        $storedPath = null;
+
+        try {
+            $record = DB::transaction(function () use (
+                $data,
+                $record,
+                $workedAt,
+                $workDate,
+                $employee,
+                &$storedPath,
+            ): AttendanceRecord {
+                $record->check_out_at = $workedAt;
+                if (isset($data['note'])) {
+                    $record->note = $data['note'];
+                }
+                $record->status = 'pending';
+                $this->applyMetrics($record);
+                $record->save();
+
+                $stored = $this->evidenceStorage->store(
+                    $record->company_id,
+                    $record->id,
+                    AttendanceEvidence::PUNCH_CHECK_OUT,
+                    $data['photo'],
+                );
+                $storedPath = $stored['photo_path'];
+
+                $evidence = $this->createEvidence(
+                    $record,
+                    AttendanceEvidence::PUNCH_CHECK_OUT,
+                    $data,
+                    $stored,
+                );
+
+                $this->audit->write(
+                    action: 'attendance.checked_out',
+                    subject: $record,
+                    payload: [
+                        'work_date' => $workDate,
+                        'employee_id' => $employee->id,
+                        'evidence_id' => $evidence->id,
+                    ],
+                );
+
+                return $record;
+            });
+        } catch (\Throwable $e) {
+            $this->evidenceStorage->delete($storedPath);
+
+            throw $e;
         }
-        $record->status = 'pending';
-        $this->applyMetrics($record);
-        $record->save();
 
-        $this->audit->write(
-            action: 'attendance.checked_out',
-            subject: $record,
-            payload: ['work_date' => $workDate, 'employee_id' => $employee->id],
+        return $record->fresh(['employee', 'evidences']) ?? $record;
+    }
+
+    public function streamEvidencePhoto(User $actor, AttendanceRecord $record, string $punchType): StreamedResponse
+    {
+        $this->assertCanViewRecord($actor, $record);
+
+        if (! in_array($punchType, AttendanceEvidence::PUNCH_TYPES, true)) {
+            throw new DomainException(
+                message: 'Invalid punch type.',
+                errorCode: 'NOT_FOUND',
+                status: 404,
+            );
+        }
+
+        $evidence = AttendanceEvidence::query()
+            ->where('attendance_record_id', $record->id)
+            ->where('company_id', $this->companyContext->id())
+            ->where('punch_type', $punchType)
+            ->first();
+
+        if ($evidence === null) {
+            throw new DomainException(
+                message: 'Evidence photo not found.',
+                errorCode: 'NOT_FOUND',
+                status: 404,
+            );
+        }
+
+        return $this->evidenceStorage->stream(
+            $evidence->photo_path,
+            $evidence->photo_mime,
         );
-
-        return $record->fresh(['employee']);
     }
 
     /**
@@ -150,7 +285,7 @@ class AttendanceService
         $companyId = $this->companyContext->id();
         $query = AttendanceRecord::query()
             ->where('company_id', $companyId)
-            ->with(['employee'])
+            ->with(['employee', 'evidences'])
             ->orderByDesc('work_date');
 
         $ownOnly = $this->mustScopeToOwn($actor);
@@ -180,7 +315,7 @@ class AttendanceService
     {
         $record = AttendanceRecord::query()
             ->where('company_id', $this->companyContext->id())
-            ->with(['employee'])
+            ->with(['employee', 'evidences'])
             ->findOrFail($id);
 
         $this->assertCanViewRecord($actor, $record);
@@ -211,7 +346,7 @@ class AttendanceService
             payload: ['employee_id' => $record->employee_id, 'work_date' => $record->work_date->toDateString()],
         );
 
-        return $record->fresh(['employee']);
+        return $record->fresh(['employee', 'evidences']);
     }
 
     /**
@@ -418,6 +553,56 @@ class AttendanceService
             ->where('company_id', $this->companyContext->id())
             ->with(['record', 'employee'])
             ->findOrFail($id);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function assertEvidencePresent(array $data): void
+    {
+        $photo = $data['photo'] ?? null;
+        $hasLocation = isset($data['latitude'], $data['longitude'], $data['address'])
+            && $data['address'] !== '';
+
+        if (! $hasLocation || ! ($photo instanceof UploadedFile)) {
+            throw new DomainException(
+                message: 'Location and camera photo are required to record attendance.',
+                errorCode: 'ATTENDANCE_EVIDENCE_REQUIRED',
+                status: 422,
+            );
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @param  array{photo_path: string, photo_mime: ?string, photo_size: ?int}  $stored
+     */
+    private function createEvidence(
+        AttendanceRecord $record,
+        string $punchType,
+        array $data,
+        array $stored,
+    ): AttendanceEvidence {
+        $capturedAt = null;
+        if (! empty($data['captured_at']) && is_string($data['captured_at'])) {
+            $capturedAt = $this->parseWorkedAt($data['captured_at']);
+        }
+
+        return AttendanceEvidence::query()->create([
+            'company_id' => $record->company_id,
+            'attendance_record_id' => $record->id,
+            'punch_type' => $punchType,
+            'latitude' => (float) $data['latitude'],
+            'longitude' => (float) $data['longitude'],
+            'accuracy_meters' => isset($data['accuracy_meters']) && $data['accuracy_meters'] !== ''
+                ? (float) $data['accuracy_meters']
+                : null,
+            'address' => (string) $data['address'],
+            'photo_path' => $stored['photo_path'],
+            'photo_mime' => $stored['photo_mime'],
+            'photo_size' => $stored['photo_size'],
+            'captured_at' => $capturedAt ?? now(),
+        ]);
     }
 
     private function applyMetrics(AttendanceRecord $record): void

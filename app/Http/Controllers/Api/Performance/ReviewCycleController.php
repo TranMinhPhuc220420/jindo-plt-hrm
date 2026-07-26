@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Performance;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Performance\StoreReviewCycleRequest;
+use App\Http\Requests\Performance\SyncReviewCycleParticipantsRequest;
 use App\Http\Resources\PerformanceReviewCycleResource;
 use App\Models\PerformanceReviewCycle;
 use App\Services\Performance\ReviewCycleService;
@@ -22,6 +23,7 @@ class ReviewCycleController extends Controller
         $this->authorize('can_view_performance');
 
         $paginator = $this->cycles->list(
+            actor: $request->user(),
             filters: $request->only(['status']),
             perPage: min((int) $request->integer('per_page', 20), 100),
         );
@@ -41,22 +43,35 @@ class ReviewCycleController extends Controller
         );
     }
 
-    public function show(int $reviewCycle): JsonResponse
+    public function show(Request $request, int $reviewCycle): JsonResponse
     {
         $this->authorize('can_view_performance');
 
-        $cycle = $this->cycles->find($reviewCycle);
+        $cycle = $this->cycles->find($reviewCycle, $request->user());
 
         return ApiResponse::success(
             (new PerformanceReviewCycleResource($cycle))->resolve(),
         );
     }
 
-    public function start(int $reviewCycle): JsonResponse
+    public function syncParticipants(SyncReviewCycleParticipantsRequest $request, int $reviewCycle): JsonResponse
+    {
+        $cycle = $this->cycles->syncParticipants(
+            $this->cycles->find($reviewCycle, $request->user()),
+            $request->validated('participant_employee_ids'),
+        );
+
+        return ApiResponse::success(
+            (new PerformanceReviewCycleResource($cycle))->resolve(),
+            'Review cycle participants updated.',
+        );
+    }
+
+    public function start(Request $request, int $reviewCycle): JsonResponse
     {
         $this->authorize('can_manage_review_cycles');
 
-        $cycle = $this->cycles->start($this->cycles->find($reviewCycle));
+        $cycle = $this->cycles->start($this->cycles->find($reviewCycle, $request->user()));
 
         return ApiResponse::success(
             (new PerformanceReviewCycleResource($cycle))->resolve(),
@@ -64,15 +79,24 @@ class ReviewCycleController extends Controller
         );
     }
 
-    public function finalize(int $reviewCycle): JsonResponse
+    public function finalize(Request $request, int $reviewCycle): JsonResponse
     {
         $this->authorize('can_manage_review_cycles');
 
-        $cycle = $this->cycles->finalize($this->cycles->find($reviewCycle));
+        $cycle = $this->cycles->finalize($this->cycles->find($reviewCycle, $request->user()));
 
         return ApiResponse::success(
             (new PerformanceReviewCycleResource($cycle))->resolve(),
             'Review cycle finalized.',
         );
+    }
+
+    public function destroy(Request $request, int $reviewCycle): JsonResponse
+    {
+        $this->authorize('can_manage_review_cycles');
+
+        $this->cycles->delete($this->cycles->find($reviewCycle, $request->user()));
+
+        return ApiResponse::success(null, 'Review cycle deleted.');
     }
 }

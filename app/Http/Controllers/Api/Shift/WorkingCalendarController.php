@@ -60,6 +60,17 @@ class WorkingCalendarController extends Controller
             $validated['date_to'],
         );
 
+        $assignedDates = array_column($days, 'date');
+        $restOnly = $this->calendar->unassignedRestDays(
+            $employeeId,
+            $validated['date_from'],
+            $validated['date_to'],
+            $assignedDates,
+        );
+
+        $merged = array_merge($days, $restOnly);
+        usort($merged, fn (array $a, array $b): int => strcmp($a['date'], $b['date']));
+
         $leaveMap = $this->leaveCoverage->coverageByDate(
             $employeeId,
             $validated['date_from'],
@@ -70,7 +81,7 @@ class WorkingCalendarController extends Controller
             $day['leave'] = $leaveMap[$day['date']] ?? null;
 
             return $day;
-        }, $days);
+        }, $merged);
 
         return ApiResponse::success($enriched);
     }

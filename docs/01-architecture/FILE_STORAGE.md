@@ -20,6 +20,7 @@ Define how binary files are stored, authorized, and linked to domain records wit
 | Company files | Policies, templates, handbooks |
 | Recruitment | Resumes, offer letters |
 | Onboarding / Assets | Signed forms, equipment photos, damage evidence |
+| Attendance | Check-in/out camera photos (private disk; mediated download) |
 | Payroll (optional) | Generated payslip PDFs if stored as files |
 | Exports | Report downloads (often temporary) |
 
@@ -49,6 +50,7 @@ Client upload/download
 
 - **Documents module** is the primary owner of company/employee document metadata and access patterns.
 - Other modules may attach files through Documents services or clearly owned attachment services — they must not invent parallel unauthorized upload endpoints.
+- **Attendance** stores punch photos on the private `local` disk and serves them only via authenticated download (`GET /api/attendance/records/{id}/evidences/{punchType}/photo`).
 - **Assets** may store images/evidence related to inventory and damage reports.
 - **Onboarding** may require document/equipment evidence but should reuse Documents/Assets capabilities.
 

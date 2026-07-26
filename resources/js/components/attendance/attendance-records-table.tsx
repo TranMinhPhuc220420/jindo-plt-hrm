@@ -2,10 +2,14 @@ import { Link } from '@inertiajs/react';
 import { format, isSameDay, isValid, parse } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { AttendanceStatusBadge } from '@/components/attendance/attendance-status-badge';
+import { AttendanceEvidencePhotoButton } from '@/components/attendance/attendance-evidence-photo-button';
 import { formatDuration } from '@/components/attendance/format-minutes';
 import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
-import type { AttendanceRecord } from '@/lib/api/modules/attendance';
+import type {
+    AttendanceEvidence,
+    AttendanceRecord,
+} from '@/lib/api/modules/attendance';
 import { dateFnsLocale } from '@/lib/datetime';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +18,35 @@ type Props = {
     pendingCorrectionCounts: Record<number, number>;
     onApprove: (id: number) => void;
 };
+
+function EvidenceHint({
+    recordId,
+    evidences,
+    punchType,
+}: {
+    recordId: number;
+    evidences?: AttendanceEvidence[];
+    punchType: 'check_in' | 'check_out';
+}) {
+    const evidence = evidences?.find((row) => row.punch_type === punchType);
+
+    if (!evidence) {
+        return null;
+    }
+
+    return (
+        <div className="mt-1 max-w-[12rem] space-y-0.5 text-xs text-muted-foreground">
+            <p className="truncate" title={evidence.address}>
+                {evidence.address}
+            </p>
+            <AttendanceEvidencePhotoButton
+                recordId={recordId}
+                evidence={evidence}
+                className="text-xs text-primary underline-offset-2 hover:underline"
+            />
+        </div>
+    );
+}
 
 function parseYmd(value: string) {
     const parsed = parse(value, 'yyyy-MM-dd', new Date());
@@ -100,11 +133,25 @@ export function AttendanceRecordsTable({
                                         </span>
                                     )}
                                 </td>
-                                <td className="px-3 py-2 tabular-nums">
-                                    {punchTime(row.check_in_at)}
+                                <td className="px-3 py-2">
+                                    <div className="tabular-nums">
+                                        {punchTime(row.check_in_at)}
+                                    </div>
+                                    <EvidenceHint
+                                        recordId={row.id}
+                                        evidences={row.evidences}
+                                        punchType="check_in"
+                                    />
                                 </td>
-                                <td className="px-3 py-2 tabular-nums">
-                                    {punchTime(row.check_out_at)}
+                                <td className="px-3 py-2">
+                                    <div className="tabular-nums">
+                                        {punchTime(row.check_out_at)}
+                                    </div>
+                                    <EvidenceHint
+                                        recordId={row.id}
+                                        evidences={row.evidences}
+                                        punchType="check_out"
+                                    />
                                 </td>
                                 <td className="px-3 py-2 tabular-nums">
                                     {formatDuration(row.worked_minutes, t)}

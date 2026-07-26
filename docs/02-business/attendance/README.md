@@ -32,14 +32,17 @@ Record when employees work and compute attendance facts (hours, late, early leav
 ## Business Rules
 
 1. Attendance rows belong to an **employee** and **company**.
-2. v1 capture method is **manual check-in/out**; providers (GPS, face, fingerprint, QR) must plug in behind the same service boundary later.
-3. Late / early / overtime interpretation should consult **Shift / working calendar** (and approved leave when relevant) via services — not duplicate shift tables.
+2. Check-in and check-out require **evidence**: GPS coordinates + address, and a camera photo. Without valid evidence the punch is rejected and **no** attendance row is written/updated.
+3. Location policy (v1): **record only** — store lat/lng + address; do not geofence-reject punches outside an office radius.
+4. Photo is stored as **evidence** (no face-matching AI in this phase).
+5. Capture method remains `manual` with evidence attached; future providers (geofence, face, fingerprint, QR) must plug in behind the same service boundary.
+6. Late / early / overtime interpretation should consult **Shift / working calendar** (and approved leave when relevant) via services — not duplicate shift tables.
    - Full-day approved leave clears late/early/OT windows (worked minutes from punches still computed).
    - Half-day leave shrinks the expected window to the non-leave half; hourly leave shrinks or clears the window for the covered span.
-4. Corrections require authorization and typically approval before they become canonical.
-5. Approving attendance is auditable.
-6. Summaries used by payroll are produced/owned by Attendance (or a read contract it exposes), not copied into Payroll as a second write model for raw punches.
-7. Module must remain replaceable without changing Payroll’s public consumption contract.
+7. Corrections require authorization and typically approval before they become canonical.
+8. Approving attendance is auditable.
+9. Summaries used by payroll are produced/owned by Attendance (or a read contract it exposes), not copied into Payroll as a second write model for raw punches.
+10. Module must remain replaceable without changing Payroll’s public consumption contract.
 
 ---
 
@@ -48,10 +51,13 @@ Record when employees work and compute attendance facts (hours, late, early leav
 ### Check-in / check-out
 
 ```
-Employee (or device provider later)
-  → Authorize → Validate shift/window rules
-    → Record punch → Recompute day metrics
+Employee
+  → Authorize → Capture GPS + address + camera photo
+    → Validate evidence → Validate shift/window rules
+      → Record punch + evidence → Recompute day metrics
 ```
+
+If evidence is missing/invalid, stop before writing the attendance record.
 
 ### Correction
 
@@ -111,7 +117,9 @@ Period close / manager review
 
 ## Out of Scope / Future
 
-- GPS / face / fingerprint / QR providers
+- Geofence radius / work-site master data
+- Face recognition / liveness
+- Fingerprint / QR hardware providers
 - Hardware device management
 - Automatic payroll run triggers on attendance approve
 

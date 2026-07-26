@@ -17,7 +17,7 @@ class PromotionSuggestionService
     ) {}
 
     /**
-     * @param  array{status?: string, employee_id?: int}  $filters
+     * @param  array{status?: string, employee_id?: int, review_cycle_id?: int}  $filters
      * @return LengthAwarePaginator<int, PerformancePromotionSuggestion>
      */
     public function list(array $filters = [], int $perPage = 20): LengthAwarePaginator
@@ -32,6 +32,9 @@ class PromotionSuggestionService
         }
         if (! empty($filters['employee_id'])) {
             $query->where('employee_id', (int) $filters['employee_id']);
+        }
+        if (! empty($filters['review_cycle_id'])) {
+            $query->where('review_cycle_id', (int) $filters['review_cycle_id']);
         }
 
         return $query->paginate($perPage);

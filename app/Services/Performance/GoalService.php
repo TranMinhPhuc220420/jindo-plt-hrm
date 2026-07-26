@@ -4,7 +4,9 @@ namespace App\Services\Performance;
 
 use App\Exceptions\DomainException;
 use App\Models\Employee;
+use App\Models\PerformanceCycleParticipant;
 use App\Models\PerformanceGoal;
+use App\Models\PerformanceReviewCycle;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
@@ -65,12 +67,18 @@ class GoalService
     public function create(array $data, User $actor): PerformanceGoal
     {
         $companyId = $this->companyContext->id();
-        $this->requireEmployee($companyId, (int) $data['employee_id']);
+        $employee = $this->requireEmployee($companyId, (int) $data['employee_id']);
+
+        $reviewCycleId = isset($data['review_cycle_id']) ? (int) $data['review_cycle_id'] : null;
+        if ($reviewCycleId) {
+            $cycle = $this->requireCycle($companyId, $reviewCycleId);
+            $this->assertParticipant($cycle, $employee);
+        }
 
         $goal = PerformanceGoal::query()->create([
             'company_id' => $companyId,
-            'review_cycle_id' => $data['review_cycle_id'] ?? null,
-            'employee_id' => (int) $data['employee_id'],
+            'review_cycle_id' => $reviewCycleId,
+            'employee_id' => $employee->id,
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
             'type' => $data['type'] ?? 'goal',
@@ -122,5 +130,38 @@ class GoalService
         }
 
         return $employee;
+    }
+
+    private function requireCycle(int $companyId, int $id): PerformanceReviewCycle
+    {
+        $cycle = PerformanceReviewCycle::query()
+            ->where('company_id', $companyId)
+            ->find($id);
+
+        if ($cycle === null) {
+            throw new DomainException(
+                message: 'Review cycle not found.',
+                errorCode: 'NOT_FOUND',
+                status: 404,
+            );
+        }
+
+        return $cycle;
+    }
+
+    private function assertParticipant(PerformanceReviewCycle $cycle, Employee $employee): void
+    {
+        $isParticipant = PerformanceCycleParticipant::query()
+            ->where('review_cycle_id', $cycle->id)
+            ->where('employee_id', $employee->id)
+            ->exists();
+
+        if (! $isParticipant) {
+            throw new DomainException(
+                message: 'Employee is not a participant in this review cycle.',
+                errorCode: 'PERFORMANCE_FORBIDDEN_SCOPE',
+                status: 403,
+            );
+        }
     }
 }

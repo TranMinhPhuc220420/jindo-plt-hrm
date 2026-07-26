@@ -27,7 +27,7 @@ Capture working time and produce **summaries** consumable by Payroll — without
 
 ## Out of Scope
 
-- GPS / face / fingerprint / QR providers (Future)
+- Geofence / face / fingerprint / QR providers (Future; GPS+photo evidence capture is in `∞.attendance-evidence`)
 - Payroll run creation (Phase 06)
 - Owning shift definitions (Phase 05) — may **consume** calendar when available
 

@@ -67,4 +67,12 @@ class PerformanceReviewCycle extends Model
     {
         return $this->hasMany(PerformanceEvaluation::class, 'review_cycle_id');
     }
+
+    /**
+     * @return HasMany<PerformanceGoal, $this>
+     */
+    public function goals(): HasMany
+    {
+        return $this->hasMany(PerformanceGoal::class, 'review_cycle_id');
+    }
 }

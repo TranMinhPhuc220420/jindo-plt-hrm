@@ -88,4 +88,12 @@ class AttendanceRecord extends Model
     {
         return $this->hasMany(AttendanceCorrection::class);
     }
+
+    /**
+     * @return HasMany<AttendanceEvidence, $this>
+     */
+    public function evidences(): HasMany
+    {
+        return $this->hasMany(AttendanceEvidence::class);
+    }
 }

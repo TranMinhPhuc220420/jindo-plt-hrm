@@ -3,10 +3,14 @@ import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AttendanceStatusBadge } from '@/components/attendance/attendance-status-badge';
+import { AttendanceEvidencePhotoButton } from '@/components/attendance/attendance-evidence-photo-button';
 import { formatDuration } from '@/components/attendance/format-minutes';
 import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
-import type { AttendanceRecord } from '@/lib/api/modules/attendance';
+import type {
+    AttendanceEvidence,
+    AttendanceRecord,
+} from '@/lib/api/modules/attendance';
 import { dateFnsLocale, displayTime } from '@/lib/datetime';
 
 type Props = {
@@ -22,7 +26,6 @@ function punchTimeLabel(value: string | null | undefined): string {
         return '—';
     }
 
-    // API may return ISO datetime; extract HH:mm for display.
     try {
         const date = new Date(value);
 
@@ -34,6 +37,13 @@ function punchTimeLabel(value: string | null | undefined): string {
     }
 
     return displayTime(value) || value;
+}
+
+function evidenceFor(
+    evidences: AttendanceEvidence[] | undefined,
+    punchType: 'check_in' | 'check_out',
+): AttendanceEvidence | undefined {
+    return evidences?.find((row) => row.punch_type === punchType);
 }
 
 export function TodayStatusCard({
@@ -64,6 +74,9 @@ export function TodayStatusCard({
     } else if (today?.check_in_at) {
         stateKey = 'state_working';
     }
+
+    const checkInEvidence = evidenceFor(today?.evidences, 'check_in');
+    const checkOutEvidence = evidenceFor(today?.evidences, 'check_out');
 
     return (
         <div className="mb-6 rounded-xl border bg-muted/20 p-4 sm:p-6">
@@ -103,6 +116,25 @@ export function TodayStatusCard({
                                     {t('index.col_ot')}:{' '}
                                     {formatDuration(today.overtime_minutes, t)}
                                 </span>
+                            ) : null}
+                        </div>
+                    ) : null}
+
+                    {today && (checkInEvidence || checkOutEvidence) ? (
+                        <div className="space-y-2 pt-2 text-sm">
+                            {checkInEvidence ? (
+                                <EvidenceLine
+                                    recordId={today.id}
+                                    label={t('evidence.check_in_label')}
+                                    evidence={checkInEvidence}
+                                />
+                            ) : null}
+                            {checkOutEvidence ? (
+                                <EvidenceLine
+                                    recordId={today.id}
+                                    label={t('evidence.check_out_label')}
+                                    evidence={checkOutEvidence}
+                                />
                             ) : null}
                         </div>
                     ) : null}
@@ -147,6 +179,32 @@ export function TodayStatusCard({
                     </Button>
                 </div>
             </div>
+        </div>
+    );
+}
+
+function EvidenceLine({
+    recordId,
+    label,
+    evidence,
+}: {
+    recordId: number;
+    label: string;
+    evidence: AttendanceEvidence;
+}) {
+    return (
+        <div className="max-w-xl text-muted-foreground">
+            <span className="font-medium text-foreground">{label}: </span>
+            <span>{evidence.address}</span>
+            {evidence.has_photo ? (
+                <>
+                    {' · '}
+                    <AttendanceEvidencePhotoButton
+                        recordId={recordId}
+                        evidence={evidence}
+                    />
+                </>
+            ) : null}
         </div>
     );
 }

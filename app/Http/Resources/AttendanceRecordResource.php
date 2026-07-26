@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\AttendanceEvidence;
 use App\Models\AttendanceRecord;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -33,6 +34,19 @@ class AttendanceRecordResource extends JsonResource
             'note' => $this->note,
             'approved_by' => $this->approved_by,
             'approved_at' => $this->approved_at?->toIso8601String(),
+            'evidences' => $this->whenLoaded('evidences', function () {
+                return $this->evidences->map(fn (AttendanceEvidence $row) => [
+                    'id' => $row->id,
+                    'punch_type' => $row->punch_type,
+                    'latitude' => $row->latitude,
+                    'longitude' => $row->longitude,
+                    'accuracy_meters' => $row->accuracy_meters,
+                    'address' => $row->address,
+                    'has_photo' => $row->photo_path !== null && $row->photo_path !== '',
+                    'photo_url' => "/api/attendance/records/{$this->id}/evidences/{$row->punch_type}/photo",
+                    'captured_at' => $row->captured_at?->toIso8601String(),
+                ])->values()->all();
+            }),
             'employee' => $this->whenLoaded('employee', fn () => $this->employee ? [
                 'id' => $this->employee->id,
                 'code' => $this->employee->code,

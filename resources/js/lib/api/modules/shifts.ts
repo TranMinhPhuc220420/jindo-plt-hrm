@@ -28,6 +28,8 @@ export type ShiftAssignment = {
     employee?: { id: number; code: string; full_name: string } | null;
 };
 
+export type WorkingCalendarRestKind = 'none' | 'weekend' | 'holiday';
+
 export type WorkingCalendarLeave = {
     request_id: number;
     leave_type_name: string;
@@ -40,11 +42,13 @@ export type WorkingCalendarLeave = {
 
 export type WorkingCalendarDay = {
     date: string;
-    shift_id: number;
-    shift_name: string;
-    start_time: string;
-    end_time: string;
+    shift_id: number | null;
+    shift_name: string | null;
+    start_time: string | null;
+    end_time: string | null;
     is_holiday: boolean;
+    rest_kind: WorkingCalendarRestKind;
+    holiday_name: string | null;
     leave: WorkingCalendarLeave | null;
 };
 

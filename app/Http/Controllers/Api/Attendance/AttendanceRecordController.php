@@ -12,6 +12,7 @@ use App\Services\Attendance\AttendanceService;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AttendanceRecordController extends Controller
 {
@@ -23,7 +24,10 @@ class AttendanceRecordController extends Controller
     {
         $this->authorize('checkInOut', AttendanceRecord::class);
 
-        $record = $this->attendance->checkIn($request->validated());
+        $payload = $request->validated();
+        $payload['photo'] = $request->file('photo');
+
+        $record = $this->attendance->checkIn($payload);
 
         return ApiResponse::created(
             (new AttendanceRecordResource($record))->resolve(),
@@ -35,7 +39,10 @@ class AttendanceRecordController extends Controller
     {
         $this->authorize('checkInOut', AttendanceRecord::class);
 
-        $record = $this->attendance->checkOut($request->validated());
+        $payload = $request->validated();
+        $payload['photo'] = $request->file('photo');
+
+        $record = $this->attendance->checkOut($payload);
 
         return ApiResponse::success(
             (new AttendanceRecordResource($record))->resolve(),
@@ -68,6 +75,14 @@ class AttendanceRecordController extends Controller
         return ApiResponse::success(
             (new AttendanceRecordResource($model))->resolve(),
         );
+    }
+
+    public function evidencePhoto(Request $request, int $record, string $punchType): StreamedResponse
+    {
+        $model = $this->attendance->findRecord($request->user(), $record);
+        $this->authorize('view', $model);
+
+        return $this->attendance->streamEvidencePhoto($request->user(), $model, $punchType);
     }
 
     public function approve(Request $request, int $record): JsonResponse

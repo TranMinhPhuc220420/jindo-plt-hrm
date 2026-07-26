@@ -31,10 +31,11 @@
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/attendance/check-in` | Check in |
-| `POST` | `/api/attendance/check-out` | Check out |
+| `POST` | `/api/attendance/check-in` | Check in (multipart: location + photo) |
+| `POST` | `/api/attendance/check-out` | Check out (multipart: location + photo) |
 | `GET` | `/api/attendance/records` | List records |
 | `GET` | `/api/attendance/records/{id}` | Detail |
+| `GET` | `/api/attendance/records/{id}/evidences/{punchType}/photo` | Stream punch photo |
 | `GET` | `/api/attendance/summary` | Summary for period |
 | `POST` | `/api/attendance/corrections` | Request correction |
 | `GET` | `/api/attendance/corrections` | List corrections |
@@ -48,19 +49,29 @@ Does **not** create payslips — Payroll consumes summaries via services.
 
 ## Check-in / Check-out
 
-`POST /api/attendance/check-in`
+`POST /api/attendance/check-in`  
+`POST /api/attendance/check-out`
 
-```json
-{
-  "worked_at": "2026-07-16T08:59:00Z",
-  "note": "optional",
-  "source": "manual"
-}
-```
+**Content-Type:** `multipart/form-data`
 
-`source`: `manual` (v1); future `gps` | `qr` | `biometric`.
+| Field | Required | Notes |
+|-------|----------|--------|
+| `latitude` | yes | -90..90 |
+| `longitude` | yes | -180..180 |
+| `address` | yes | reverse-geocoded or coordinate fallback, max 500 |
+| `photo` | yes | jpeg/png/webp, max 5MB |
+| `accuracy_meters` | no | browser GPS accuracy |
+| `captured_at` | no | ISO datetime |
+| `worked_at` | no | punch time (defaults to now) |
+| `note` | no | optional note |
+| `source` | no | `manual` (check-in only) |
 
-**200/201** → attendance record for the day/session.
+Location is **recorded only** (no geofence rejection). Missing evidence → **422** `ATTENDANCE_EVIDENCE_REQUIRED` and **no** attendance write.
+
+**200/201** → attendance record for the day/session, including nested `evidences`.
+
+`GET /api/attendance/records/{id}/evidences/{punchType}/photo`  
+Streams the private photo (`punchType` = `check_in` \| `check_out`). Authorized via attendance view policy.
 
 ---
 
@@ -132,6 +143,7 @@ Approve/reject → audited; notify requester.
 
 | Code | When |
 |------|------|
+| `ATTENDANCE_EVIDENCE_REQUIRED` | Missing/invalid location or camera photo |
 | `ATTENDANCE_ALREADY_CHECKED_IN` | Duplicate check-in |
 | `ATTENDANCE_PERIOD_LOCKED` | Cannot correct/approve |
 | `ATTENDANCE_INVALID_TRANSITION` | Bad status change |

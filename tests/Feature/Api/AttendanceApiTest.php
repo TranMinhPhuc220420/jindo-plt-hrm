@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AttendanceEvidence;
 use App\Models\AttendanceRecord;
 use App\Models\AuditLog;
 use App\Models\Company;
@@ -14,6 +15,8 @@ use App\Models\ShiftAssignment;
 use App\Models\User;
 use App\Services\Attendance\AttendanceSummaryService;
 use App\Services\Settings\SettingsService;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 function seedAttendanceAuth(): void
 {
@@ -34,17 +37,51 @@ function linkEmployee(User $user, Company $company): Employee
     ]);
 }
 
+/**
+ * @param  array<string, mixed>  $extra
+ * @return array<string, mixed>
+ */
+function attendanceEvidence(array $extra = []): array
+{
+    return array_merge([
+        'latitude' => 10.7769000,
+        'longitude' => 106.7009000,
+        'accuracy_meters' => 12.5,
+        'address' => 'Ho Chi Minh City, Vietnam',
+        'photo' => UploadedFile::fake()->image('punch.jpg', 320, 240),
+    ], $extra);
+}
+
 test('cannot check in without can_check_in_out', function () {
     Company::factory()->create();
     $user = attendanceUser([]);
 
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-in')
+        ->post('/api/attendance/check-in', attendanceEvidence())
         ->assertForbidden();
 });
 
+test('check-in without evidence is rejected and creates no record', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $user = attendanceUser(['can_check_in_out']);
+    linkEmployee($user, $company);
+
+    $this->actingAs($user)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/attendance/check-in', [
+            'worked_at' => '2026-07-16T08:00:00+07:00',
+        ])
+        ->assertStatus(422)
+        ->assertJsonPath('error_code', 'ATTENDANCE_EVIDENCE_REQUIRED');
+
+    expect(AttendanceRecord::query()->count())->toBe(0)
+        ->and(AttendanceEvidence::query()->count())->toBe(0);
+});
+
 test('employee can check in and out with metrics from shift', function () {
+    Storage::fake('local');
     $company = Company::factory()->create();
     $user = attendanceUser([
         'can_check_in_out',
@@ -75,63 +112,253 @@ test('employee can check in and out with metrics from shift', function () {
 
     $in = $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-in', [
+        ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T08:15:00+07:00',
-        ]);
+        ]));
 
     $in->assertCreated()
         ->assertJsonPath('data.status', 'open')
-        ->assertJsonPath('data.late_minutes', 15);
+        ->assertJsonPath('data.late_minutes', 15)
+        ->assertJsonPath('data.evidences.0.punch_type', 'check_in')
+        ->assertJsonPath('data.evidences.0.address', 'Ho Chi Minh City, Vietnam');
 
+    $evidence = AttendanceEvidence::query()->first();
+    expect($evidence)->not->toBeNull();
+    Storage::disk('local')->assertExists($evidence->photo_path);
     expect(AuditLog::query()->where('action', 'attendance.checked_in')->count())->toBe(1);
 
     $out = $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-out', [
+        ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-16T17:30:00+07:00',
-        ]);
+            'address' => 'District 1, Ho Chi Minh City',
+        ]));
 
     $out->assertOk()
         ->assertJsonPath('data.status', 'pending')
-        ->assertJsonPath('data.overtime_minutes', 30);
+        ->assertJsonPath('data.overtime_minutes', 30)
+        ->assertJsonPath('data.evidences.1.punch_type', 'check_out');
+
+    expect(AttendanceEvidence::query()->count())->toBe(2);
 });
 
-test('double check-in returns ATTENDANCE_ALREADY_CHECKED_IN', function () {
+test('evidence photo endpoint is authorized', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $user = attendanceUser([
+        'can_check_in_out',
+        'can_view_attendance',
+    ]);
+    linkEmployee($user, $company);
+
+    $recordId = $this->actingAs($user)
+        ->withHeaders(spaJsonHeaders())
+        ->post('/api/attendance/check-in', attendanceEvidence([
+            'worked_at' => '2026-07-16T08:00:00+07:00',
+        ]))
+        ->assertCreated()
+        ->json('data.id');
+
+    $this->actingAs($user)
+        ->withHeaders(spaJsonHeaders())
+        ->get("/api/attendance/records/{$recordId}/evidences/check_in/photo")
+        ->assertOk();
+
+    $outsider = attendanceUser(['can_view_attendance']);
+    Employee::factory()->create([
+        'company_id' => $company->id,
+        'user_id' => $outsider->id,
+        'code' => 'E-ATT-OUT-'.uniqid(),
+    ]);
+
+    // Own-scope viewer without approve/manage cannot view another employee's evidence.
+    $this->actingAs($outsider)
+        ->withHeaders(spaJsonHeaders())
+        ->get("/api/attendance/records/{$recordId}/evidences/check_in/photo")
+        ->assertStatus(403);
+
+    // Manager / approver can view employee punch photos.
+    $manager = attendanceUser([
+        'can_view_attendance',
+        'can_approve_attendance',
+    ]);
+
+    $this->actingAs($manager)
+        ->withHeaders(spaJsonHeaders())
+        ->get("/api/attendance/records/{$recordId}/evidences/check_in/photo")
+        ->assertOk();
+});
+
+test('check-in rejects an out-of-range latitude', function () {
+    Storage::fake('local');
     $company = Company::factory()->create();
     $user = attendanceUser(['can_check_in_out']);
     linkEmployee($user, $company);
 
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-in', [
+        ->post('/api/attendance/check-in', attendanceEvidence([
+            'latitude' => 95.0,
+        ]))
+        ->assertStatus(422)
+        ->assertJsonPath('error_code', 'ATTENDANCE_EVIDENCE_REQUIRED')
+        ->assertJsonPath('errors.latitude.0', fn ($value) => is_string($value));
+
+    expect(AttendanceRecord::query()->count())->toBe(0);
+});
+
+test('check-in rejects a non-image photo upload', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $user = attendanceUser(['can_check_in_out']);
+    linkEmployee($user, $company);
+
+    $this->actingAs($user)
+        ->withHeaders(spaJsonHeaders())
+        ->post('/api/attendance/check-in', attendanceEvidence([
+            'photo' => UploadedFile::fake()->create('note.pdf', 100, 'application/pdf'),
+        ]))
+        ->assertStatus(422)
+        ->assertJsonPath('error_code', 'ATTENDANCE_EVIDENCE_REQUIRED');
+
+    expect(AttendanceRecord::query()->count())->toBe(0);
+});
+
+test('check-in rejects a photo larger than 5MB', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $user = attendanceUser(['can_check_in_out']);
+    linkEmployee($user, $company);
+
+    $this->actingAs($user)
+        ->withHeaders(spaJsonHeaders())
+        ->post('/api/attendance/check-in', attendanceEvidence([
+            'photo' => UploadedFile::fake()->image('big.jpg')->size(6000),
+        ]))
+        ->assertStatus(422)
+        ->assertJsonPath('error_code', 'ATTENDANCE_EVIDENCE_REQUIRED');
+
+    expect(AttendanceRecord::query()->count())->toBe(0);
+});
+
+test('check-in requires authentication', function () {
+    Company::factory()->create();
+
+    $this->withHeaders(spaJsonHeaders())
+        ->post('/api/attendance/check-in', attendanceEvidence())
+        ->assertStatus(401);
+});
+
+test('evidence photo endpoint requires authentication', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $record = AttendanceRecord::factory()->create(['company_id' => $company->id]);
+    AttendanceEvidence::query()->create([
+        'company_id' => $company->id,
+        'attendance_record_id' => $record->id,
+        'punch_type' => AttendanceEvidence::PUNCH_CHECK_IN,
+        'latitude' => 10.0,
+        'longitude' => 106.0,
+        'address' => 'Somewhere',
+        'photo_path' => 'attendance/guest/fake.jpg',
+        'photo_mime' => 'image/jpeg',
+        'photo_size' => 100,
+        'captured_at' => now(),
+    ]);
+
+    // No actingAs() in this test — the request must be treated as a guest.
+    $this->withHeaders(spaJsonHeaders())
+        ->get("/api/attendance/records/{$record->id}/evidences/check_in/photo")
+        ->assertStatus(401);
+});
+
+test('evidence photo for a punch type without a stored photo returns 404', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $user = attendanceUser(['can_check_in_out', 'can_view_attendance']);
+    linkEmployee($user, $company);
+
+    $recordId = $this->actingAs($user)
+        ->withHeaders(spaJsonHeaders())
+        ->post('/api/attendance/check-in', attendanceEvidence())
+        ->assertCreated()
+        ->json('data.id');
+
+    // Check-in evidence exists, but the employee has not checked out yet.
+    $this->actingAs($user)
+        ->withHeaders(spaJsonHeaders())
+        ->get("/api/attendance/records/{$recordId}/evidences/check_out/photo")
+        ->assertStatus(404);
+});
+
+test('evidence photo for a record belonging to another company is not found', function () {
+    Storage::fake('local');
+    // The first company created becomes the active one resolved by CompanyContext.
+    $company = Company::factory()->create();
+    $otherCompany = Company::factory()->create();
+
+    $manager = attendanceUser(['can_view_attendance', 'can_approve_attendance']);
+    linkEmployee($manager, $company);
+
+    $foreignRecord = AttendanceRecord::factory()->create(['company_id' => $otherCompany->id]);
+    AttendanceEvidence::query()->create([
+        'company_id' => $otherCompany->id,
+        'attendance_record_id' => $foreignRecord->id,
+        'punch_type' => AttendanceEvidence::PUNCH_CHECK_IN,
+        'latitude' => 10.0,
+        'longitude' => 106.0,
+        'address' => 'Somewhere',
+        'photo_path' => 'attendance/foreign/fake.jpg',
+        'photo_mime' => 'image/jpeg',
+        'photo_size' => 100,
+        'captured_at' => now(),
+    ]);
+
+    $this->actingAs($manager)
+        ->withHeaders(spaJsonHeaders())
+        ->get("/api/attendance/records/{$foreignRecord->id}/evidences/check_in/photo")
+        ->assertStatus(404);
+});
+
+test('double check-in returns ATTENDANCE_ALREADY_CHECKED_IN', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $user = attendanceUser(['can_check_in_out']);
+    linkEmployee($user, $company);
+
+    $this->actingAs($user)
+        ->withHeaders(spaJsonHeaders())
+        ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T08:00:00+07:00',
-        ])
+        ]))
         ->assertCreated();
 
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-in', [
+        ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T08:05:00+07:00',
-        ])
+        ]))
         ->assertStatus(409)
         ->assertJsonPath('error_code', 'ATTENDANCE_ALREADY_CHECKED_IN');
 });
 
 test('checking out without an open check-in returns ATTENDANCE_INVALID_TRANSITION', function () {
+    Storage::fake('local');
     $company = Company::factory()->create();
     $user = attendanceUser(['can_check_in_out']);
     linkEmployee($user, $company);
 
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-out', [
+        ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-16T17:00:00+07:00',
-        ])
+        ]))
         ->assertStatus(422)
         ->assertJsonPath('error_code', 'ATTENDANCE_INVALID_TRANSITION');
 });
 
 test('correction approve and reject with audit', function () {
+    Storage::fake('local');
     $company = Company::factory()->create();
     $employeeUser = attendanceUser([
         'can_check_in_out',
@@ -147,16 +374,16 @@ test('correction approve and reject with audit', function () {
 
     $this->actingAs($employeeUser)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-in', [
+        ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T09:00:00+07:00',
-        ])
+        ]))
         ->assertCreated();
 
     $this->actingAs($employeeUser)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-out', [
+        ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-16T17:00:00+07:00',
-        ])
+        ]))
         ->assertOk();
 
     $recordId = $this->actingAs($employeeUser)
@@ -187,15 +414,15 @@ test('correction approve and reject with audit', function () {
     // Second correction then reject
     $this->actingAs($employeeUser)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-in', [
+        ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-17T08:00:00+07:00',
-        ])
+        ]))
         ->assertCreated();
     $this->actingAs($employeeUser)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-out', [
+        ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-17T17:00:00+07:00',
-        ])
+        ]))
         ->assertOk();
 
     $record2 = $this->actingAs($employeeUser)
@@ -226,6 +453,7 @@ test('correction approve and reject with audit', function () {
 });
 
 test('locked period blocks check-in and correction', function () {
+    Storage::fake('local');
     $company = Company::factory()->create();
     $user = attendanceUser([
         'can_check_in_out',
@@ -237,16 +465,16 @@ test('locked period blocks check-in and correction', function () {
 
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-in', [
+        ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T08:00:00+07:00',
-        ])
+        ]))
         ->assertCreated();
 
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-out', [
+        ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-16T17:00:00+07:00',
-        ])
+        ]))
         ->assertOk();
 
     $recordId = $this->actingAs($user)
@@ -274,14 +502,11 @@ test('locked period blocks check-in and correction', function () {
         ->assertStatus(409)
         ->assertJsonPath('error_code', 'ATTENDANCE_PERIOD_LOCKED');
 
-    // New check-in on locked date after wiping uniqueness - create locked empty day:
-    // For same date already locked with check-in, trying check-in again hits ALREADY or LOCKED.
-    // Lock another empty day by creating then locking:
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-in', [
+        ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-18T08:00:00+07:00',
-        ])
+        ]))
         ->assertCreated();
 
     $this->actingAs($user)
@@ -292,17 +517,17 @@ test('locked period blocks check-in and correction', function () {
         ])
         ->assertOk();
 
-    // Check-out on locked open record should fail
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-out', [
+        ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-18T17:00:00+07:00',
-        ])
+        ]))
         ->assertStatus(409)
         ->assertJsonPath('error_code', 'ATTENDANCE_PERIOD_LOCKED');
 });
 
 test('summary aggregates period minutes', function () {
+    Storage::fake('local');
     $company = Company::factory()->create();
     $user = attendanceUser([
         'can_check_in_out',
@@ -312,15 +537,15 @@ test('summary aggregates period minutes', function () {
 
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-in', [
+        ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T08:00:00+07:00',
-        ])
+        ]))
         ->assertCreated();
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-out', [
+        ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-16T17:00:00+07:00',
-        ])
+        ]))
         ->assertOk();
 
     $this->actingAs($user)
@@ -367,6 +592,7 @@ test('AttendanceSummaryService smoke without payroll writes', function () {
 });
 
 test('record approve path works', function () {
+    Storage::fake('local');
     $company = Company::factory()->create();
     $user = attendanceUser([
         'can_check_in_out',
@@ -377,15 +603,15 @@ test('record approve path works', function () {
 
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-in', [
+        ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T08:00:00+07:00',
-        ])
+        ]))
         ->assertCreated();
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-out', [
+        ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-16T17:00:00+07:00',
-        ])
+        ]))
         ->assertOk();
 
     $id = $this->actingAs($user)
@@ -401,6 +627,7 @@ test('record approve path works', function () {
 });
 
 test('naive datetime-local correction is interpreted in company timezone', function () {
+    Storage::fake('local');
     $company = Company::factory()->create();
     app(SettingsService::class)->seedDefaultsForCompany($company->id);
 
@@ -413,15 +640,15 @@ test('naive datetime-local correction is interpreted in company timezone', funct
 
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-in', [
+        ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T09:00:00+07:00',
-        ])
+        ]))
         ->assertCreated();
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-out', [
+        ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-16T18:00:00+07:00',
-        ])
+        ]))
         ->assertOk();
 
     $recordId = $this->actingAs($user)
@@ -430,7 +657,6 @@ test('naive datetime-local correction is interpreted in company timezone', funct
         ->assertOk()
         ->json('data.0.id');
 
-    // UI DateTimePicker sends naive local wall-clock (company TZ Asia/Ho_Chi_Minh).
     $correction = $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
         ->postJson('/api/attendance/corrections', [
@@ -442,12 +668,12 @@ test('naive datetime-local correction is interpreted in company timezone', funct
         ->assertCreated()
         ->json('data');
 
-    // Stored as UTC instants equivalent to 08:00 / 17:00 ICT.
     expect($correction['proposed_check_in_at'])->toContain('01:00:00')
         ->and($correction['proposed_check_out_at'])->toContain('10:00:00');
 });
 
 test('full-day approved leave suppresses late and overtime metrics', function () {
+    Storage::fake('local');
     $company = Company::factory()->create();
     $user = attendanceUser(['can_check_in_out', 'can_view_attendance']);
     $employee = linkEmployee($user, $company);
@@ -490,23 +716,24 @@ test('full-day approved leave suppresses late and overtime metrics', function ()
 
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-in', [
+        ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T08:15:00+07:00',
-        ])
+        ]))
         ->assertCreated()
         ->assertJsonPath('data.late_minutes', 0);
 
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-out', [
+        ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-16T17:30:00+07:00',
-        ])
+        ]))
         ->assertOk()
         ->assertJsonPath('data.overtime_minutes', 0)
         ->assertJsonPath('data.early_leave_minutes', 0);
 });
 
 test('am half-day leave evaluates late against afternoon window', function () {
+    Storage::fake('local');
     $company = Company::factory()->create();
     $user = attendanceUser(['can_check_in_out', 'can_view_attendance']);
     $employee = linkEmployee($user, $company);
@@ -543,12 +770,11 @@ test('am half-day leave evaluates late against afternoon window', function () {
         'status' => 'approved',
     ]);
 
-    // Midpoint of 08:00–17:00 is 12:30; arrive 13:00 → 30 late.
     $this->actingAs($user)
         ->withHeaders(spaJsonHeaders())
-        ->postJson('/api/attendance/check-in', [
+        ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-17T13:00:00+07:00',
-        ])
+        ]))
         ->assertCreated()
         ->assertJsonPath('data.late_minutes', 30);
 });

@@ -1,9 +1,17 @@
-import { endOfMonth, startOfMonth } from 'date-fns';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import {
+    AttendancePeriodFilter,
+    rangeForPreset,
+    type AttendancePeriodPreset,
+} from '@/components/attendance/attendance-period-filter';
 import { AttendanceRecordsTable } from '@/components/attendance/attendance-records-table';
 import { MonthSummaryStrip } from '@/components/attendance/month-summary-strip';
+import {
+    PunchEvidenceDialog,
+    type PunchEvidencePayload,
+} from '@/components/attendance/punch-evidence-dialog';
 import { TodayStatusCard } from '@/components/attendance/today-status-card';
 import AdminPageShell from '@/components/shared/admin-page-shell';
 import {
@@ -11,9 +19,6 @@ import {
     ErrorState,
     LoadingState,
 } from '@/components/shared/async-state';
-import { DateRangePicker } from '@/components/shared/date-range-picker';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import * as attendanceApi from '@/lib/api/modules/attendance';
@@ -28,15 +33,6 @@ function todayIso(): string {
     return formatDateString(new Date());
 }
 
-function defaultMonthRange(): { from: string; to: string } {
-    const now = new Date();
-
-    return {
-        from: formatDateString(startOfMonth(now)),
-        to: formatDateString(endOfMonth(now)),
-    };
-}
-
 export default function AttendanceIndexPage() {
     const { t } = useTranslation(['attendance', 'common']);
     const { employeeId, can } = useAuth();
@@ -44,7 +40,9 @@ export default function AttendanceIndexPage() {
         can('can_approve_attendance') || can('can_manage_attendance');
     const canSeeCorrections =
         canViewOthers || can('can_request_attendance_correction');
-    const initial = defaultMonthRange();
+    const initial = rangeForPreset('today');
+    const [periodPreset, setPeriodPreset] =
+        useState<AttendancePeriodPreset>('today');
     const [dateFrom, setDateFrom] = useState(initial.from);
     const [dateTo, setDateTo] = useState(initial.to);
     const [records, setRecords] = useState<AttendanceRecord[]>([]);
@@ -60,6 +58,9 @@ export default function AttendanceIndexPage() {
     const [error, setError] = useState<string | null>(null);
     const [summaryError, setSummaryError] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
+    const [punchMode, setPunchMode] = useState<'check_in' | 'check_out' | null>(
+        null,
+    );
 
     const loadToday = useCallback(async () => {
         if (!employeeId) {
@@ -170,28 +171,32 @@ export default function AttendanceIndexPage() {
         await Promise.all([loadRecords(), loadSummary(), loadToday()]);
     }
 
-    async function handleCheckIn() {
-        setBusy(true);
-
-        try {
-            await attendanceApi.checkIn();
-            toast.success(t('index.toast_in'));
-            await refreshAll();
-        } catch (err) {
-            toast.error(
-                err instanceof ApiError ? err.message : t('index.toast_error'),
-            );
-        } finally {
-            setBusy(false);
-        }
+    function applyPeriod(
+        preset: AttendancePeriodPreset,
+        range: { from: string; to: string },
+    ) {
+        setPeriodPreset(preset);
+        setDateFrom(range.from);
+        setDateTo(range.to);
     }
 
-    async function handleCheckOut() {
+    async function handlePunchSubmit(payload: PunchEvidencePayload) {
+        if (!punchMode) {
+            return;
+        }
+
         setBusy(true);
 
         try {
-            await attendanceApi.checkOut();
-            toast.success(t('index.toast_out'));
+            if (punchMode === 'check_in') {
+                await attendanceApi.checkIn(payload);
+                toast.success(t('index.toast_in'));
+            } else {
+                await attendanceApi.checkOut(payload);
+                toast.success(t('index.toast_out'));
+            }
+
+            setPunchMode(null);
             await refreshAll();
         } catch (err) {
             toast.error(
@@ -227,8 +232,30 @@ export default function AttendanceIndexPage() {
                 employeeId={employeeId}
                 today={todayRecord}
                 busy={busy}
-                onCheckIn={() => void handleCheckIn()}
-                onCheckOut={() => void handleCheckOut()}
+                onCheckIn={() => setPunchMode('check_in')}
+                onCheckOut={() => setPunchMode('check_out')}
+            />
+
+            <PunchEvidenceDialog
+                open={punchMode !== null}
+                mode={punchMode ?? 'check_in'}
+                busy={busy}
+                onOpenChange={(open) => {
+                    if (!open && !busy) {
+                        setPunchMode(null);
+                    }
+                }}
+                onSubmit={handlePunchSubmit}
+            />
+
+            <AttendancePeriodFilter
+                preset={periodPreset}
+                dateFrom={dateFrom}
+                dateTo={dateTo}
+                onPresetChange={applyPeriod}
+                onCustomRangeChange={(range) => {
+                    applyPeriod('custom', range);
+                }}
             />
 
             <MonthSummaryStrip
@@ -236,34 +263,6 @@ export default function AttendanceIndexPage() {
                 loading={summaryLoading}
                 error={summaryError}
             />
-
-            <form
-                className="mb-4 flex flex-wrap items-end gap-3"
-                onSubmit={(event) => {
-                    event.preventDefault();
-                    void Promise.all([loadRecords(), loadSummary()]);
-                }}
-            >
-                <div className="space-y-1">
-                    <Label htmlFor="attendance_range">
-                        {t('index.date_range')}
-                    </Label>
-                    <DateRangePicker
-                        id="attendance_range"
-                        from={dateFrom}
-                        to={dateTo}
-                        onChange={({ from, to }) => {
-                            setDateFrom(from);
-                            setDateTo(to);
-                        }}
-                        numberOfMonths={1}
-                        className="min-w-[16rem]"
-                    />
-                </div>
-                <Button type="submit" variant="secondary">
-                    {t('search', { ns: 'common' })}
-                </Button>
-            </form>
 
             <h2 className="mb-2 text-lg font-medium">{t('index.recent')}</h2>
 

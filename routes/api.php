@@ -264,6 +264,9 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->name('api.attendance.records.index');
     Route::get('/attendance/records/{record}', [AttendanceRecordController::class, 'show'])
         ->name('api.attendance.records.show');
+    Route::get('/attendance/records/{record}/evidences/{punchType}/photo', [AttendanceRecordController::class, 'evidencePhoto'])
+        ->where('punchType', 'check_in|check_out')
+        ->name('api.attendance.records.evidence-photo');
     Route::post('/attendance/records/{record}/approve', [AttendanceRecordController::class, 'approve'])
         ->name('api.attendance.records.approve');
     Route::post('/attendance/period/lock', [AttendanceRecordController::class, 'lockPeriod'])
@@ -469,10 +472,14 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->name('api.performance.review-cycles.store');
     Route::get('/performance/review-cycles/{reviewCycle}', [ReviewCycleController::class, 'show'])
         ->name('api.performance.review-cycles.show');
+    Route::put('/performance/review-cycles/{reviewCycle}/participants', [ReviewCycleController::class, 'syncParticipants'])
+        ->name('api.performance.review-cycles.participants');
     Route::post('/performance/review-cycles/{reviewCycle}/start', [ReviewCycleController::class, 'start'])
         ->name('api.performance.review-cycles.start');
     Route::post('/performance/review-cycles/{reviewCycle}/finalize', [ReviewCycleController::class, 'finalize'])
         ->name('api.performance.review-cycles.finalize');
+    Route::delete('/performance/review-cycles/{reviewCycle}', [ReviewCycleController::class, 'destroy'])
+        ->name('api.performance.review-cycles.destroy');
 
     // Performance: goals
     Route::get('/performance/goals', [GoalController::class, 'index'])->name('api.performance.goals.index');

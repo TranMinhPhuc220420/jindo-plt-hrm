@@ -21,7 +21,7 @@ class PromotionSuggestionController extends Controller
         $this->authorize('can_view_promotion_suggestions');
 
         $paginator = $this->suggestions->list(
-            filters: $request->only(['status', 'employee_id']),
+            filters: $request->only(['status', 'employee_id', 'review_cycle_id']),
             perPage: min((int) $request->integer('per_page', 20), 100),
         );
 

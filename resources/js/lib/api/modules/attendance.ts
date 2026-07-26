@@ -1,8 +1,21 @@
-import { apiGet, apiPost } from '../client';
+import { apiGet, apiPost, ensureCsrfCookie } from '../client';
+import { normalizeError } from '../errors';
 import type { PaginationMeta } from '../types';
 
 export type AttendanceStatus =
     'open' | 'pending' | 'approved' | 'rejected' | 'locked';
+
+export type AttendanceEvidence = {
+    id: number;
+    punch_type: 'check_in' | 'check_out';
+    latitude: number;
+    longitude: number;
+    accuracy_meters: number | null;
+    address: string;
+    has_photo: boolean;
+    photo_url: string;
+    captured_at: string | null;
+};
 
 export type AttendanceRecord = {
     id: number;
@@ -19,6 +32,7 @@ export type AttendanceRecord = {
     status: AttendanceStatus;
     source: string;
     note: string | null;
+    evidences?: AttendanceEvidence[];
     employee?: { id: number; code: string; full_name: string } | null;
 };
 
@@ -45,22 +59,80 @@ export type AttendanceSummary = {
     days_present: number;
 };
 
-export async function checkIn(payload: Record<string, unknown> = {}) {
-    const res = await apiPost<AttendanceRecord>(
-        '/api/attendance/check-in',
-        payload,
-    );
+export type PunchEvidenceInput = {
+    latitude: number;
+    longitude: number;
+    accuracy_meters?: number | null;
+    address: string;
+    photo: File;
+    worked_at?: string;
+    note?: string;
+    captured_at?: string;
+};
 
-    return res.data;
+async function postPunch(
+    path: string,
+    payload: PunchEvidenceInput,
+): Promise<AttendanceRecord> {
+    await ensureCsrfCookie();
+
+    const form = new FormData();
+    form.append('latitude', String(payload.latitude));
+    form.append('longitude', String(payload.longitude));
+    form.append('address', payload.address);
+    form.append('photo', payload.photo);
+
+    if (
+        payload.accuracy_meters !== undefined &&
+        payload.accuracy_meters !== null
+    ) {
+        form.append('accuracy_meters', String(payload.accuracy_meters));
+    }
+
+    if (payload.worked_at) {
+        form.append('worked_at', payload.worked_at);
+    }
+
+    if (payload.note) {
+        form.append('note', payload.note);
+    }
+
+    if (payload.captured_at) {
+        form.append('captured_at', payload.captured_at);
+    }
+
+    const xsrf = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]*)/);
+    const headers: Record<string, string> = {
+        Accept: 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+    };
+
+    if (xsrf) {
+        headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf[1]);
+    }
+
+    const response = await fetch(path, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers,
+        body: form,
+    });
+
+    const body = await response.json().catch(() => null);
+
+    if (!response.ok) {
+        throw normalizeError(response.status, body);
+    }
+
+    return (body as { data: AttendanceRecord }).data;
 }
 
-export async function checkOut(payload: Record<string, unknown> = {}) {
-    const res = await apiPost<AttendanceRecord>(
-        '/api/attendance/check-out',
-        payload,
-    );
+export async function checkIn(payload: PunchEvidenceInput) {
+    return postPunch('/api/attendance/check-in', payload);
+}
 
-    return res.data;
+export async function checkOut(payload: PunchEvidenceInput) {
+    return postPunch('/api/attendance/check-out', payload);
 }
 
 export async function listRecords(
@@ -184,4 +256,44 @@ export async function getSummary(params: {
     );
 
     return res.data;
+}
+
+/**
+ * Fetch a private punch photo with session credentials (same pattern as documents).
+ * Returns an object URL the caller must revoke.
+ */
+export async function fetchEvidencePhotoObjectUrl(
+    recordId: number,
+    punchType: 'check_in' | 'check_out',
+): Promise<string> {
+    await ensureCsrfCookie();
+
+    const xsrf = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]*)/);
+    const headers: Record<string, string> = {
+        Accept: 'image/*, application/octet-stream, application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+    };
+
+    if (xsrf) {
+        headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf[1]);
+    }
+
+    const response = await fetch(
+        `/api/attendance/records/${recordId}/evidences/${punchType}/photo`,
+        {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers,
+        },
+    );
+
+    if (!response.ok) {
+        const body = await response.json().catch(() => null);
+
+        throw normalizeError(response.status, body);
+    }
+
+    const blob = await response.blob();
+
+    return URL.createObjectURL(blob);
 }

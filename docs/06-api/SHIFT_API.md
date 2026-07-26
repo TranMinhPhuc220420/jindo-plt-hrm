@@ -93,6 +93,18 @@ Overlap conflicts → `409` / `SHIFT_ASSIGNMENT_OVERLAP`.
 
 Resolves assigned shift windows and overlays **approved** leave for the employee (via Leave services in the controller — Shift `WorkingCalendarService` does not depend on Leave). Pending leave is ignored. When multiple approved leaves cover the same day, the lowest `request_id` wins.
 
+Also includes **rest-only days** (weekend / public holiday with no shift assignment) so schedule UIs can label them clearly. Domain consumers that need work windows only should call `WorkingCalendarService::resolve()` (assigned days only).
+
+Each day includes:
+
+| Field | Meaning |
+|-------|---------|
+| `is_holiday` | `true` when the day is a weekend rest day or public holiday (BC flag) |
+| `rest_kind` | `none` \| `weekend` \| `holiday` (public holiday wins if both apply) |
+| `holiday_name` | Public holiday name when `rest_kind=holiday`, otherwise `null` |
+
+Rest-only rows have `shift_id` / `shift_name` / `start_time` / `end_time` = `null`.
+
 ```json
 {
   "success": true,
@@ -104,6 +116,8 @@ Resolves assigned shift windows and overlays **approved** leave for the employee
       "start_time": "08:00",
       "end_time": "17:00",
       "is_holiday": false,
+      "rest_kind": "none",
+      "holiday_name": null,
       "leave": null
     },
     {
@@ -113,6 +127,8 @@ Resolves assigned shift windows and overlays **approved** leave for the employee
       "start_time": "08:00",
       "end_time": "17:00",
       "is_holiday": false,
+      "rest_kind": "none",
+      "holiday_name": null,
       "leave": {
         "request_id": 12,
         "leave_type_name": "Annual Leave",
@@ -122,6 +138,17 @@ Resolves assigned shift windows and overlays **approved** leave for the employee
         "start_at": null,
         "end_at": null
       }
+    },
+    {
+      "date": "2026-08-03",
+      "shift_id": null,
+      "shift_name": null,
+      "start_time": null,
+      "end_time": null,
+      "is_holiday": true,
+      "rest_kind": "holiday",
+      "holiday_name": "Independence Day",
+      "leave": null
     }
   ]
 }
