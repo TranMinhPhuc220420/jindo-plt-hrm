@@ -120,8 +120,11 @@ See [FILE_STORAGE.md](../01-architecture/FILE_STORAGE.md).
 | 403 | Toast / 403 panel |
 | 404 | Not found panel |
 | 409 / domain `error_code` | Alert with message |
-| 429 | “Too many attempts” |
-| 500 | Generic error + retry |
+| 429 | “Too many attempts” / retry later (`TOO_MANY_REQUESTS`) |
+| 500 | Generic error + retry (`SERVER_ERROR`) |
+| 502 / 503 | Service unavailable + retry (`BAD_GATEWAY` / `SERVICE_UNAVAILABLE`) |
+
+Attendance check-in/out: always send `Idempotency-Key`; on infra/network failure queue locally and retry with the **same** key.
 
 ---
 

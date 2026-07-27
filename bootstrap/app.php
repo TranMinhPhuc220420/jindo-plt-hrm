@@ -98,8 +98,20 @@ return Application::configure(basePath: dirname(__DIR__))
                     404 => 'Resource not found.',
                     403 => 'Forbidden.',
                     401 => 'Unauthenticated.',
+                    502 => 'Bad gateway.',
+                    503 => 'Service unavailable.',
                     default => 'Request failed.',
                 };
+
+                $meta = [];
+                $headers = $e->getHeaders();
+                $retryAfter = $headers['Retry-After'] ?? $headers['retry-after'] ?? null;
+
+                if ($retryAfter !== null && $retryAfter !== '') {
+                    $meta['retry_after'] = is_numeric($retryAfter)
+                        ? (int) $retryAfter
+                        : $retryAfter;
+                }
 
                 return ApiResponse::error(
                     message: $message,
@@ -109,8 +121,11 @@ return Application::configure(basePath: dirname(__DIR__))
                         403 => 'FORBIDDEN',
                         401 => 'UNAUTHENTICATED',
                         429 => 'TOO_MANY_REQUESTS',
+                        502 => 'BAD_GATEWAY',
+                        503 => 'SERVICE_UNAVAILABLE',
                         default => null,
                     },
+                    meta: $meta,
                 );
             }
 

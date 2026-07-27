@@ -5,6 +5,11 @@ export type PunchLocation = {
     address: string;
 };
 
+export const MAX_PUNCH_LOCATION_ATTEMPTS = 5;
+
+/** Backoff after attempts 1–4 before the next try. */
+const LOCATION_RETRY_BACKOFF_MS = [500, 1000, 2000, 3000] as const;
+
 function formatCoordFallback(latitude: number, longitude: number): string {
     return `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
 }
@@ -45,6 +50,95 @@ export async function getCurrentPunchLocation(
         accuracyMeters,
         address,
     };
+}
+
+export function isNonRetryableGeolocationError(error: unknown): boolean {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+        return true;
+    }
+
+    if (error instanceof Error && error.message === 'GEOLOCATION_UNSUPPORTED') {
+        return true;
+    }
+
+    if (error instanceof GeolocationPositionError) {
+        return error.code === error.PERMISSION_DENIED;
+    }
+
+    return false;
+}
+
+export type GetCurrentPunchLocationWithRetryOptions = {
+    signal?: AbortSignal;
+    maxAttempts?: number;
+    onAttempt?: (attempt: number, maxAttempts: number) => void;
+};
+
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+    return new Promise((resolve, reject) => {
+        if (signal?.aborted) {
+            reject(new DOMException('Aborted', 'AbortError'));
+
+            return;
+        }
+
+        const timer = window.setTimeout(() => {
+            signal?.removeEventListener('abort', onAbort);
+            resolve();
+        }, ms);
+
+        const onAbort = () => {
+            window.clearTimeout(timer);
+            reject(new DOMException('Aborted', 'AbortError'));
+        };
+
+        signal?.addEventListener('abort', onAbort, { once: true });
+    });
+}
+
+/**
+ * Load GPS for punch evidence with up to `maxAttempts` tries.
+ * Does not retry permission denied, unsupported geolocation, or abort.
+ */
+export async function getCurrentPunchLocationWithRetry(
+    options: GetCurrentPunchLocationWithRetryOptions = {},
+): Promise<PunchLocation> {
+    const maxAttempts = options.maxAttempts ?? MAX_PUNCH_LOCATION_ATTEMPTS;
+    const { signal, onAttempt } = options;
+    let lastError: unknown;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        if (signal?.aborted) {
+            throw new DOMException('Aborted', 'AbortError');
+        }
+
+        onAttempt?.(attempt, maxAttempts);
+
+        try {
+            return await getCurrentPunchLocation(signal);
+        } catch (error) {
+            lastError = error;
+
+            if (isNonRetryableGeolocationError(error)) {
+                throw error;
+            }
+
+            if (attempt >= maxAttempts) {
+                break;
+            }
+
+            const backoff =
+                LOCATION_RETRY_BACKOFF_MS[
+                    Math.min(attempt - 1, LOCATION_RETRY_BACKOFF_MS.length - 1)
+                ];
+
+            await sleep(backoff, signal);
+        }
+    }
+
+    throw lastError instanceof Error
+        ? lastError
+        : new Error('GEOLOCATION_UNAVAILABLE');
 }
 
 async function reverseGeocode(

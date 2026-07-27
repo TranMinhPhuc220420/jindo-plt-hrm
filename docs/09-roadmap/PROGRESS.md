@@ -39,9 +39,9 @@
 | Field | Value |
 |-------|--------|
 | **Current phase** | ∞ Future |
-| **Current step** | `∞.dashboard-mobile` |
+| **Current step** | `∞.attendance-punch-load-retry` |
 | **Overall status** | Done |
-| **Last updated** | 2026-07-26 |
+| **Last updated** | 2026-07-27 |
 | **Last updated by** | agent |
 | **Next action** | Future backlog / discuss `v1.0.0` readiness |
 | **Blockers** | None |
@@ -2379,6 +2379,51 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 - types:check green
 ```
 
+### ∞.attendance-punch-resilience — Check-in/out infra + offline resilience
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-27 |
+| Completed | 2026-07-27 |
+| Docs | [ATTENDANCE_API.md](../06-api/ATTENDANCE_API.md), [ERROR_HANDLING.md](../04-backend/ERROR_HANDLING.md), [API_CLIENT.md](../05-frontend/API_CLIENT.md) |
+
+- [x] Map 503/502 to stable `error_code`; require `Idempotency-Key` on punch
+- [x] Persist punch idempotency rows (48h TTL); safe replay
+- [x] FE: classify infra errors, client timeout, i18n toasts
+- [x] IndexedDB offline queue + sync banner on `/attendance`
+- [x] AttendanceApiTest + types:check
+
+**Notes:**
+
+```
+- Scope: UX + Idempotency-Key + offline queue (no Service Worker)
+- Migration: attendance_punch_idempotency; AttendancePunchIdempotencyService
+- FE: punch-queue.ts (IndexedDB), classifyPunchError, pending sync banner
+- AttendanceApiTest 25 passed; types:check green
+```
+
+### ∞.attendance-punch-load-retry — GPS load retry before punch (max 5)
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-07-27 |
+| Completed | 2026-07-27 |
+| Docs | — |
+
+- [x] `getCurrentPunchLocationWithRetry` (max 5, backoff, skip permission/unsupported)
+- [x] PunchEvidenceDialog boot + Retry location use retry helper; attempt UI
+- [x] en/vi i18n + types:check
+
+**Notes:**
+
+```
+- Scope: GPS evidence load only (not camera permission, not API list load)
+- Backoff 500ms → 1s → 2s → 3s; attempt UI evidence.location_loading_attempt
+- types:check green
+```
+
 ---
 
 ## Activity log
@@ -2387,6 +2432,10 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-07-27 | `∞.attendance-punch-load-retry` | Done: GPS load retry max 5 + attempt UI; types green | agent |
+| 2026-07-27 | `∞.attendance-punch-load-retry` | Started: GPS location load retry max 5 for punch dialog | agent |
+| 2026-07-27 | `∞.attendance-punch-resilience` | Done: Idempotency-Key + offline queue + 503 UX; tests + types green | agent |
+| 2026-07-27 | `∞.attendance-punch-resilience` | Started: punch 503/offline resilience + Idempotency-Key | agent |
 | 2026-07-26 | `∞.dashboard-mobile` | Done: company+self dashboard mobile polish; types green | agent |
 | 2026-07-26 | `∞.dashboard-mobile` | Started: mobile polish for company + self dashboard | agent |
 | 2026-07-26 | `∞.assets-documents-mobile` | Done: assets + documents mobile cards/Sheets; types green | agent |

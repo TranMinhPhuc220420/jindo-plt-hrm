@@ -49,9 +49,12 @@
 | 404 | Resource not found (or not visible in scope — avoid leaking cross-company existence when required) |
 | 409 | Conflict (duplicate run, invalid state transition race) |
 | 422 | Validation failed (Form Request) |
-| 429 | Rate limited |
-| 500 | Unexpected server error |
-| 503 | Dependency unavailable |
+| 429 | Rate limited (`TOO_MANY_REQUESTS`) |
+| 500 | Unexpected server error (`SERVER_ERROR`) |
+| 502 | Bad gateway (`BAD_GATEWAY`) |
+| 503 | Dependency / service unavailable (`SERVICE_UNAVAILABLE`) |
+
+When an HTTP exception exposes `Retry-After`, include it in the error envelope as `meta.retry_after` (seconds or HTTP-date).
 
 ---
 
@@ -79,6 +82,11 @@ Use UPPER_SNAKE_CASE, stable across releases:
 | `LEAVE_BALANCE_INSUFFICIENT` | Not enough balance |
 | `LEAVE_INVALID_TRANSITION` | Bad status change |
 | `ATTENDANCE_PERIOD_LOCKED` | Cannot correct/approve |
+| `IDEMPOTENCY_KEY_REQUIRED` | Punch missing `Idempotency-Key` header |
+| `IDEMPOTENCY_KEY_INVALID` | Punch `Idempotency-Key` is not a UUID |
+| `IDEMPOTENCY_KEY_REUSE` | Same key used with a different punch body |
+| `SERVICE_UNAVAILABLE` | HTTP 503 |
+| `BAD_GATEWAY` | HTTP 502 |
 | `PAYROLL_ALREADY_FINALIZED` | Immutable run |
 | `ASSET_NOT_AVAILABLE` | Cannot assign |
 | `COMPANY_SCOPE_MISMATCH` | Cross-company reference |

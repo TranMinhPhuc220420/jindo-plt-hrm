@@ -19,6 +19,8 @@ type Props = {
     employeeId: number | null;
     today: AttendanceRecord | null;
     busy: boolean;
+    pendingCheckIn?: boolean;
+    pendingCheckOut?: boolean;
     onCheckIn: () => void;
     onCheckOut: () => void;
 };
@@ -52,6 +54,8 @@ export function TodayStatusCard({
     employeeId,
     today,
     busy,
+    pendingCheckIn = false,
+    pendingCheckOut = false,
     onCheckIn,
     onCheckOut,
 }: Props) {
@@ -162,7 +166,11 @@ export function TodayStatusCard({
                                     className={cn(
                                         isMobile && 'min-h-11 w-full',
                                     )}
-                                    disabled={busy || !!today?.check_in_at}
+                                    disabled={
+                                        busy ||
+                                        !!today?.check_in_at ||
+                                        pendingCheckIn
+                                    }
                                     onClick={onCheckIn}
                                 >
                                     {t('index.check_in')}
@@ -177,7 +185,8 @@ export function TodayStatusCard({
                                     disabled={
                                         busy ||
                                         !today?.check_in_at ||
-                                        !!today?.check_out_at
+                                        !!today?.check_out_at ||
+                                        pendingCheckOut
                                     }
                                     onClick={onCheckOut}
                                 >

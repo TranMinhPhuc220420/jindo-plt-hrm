@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
@@ -11,6 +11,7 @@ import { AttendanceRecordsTable } from '@/components/attendance/attendance-recor
 import { MonthSummaryStrip } from '@/components/attendance/month-summary-strip';
 import { PunchEvidenceDialog } from '@/components/attendance/punch-evidence-dialog';
 import type { PunchEvidencePayload } from '@/components/attendance/punch-evidence-dialog';
+import { PunchPendingSyncBanner } from '@/components/attendance/punch-pending-sync-banner';
 import { TodayStatusCard } from '@/components/attendance/today-status-card';
 import AdminPageShell from '@/components/shared/admin-page-shell';
 import {
@@ -19,12 +20,19 @@ import {
     LoadingState,
 } from '@/components/shared/async-state';
 import { useLoadEffect } from '@/hooks/use-load-effect';
-import { ApiError } from '@/lib/api/errors';
+import {
+    ApiError,
+    classifyPunchError,
+    isRetryablePunchError,
+    punchErrorToastKey,
+} from '@/lib/api/errors';
 import * as attendanceApi from '@/lib/api/modules/attendance';
 import type {
     AttendanceRecord,
     AttendanceSummary,
 } from '@/lib/api/modules/attendance';
+import * as punchQueue from '@/lib/attendance/punch-queue';
+import type { PendingPunch } from '@/lib/attendance/punch-queue';
 import { useAuth } from '@/lib/auth/auth-context';
 import { formatDateString } from '@/lib/datetime';
 
@@ -63,12 +71,23 @@ export default function AttendanceIndexPage() {
     const [selectedRecordId, setSelectedRecordId] = useState<number | null>(
         null,
     );
+    const [pendingPunches, setPendingPunches] = useState<PendingPunch[]>([]);
+    const [syncingQueue, setSyncingQueue] = useState(false);
+    const syncingRef = useRef(false);
+
+    const refreshPending = useCallback(async () => {
+        try {
+            setPendingPunches(await punchQueue.listPending());
+        } catch {
+            // IndexedDB unavailable — punch still works online-only.
+        }
+    }, []);
 
     const loadToday = useCallback(async () => {
         if (!employeeId) {
             setTodayRecord(null);
 
-            return;
+            return null as AttendanceRecord | null;
         }
 
         const day = todayIso();
@@ -80,11 +99,13 @@ export default function AttendanceIndexPage() {
                 date_to: day,
                 per_page: 5,
             });
-            setTodayRecord(
-                result.data.find((row) => row.work_date === day) ?? null,
-            );
+            const row =
+                result.data.find((item) => item.work_date === day) ?? null;
+            setTodayRecord(row);
+
+            return row;
         } catch {
-            // Hero stays empty; list error handled separately.
+            return null;
         }
     }, [employeeId]);
 
@@ -167,11 +188,96 @@ export default function AttendanceIndexPage() {
 
     useLoadEffect(loadSummary, [loadSummary]);
 
-    useLoadEffect(loadToday, [loadToday]);
+    useLoadEffect(() => {
+        void loadToday();
+    }, [loadToday]);
 
-    async function refreshAll() {
+    const refreshAll = useCallback(async () => {
         await Promise.all([loadRecords(), loadSummary(), loadToday()]);
-    }
+    }, [loadRecords, loadSummary, loadToday]);
+
+    const syncPendingPunches = useCallback(async () => {
+        if (syncingRef.current) {
+            return;
+        }
+
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+            await refreshPending();
+
+            return;
+        }
+
+        syncingRef.current = true;
+        setSyncingQueue(true);
+
+        try {
+            const result = await punchQueue.drain(async (row) => {
+                const photo = punchQueue.toPunchFile(row);
+                const payload = {
+                    latitude: row.latitude,
+                    longitude: row.longitude,
+                    accuracy_meters: row.accuracy_meters,
+                    address: row.address,
+                    photo,
+                    captured_at: row.captured_at,
+                    idempotencyKey: row.idempotencyKey,
+                };
+
+                try {
+                    if (row.mode === 'check_in') {
+                        await attendanceApi.checkIn(payload);
+                    } else {
+                        await attendanceApi.checkOut(payload);
+                    }
+                } catch (err) {
+                    if (
+                        err instanceof ApiError &&
+                        (err.errorCode === 'ATTENDANCE_ALREADY_CHECKED_IN' ||
+                            err.errorCode === 'ATTENDANCE_INVALID_TRANSITION')
+                    ) {
+                        const today = await loadToday();
+
+                        if (row.mode === 'check_in' && today?.check_in_at) {
+                            return;
+                        }
+
+                        if (row.mode === 'check_out' && today?.check_out_at) {
+                            return;
+                        }
+                    }
+
+                    throw err;
+                }
+            });
+
+            await refreshPending();
+
+            if (result.synced > 0) {
+                toast.success(t('index.toast_synced'));
+                await refreshAll();
+            }
+        } catch {
+            await refreshPending();
+        } finally {
+            syncingRef.current = false;
+            setSyncingQueue(false);
+        }
+    }, [refreshPending, loadToday, refreshAll, t]);
+
+    useLoadEffect(() => {
+        void refreshPending();
+        void syncPendingPunches();
+    }, [refreshPending, syncPendingPunches]);
+
+    useEffect(() => {
+        function onOnline() {
+            void syncPendingPunches();
+        }
+
+        window.addEventListener('online', onOnline);
+
+        return () => window.removeEventListener('online', onOnline);
+    }, [syncPendingPunches]);
 
     function applyPeriod(
         preset: AttendancePeriodPreset,
@@ -182,25 +288,72 @@ export default function AttendanceIndexPage() {
         setDateTo(range.to);
     }
 
+    async function queuePunch(
+        mode: 'check_in' | 'check_out',
+        payload: PunchEvidencePayload,
+        idempotencyKey: string,
+    ) {
+        await punchQueue.enqueue({
+            mode,
+            idempotencyKey,
+            latitude: payload.latitude,
+            longitude: payload.longitude,
+            accuracy_meters: payload.accuracy_meters,
+            address: payload.address,
+            captured_at: payload.captured_at,
+            photo: payload.photo,
+        });
+        await refreshPending();
+    }
+
     async function handlePunchSubmit(payload: PunchEvidencePayload) {
         if (!punchMode) {
             return;
         }
 
+        const mode = punchMode;
+        const idempotencyKey = crypto.randomUUID();
+
         setBusy(true);
 
         try {
-            if (punchMode === 'check_in') {
-                await attendanceApi.checkIn(payload);
+            if (typeof navigator !== 'undefined' && !navigator.onLine) {
+                await queuePunch(mode, payload, idempotencyKey);
+                toast.message(t('index.toast_queued'));
+                setPunchMode(null);
+
+                return;
+            }
+
+            const request = {
+                ...payload,
+                idempotencyKey,
+            };
+
+            if (mode === 'check_in') {
+                await attendanceApi.checkIn(request);
                 toast.success(t('index.toast_in'));
             } else {
-                await attendanceApi.checkOut(payload);
+                await attendanceApi.checkOut(request);
                 toast.success(t('index.toast_out'));
             }
 
             setPunchMode(null);
             await refreshAll();
         } catch (err) {
+            if (isRetryablePunchError(err)) {
+                try {
+                    await queuePunch(mode, payload, idempotencyKey);
+                    const kind = classifyPunchError(err);
+                    toast.error(t(punchErrorToastKey(kind)));
+                    setPunchMode(null);
+                } catch {
+                    toast.error(t('index.queue_full'));
+                }
+
+                return;
+            }
+
             toast.error(
                 err instanceof ApiError ? err.message : t('index.toast_error'),
             );
@@ -224,16 +377,31 @@ export default function AttendanceIndexPage() {
         ? 'can_view_attendance'
         : 'can_check_in_out';
 
+    const pendingCheckIn = pendingPunches.some(
+        (row) => row.mode === 'check_in',
+    );
+    const pendingCheckOut = pendingPunches.some(
+        (row) => row.mode === 'check_out',
+    );
+
     return (
         <AdminPageShell
             title={t('index.title')}
             description={t('index.description')}
             permission={permission}
         >
+            <PunchPendingSyncBanner
+                pending={pendingPunches}
+                syncing={syncingQueue}
+                onSync={() => void syncPendingPunches()}
+            />
+
             <TodayStatusCard
                 employeeId={employeeId}
                 today={todayRecord}
-                busy={busy}
+                busy={busy || syncingQueue}
+                pendingCheckIn={pendingCheckIn}
+                pendingCheckOut={pendingCheckOut}
                 onCheckIn={() => setPunchMode('check_in')}
                 onCheckOut={() => setPunchMode('check_out')}
             />

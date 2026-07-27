@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,8 +19,9 @@ import {
 } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
-    getCurrentPunchLocation,
+    getCurrentPunchLocationWithRetry,
     mapGeolocationError,
+    MAX_PUNCH_LOCATION_ATTEMPTS,
 } from '@/lib/attendance/geolocation';
 import type { PunchLocation } from '@/lib/attendance/geolocation';
 
@@ -55,10 +56,45 @@ export function PunchEvidenceDialog({
     const [location, setLocation] = useState<PunchLocation | null>(null);
     const [locationError, setLocationError] = useState<string | null>(null);
     const [locationLoading, setLocationLoading] = useState(false);
+    const [locationAttempt, setLocationAttempt] = useState(0);
     const [cameraError, setCameraError] = useState<string | null>(null);
     const [photo, setPhoto] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    const locationAbortRef = useRef<AbortController | null>(null);
+
+    const loadLocation = useCallback(async (signal: AbortSignal) => {
+        setLocationLoading(true);
+        setLocationError(null);
+        setLocation(null);
+        setLocationAttempt(0);
+
+        try {
+            const loc = await getCurrentPunchLocationWithRetry({
+                signal,
+                onAttempt: (attempt) => {
+                    setLocationAttempt(attempt);
+                },
+            });
+
+            if (!signal.aborted) {
+                setLocation(loc);
+                setLocationAttempt(0);
+            }
+        } catch (error) {
+            if (
+                !signal.aborted &&
+                !(error instanceof DOMException && error.name === 'AbortError')
+            ) {
+                setLocationError(mapGeolocationError(error));
+                setLocationAttempt(0);
+            }
+        } finally {
+            if (!signal.aborted) {
+                setLocationLoading(false);
+            }
+        }
+    }, []);
 
     useEffect(() => {
         if (!open) {
@@ -66,11 +102,10 @@ export function PunchEvidenceDialog({
         }
 
         const abort = new AbortController();
+        locationAbortRef.current = abort;
         let cancelled = false;
 
         async function boot() {
-            setLocation(null);
-            setLocationError(null);
             setCameraError(null);
             setPhoto(null);
             setPreviewUrl((prev) => {
@@ -80,29 +115,8 @@ export function PunchEvidenceDialog({
 
                 return null;
             });
-            setLocationLoading(true);
 
-            try {
-                const loc = await getCurrentPunchLocation(abort.signal);
-
-                if (!cancelled) {
-                    setLocation(loc);
-                }
-            } catch (error) {
-                if (
-                    !cancelled &&
-                    !(
-                        error instanceof DOMException &&
-                        error.name === 'AbortError'
-                    )
-                ) {
-                    setLocationError(mapGeolocationError(error));
-                }
-            } finally {
-                if (!cancelled) {
-                    setLocationLoading(false);
-                }
-            }
+            await loadLocation(abort.signal);
 
             try {
                 if (!navigator.mediaDevices?.getUserMedia) {
@@ -138,10 +152,11 @@ export function PunchEvidenceDialog({
         return () => {
             cancelled = true;
             abort.abort();
+            locationAbortRef.current = null;
             streamRef.current?.getTracks().forEach((track) => track.stop());
             streamRef.current = null;
         };
-    }, [open]);
+    }, [open, loadLocation]);
 
     useEffect(() => {
         return () => {
@@ -242,7 +257,12 @@ export function PunchEvidenceDialog({
                 </h3>
                 {locationLoading ? (
                     <p className="text-sm text-muted-foreground">
-                        {t('evidence.location_loading')}
+                        {locationAttempt > 0
+                            ? t('evidence.location_loading_attempt', {
+                                  attempt: locationAttempt,
+                                  max: MAX_PUNCH_LOCATION_ATTEMPTS,
+                              })
+                            : t('evidence.location_loading')}
                     </p>
                 ) : locationError ? (
                     <p className="text-sm text-destructive">
@@ -267,15 +287,10 @@ export function PunchEvidenceDialog({
                     className="min-h-9"
                     disabled={locationLoading || busy || submitting}
                     onClick={() => {
-                        setLocationLoading(true);
-                        setLocationError(null);
-                        void getCurrentPunchLocation()
-                            .then(setLocation)
-                            .catch((error) => {
-                                setLocation(null);
-                                setLocationError(mapGeolocationError(error));
-                            })
-                            .finally(() => setLocationLoading(false));
+                        locationAbortRef.current?.abort();
+                        const abort = new AbortController();
+                        locationAbortRef.current = abort;
+                        void loadLocation(abort.signal);
                     }}
                 >
                     {t('evidence.retry_location')}

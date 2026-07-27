@@ -54,6 +54,8 @@ Does **not** create payslips — Payroll consumes summaries via services.
 
 **Content-Type:** `multipart/form-data`
 
+**Required header:** `Idempotency-Key` — UUID for this punch attempt. Replays with the same key and same request fingerprint return the original `200`/`201` body without a second write. Missing key → **400** `IDEMPOTENCY_KEY_REQUIRED`. Same key with a different body → **409** `IDEMPOTENCY_KEY_REUSE`. Keys are retained for **48 hours**.
+
 | Field | Required | Notes |
 |-------|----------|--------|
 | `latitude` | yes | -90..90 |
@@ -66,7 +68,9 @@ Does **not** create payslips — Payroll consumes summaries via services.
 | `note` | no | optional note |
 | `source` | no | `manual` (check-in only) |
 
-Location is **recorded only** (no geofence rejection). Missing evidence → **422** `ATTENDANCE_EVIDENCE_REQUIRED` and **no** attendance write.
+Location is **recorded only** (no geofence rejection). Missing evidence → **422** `ATTENDANCE_EVIDENCE_REQUIRED` and **no** attendance write. Domain / validation failures do **not** cache an idempotency success response.
+
+Infrastructure failures (`502` `BAD_GATEWAY`, `503` `SERVICE_UNAVAILABLE`, `500` `SERVER_ERROR`, timeouts, offline) should be retried by the client using the **same** `Idempotency-Key` (and/or queued offline). Optional `meta.retry_after` may be present on rate-limit / unavailable responses.
 
 **200/201** → attendance record for the day/session, including nested `evidences`.
 

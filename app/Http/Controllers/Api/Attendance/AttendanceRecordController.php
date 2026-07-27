@@ -9,6 +9,7 @@ use App\Http\Requests\Attendance\CheckOutRequest;
 use App\Http\Requests\Attendance\LockAttendancePeriodRequest;
 use App\Http\Resources\AttendanceRecordResource;
 use App\Models\AttendanceRecord;
+use App\Services\Attendance\AttendancePunchIdempotencyService;
 use App\Services\Attendance\AttendanceService;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -20,6 +21,7 @@ class AttendanceRecordController extends Controller
 {
     public function __construct(
         private readonly AttendanceService $attendance,
+        private readonly AttendancePunchIdempotencyService $punchIdempotency,
     ) {}
 
     public function checkIn(CheckInRequest $request): JsonResponse
@@ -28,21 +30,19 @@ class AttendanceRecordController extends Controller
 
         $validated = $request->validated();
 
-        $record = $this->attendance->checkIn([
-            'worked_at' => $validated['worked_at'] ?? null,
-            'note' => $validated['note'] ?? null,
-            'source' => $validated['source'] ?? null,
-            'latitude' => $validated['latitude'],
-            'longitude' => $validated['longitude'],
-            'accuracy_meters' => $validated['accuracy_meters'] ?? null,
-            'address' => $validated['address'],
-            'captured_at' => $validated['captured_at'] ?? null,
-            'photo' => $this->requireEvidencePhoto($request),
-        ]);
-
-        return ApiResponse::created(
-            (new AttendanceRecordResource($record))->resolve(),
-            'Checked in.',
+        return $this->punchIdempotency->checkIn(
+            $request->header('Idempotency-Key'),
+            [
+                'worked_at' => $validated['worked_at'] ?? null,
+                'note' => $validated['note'] ?? null,
+                'source' => $validated['source'] ?? null,
+                'latitude' => $validated['latitude'],
+                'longitude' => $validated['longitude'],
+                'accuracy_meters' => $validated['accuracy_meters'] ?? null,
+                'address' => $validated['address'],
+                'captured_at' => $validated['captured_at'] ?? null,
+                'photo' => $this->requireEvidencePhoto($request),
+            ],
         );
     }
 
@@ -52,20 +52,18 @@ class AttendanceRecordController extends Controller
 
         $validated = $request->validated();
 
-        $record = $this->attendance->checkOut([
-            'worked_at' => $validated['worked_at'] ?? null,
-            'note' => $validated['note'] ?? null,
-            'latitude' => $validated['latitude'],
-            'longitude' => $validated['longitude'],
-            'accuracy_meters' => $validated['accuracy_meters'] ?? null,
-            'address' => $validated['address'],
-            'captured_at' => $validated['captured_at'] ?? null,
-            'photo' => $this->requireEvidencePhoto($request),
-        ]);
-
-        return ApiResponse::success(
-            (new AttendanceRecordResource($record))->resolve(),
-            'Checked out.',
+        return $this->punchIdempotency->checkOut(
+            $request->header('Idempotency-Key'),
+            [
+                'worked_at' => $validated['worked_at'] ?? null,
+                'note' => $validated['note'] ?? null,
+                'latitude' => $validated['latitude'],
+                'longitude' => $validated['longitude'],
+                'accuracy_meters' => $validated['accuracy_meters'] ?? null,
+                'address' => $validated['address'],
+                'captured_at' => $validated['captured_at'] ?? null,
+                'photo' => $this->requireEvidencePhoto($request),
+            ],
         );
     }
 

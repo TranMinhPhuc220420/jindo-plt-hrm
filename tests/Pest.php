@@ -7,6 +7,7 @@ use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /*
@@ -72,6 +73,18 @@ function spaJsonHeaders(): array
         'Origin' => 'http://localhost',
         'Referer' => 'http://localhost',
     ];
+}
+
+/**
+ * SPA headers plus Idempotency-Key for attendance check-in / check-out.
+ *
+ * @return array<string, string>
+ */
+function punchHeaders(?string $idempotencyKey = null): array
+{
+    return array_merge(spaJsonHeaders(), [
+        'Idempotency-Key' => $idempotencyKey ?? (string) Str::uuid(),
+    ]);
 }
 
 /**

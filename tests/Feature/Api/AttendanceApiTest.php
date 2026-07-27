@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\AttendanceEvidence;
+use App\Models\AttendancePunchIdempotency;
 use App\Models\AttendanceRecord;
 use App\Models\AuditLog;
 use App\Models\Company;
@@ -17,6 +18,7 @@ use App\Services\Attendance\AttendanceSummaryService;
 use App\Services\Settings\SettingsService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 function seedAttendanceAuth(): void
 {
@@ -57,7 +59,7 @@ test('cannot check in without can_check_in_out', function () {
     $user = attendanceUser([]);
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence())
         ->assertForbidden();
 });
@@ -69,7 +71,7 @@ test('check-in without evidence is rejected and creates no record', function () 
     linkEmployee($user, $company);
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->postJson('/api/attendance/check-in', [
             'worked_at' => '2026-07-16T08:00:00+07:00',
         ])
@@ -111,7 +113,7 @@ test('employee can check in and out with metrics from shift', function () {
     ]);
 
     $in = $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T08:15:00+07:00',
         ]));
@@ -128,7 +130,7 @@ test('employee can check in and out with metrics from shift', function () {
     expect(AuditLog::query()->where('action', 'attendance.checked_in')->count())->toBe(1);
 
     $out = $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-16T17:30:00+07:00',
             'address' => 'District 1, Ho Chi Minh City',
@@ -152,7 +154,7 @@ test('evidence photo endpoint is authorized', function () {
     linkEmployee($user, $company);
 
     $recordId = $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T08:00:00+07:00',
         ]))
@@ -196,7 +198,7 @@ test('check-in rejects an out-of-range latitude', function () {
     linkEmployee($user, $company);
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence([
             'latitude' => 95.0,
         ]))
@@ -214,7 +216,7 @@ test('check-in rejects a non-image photo upload', function () {
     linkEmployee($user, $company);
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence([
             'photo' => UploadedFile::fake()->create('note.pdf', 100, 'application/pdf'),
         ]))
@@ -231,7 +233,7 @@ test('check-in rejects a photo larger than 5MB', function () {
     linkEmployee($user, $company);
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence([
             'photo' => UploadedFile::fake()->image('big.jpg')->size(6000),
         ]))
@@ -244,7 +246,7 @@ test('check-in rejects a photo larger than 5MB', function () {
 test('check-in requires authentication', function () {
     Company::factory()->create();
 
-    $this->withHeaders(spaJsonHeaders())
+    $this->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence())
         ->assertStatus(401);
 });
@@ -279,7 +281,7 @@ test('evidence photo for a punch type without a stored photo returns 404', funct
     linkEmployee($user, $company);
 
     $recordId = $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence())
         ->assertCreated()
         ->json('data.id');
@@ -327,14 +329,14 @@ test('double check-in returns ATTENDANCE_ALREADY_CHECKED_IN', function () {
     linkEmployee($user, $company);
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T08:00:00+07:00',
         ]))
         ->assertCreated();
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T08:05:00+07:00',
         ]))
@@ -349,7 +351,7 @@ test('checking out without an open check-in returns ATTENDANCE_INVALID_TRANSITIO
     linkEmployee($user, $company);
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-16T17:00:00+07:00',
         ]))
@@ -373,14 +375,14 @@ test('correction approve and reject with audit', function () {
     ]);
 
     $this->actingAs($employeeUser)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T09:00:00+07:00',
         ]))
         ->assertCreated();
 
     $this->actingAs($employeeUser)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-16T17:00:00+07:00',
         ]))
@@ -413,13 +415,13 @@ test('correction approve and reject with audit', function () {
 
     // Second correction then reject
     $this->actingAs($employeeUser)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-17T08:00:00+07:00',
         ]))
         ->assertCreated();
     $this->actingAs($employeeUser)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-17T17:00:00+07:00',
         ]))
@@ -464,14 +466,14 @@ test('locked period blocks check-in and correction', function () {
     linkEmployee($user, $company);
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T08:00:00+07:00',
         ]))
         ->assertCreated();
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-16T17:00:00+07:00',
         ]))
@@ -503,7 +505,7 @@ test('locked period blocks check-in and correction', function () {
         ->assertJsonPath('error_code', 'ATTENDANCE_PERIOD_LOCKED');
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-18T08:00:00+07:00',
         ]))
@@ -518,7 +520,7 @@ test('locked period blocks check-in and correction', function () {
         ->assertOk();
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-18T17:00:00+07:00',
         ]))
@@ -536,13 +538,13 @@ test('summary aggregates period minutes', function () {
     $employee = linkEmployee($user, $company);
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T08:00:00+07:00',
         ]))
         ->assertCreated();
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-16T17:00:00+07:00',
         ]))
@@ -602,13 +604,13 @@ test('record approve path works', function () {
     linkEmployee($user, $company);
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T08:00:00+07:00',
         ]))
         ->assertCreated();
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-16T17:00:00+07:00',
         ]))
@@ -639,13 +641,13 @@ test('naive datetime-local correction is interpreted in company timezone', funct
     linkEmployee($user, $company);
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T09:00:00+07:00',
         ]))
         ->assertCreated();
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-16T18:00:00+07:00',
         ]))
@@ -715,7 +717,7 @@ test('full-day approved leave suppresses late and overtime metrics', function ()
     ]);
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-16T08:15:00+07:00',
         ]))
@@ -723,7 +725,7 @@ test('full-day approved leave suppresses late and overtime metrics', function ()
         ->assertJsonPath('data.late_minutes', 0);
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-out', attendanceEvidence([
             'worked_at' => '2026-07-16T17:30:00+07:00',
         ]))
@@ -771,10 +773,104 @@ test('am half-day leave evaluates late against afternoon window', function () {
     ]);
 
     $this->actingAs($user)
-        ->withHeaders(spaJsonHeaders())
+        ->withHeaders(punchHeaders())
         ->post('/api/attendance/check-in', attendanceEvidence([
             'worked_at' => '2026-07-17T13:00:00+07:00',
         ]))
         ->assertCreated()
         ->assertJsonPath('data.late_minutes', 30);
+});
+
+test('check-in without Idempotency-Key is rejected', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $user = attendanceUser(['can_check_in_out']);
+    linkEmployee($user, $company);
+
+    $this->actingAs($user)
+        ->withHeaders(spaJsonHeaders())
+        ->post('/api/attendance/check-in', attendanceEvidence([
+            'worked_at' => '2026-07-16T08:00:00+07:00',
+        ]))
+        ->assertStatus(400)
+        ->assertJsonPath('error_code', 'IDEMPOTENCY_KEY_REQUIRED');
+
+    expect(AttendanceRecord::query()->count())->toBe(0);
+});
+
+test('repeated check-in with the same Idempotency-Key replays without a second write', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $user = attendanceUser(['can_check_in_out']);
+    linkEmployee($user, $company);
+    $key = (string) Str::uuid();
+    $shared = [
+        'worked_at' => '2026-07-16T08:00:00+07:00',
+        'captured_at' => '2026-07-16T08:00:00+07:00',
+        'address' => 'Ho Chi Minh City, Vietnam',
+        'latitude' => 10.7769000,
+        'longitude' => 106.7009000,
+    ];
+
+    $first = $this->actingAs($user)
+        ->withHeaders(punchHeaders($key))
+        ->post('/api/attendance/check-in', attendanceEvidence($shared))
+        ->assertCreated();
+
+    $second = $this->actingAs($user)
+        ->withHeaders(punchHeaders($key))
+        ->post('/api/attendance/check-in', attendanceEvidence($shared))
+        ->assertCreated();
+
+    expect($second->json())->toEqual($first->json())
+        ->and(AttendanceRecord::query()->count())->toBe(1)
+        ->and(AttendanceEvidence::query()->count())->toBe(1)
+        ->and(AttendancePunchIdempotency::query()->count())->toBe(1)
+        ->and(AuditLog::query()->where('action', 'attendance.checked_in')->count())->toBe(1);
+});
+
+test('same Idempotency-Key with a different body returns IDEMPOTENCY_KEY_REUSE', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $user = attendanceUser(['can_check_in_out']);
+    linkEmployee($user, $company);
+    $key = (string) Str::uuid();
+
+    $this->actingAs($user)
+        ->withHeaders(punchHeaders($key))
+        ->post('/api/attendance/check-in', attendanceEvidence([
+            'worked_at' => '2026-07-16T08:00:00+07:00',
+            'address' => 'First address',
+        ]))
+        ->assertCreated();
+
+    $this->actingAs($user)
+        ->withHeaders(punchHeaders($key))
+        ->post('/api/attendance/check-in', attendanceEvidence([
+            'worked_at' => '2026-07-16T08:00:00+07:00',
+            'address' => 'Different address',
+        ]))
+        ->assertStatus(409)
+        ->assertJsonPath('error_code', 'IDEMPOTENCY_KEY_REUSE');
+
+    expect(AttendanceRecord::query()->count())->toBe(1);
+});
+
+test('domain failure does not cache an idempotency success response', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $user = attendanceUser(['can_check_in_out']);
+    linkEmployee($user, $company);
+    $key = (string) Str::uuid();
+
+    $this->actingAs($user)
+        ->withHeaders(punchHeaders($key))
+        ->post('/api/attendance/check-out', attendanceEvidence([
+            'worked_at' => '2026-07-16T17:00:00+07:00',
+        ]))
+        ->assertStatus(422)
+        ->assertJsonPath('error_code', 'ATTENDANCE_INVALID_TRANSITION');
+
+    expect(AttendancePunchIdempotency::query()->count())->toBe(0)
+        ->and(AttendanceRecord::query()->count())->toBe(0);
 });

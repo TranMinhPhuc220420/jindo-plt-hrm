@@ -68,7 +68,11 @@ export type PunchEvidenceInput = {
     worked_at?: string;
     note?: string;
     captured_at?: string;
+    /** Required UUID — reuse on retry / offline sync for the same attempt. */
+    idempotencyKey: string;
 };
+
+const PUNCH_TIMEOUT_MS = 45_000;
 
 async function postPunch(
     path: string,
@@ -105,6 +109,7 @@ async function postPunch(
     const headers: Record<string, string> = {
         Accept: 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
+        'Idempotency-Key': payload.idempotencyKey,
     };
 
     if (xsrf) {
@@ -116,6 +121,7 @@ async function postPunch(
         credentials: 'same-origin',
         headers,
         body: form,
+        signal: AbortSignal.timeout(PUNCH_TIMEOUT_MS),
     });
 
     const body = await response.json().catch(() => null);
