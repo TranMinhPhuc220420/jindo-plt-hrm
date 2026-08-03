@@ -16,6 +16,7 @@ use App\Models\ShiftAssignment;
 use App\Models\User;
 use App\Services\Attendance\AttendanceSummaryService;
 use App\Services\Settings\SettingsService;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -357,6 +358,65 @@ test('checking out without an open check-in returns ATTENDANCE_INVALID_TRANSITIO
         ]))
         ->assertStatus(422)
         ->assertJsonPath('error_code', 'ATTENDANCE_INVALID_TRANSITION');
+});
+
+test('check-out after midnight attaches to the previous open session', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $user = attendanceUser(['can_check_in_out']);
+    linkEmployee($user, $company);
+
+    $this->actingAs($user)
+        ->withHeaders(punchHeaders())
+        ->post('/api/attendance/check-in', attendanceEvidence([
+            'worked_at' => '2026-07-27T22:00:00+07:00',
+        ]))
+        ->assertCreated()
+        ->assertJsonPath('data.work_date', '2026-07-27');
+
+    $this->actingAs($user)
+        ->withHeaders(punchHeaders())
+        ->post('/api/attendance/check-out', attendanceEvidence([
+            'worked_at' => '2026-07-28T00:57:00+07:00',
+        ]))
+        ->assertOk()
+        ->assertJsonPath('data.work_date', '2026-07-27')
+        ->assertJsonPath('data.status', 'pending');
+
+    expect(
+        AttendanceRecord::query()
+            ->whereDate('work_date', '2026-07-27')
+            ->whereNotNull('check_out_at')
+            ->exists(),
+    )->toBeTrue();
+});
+
+test('check-out uses captured_at when worked_at is omitted', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $user = attendanceUser(['can_check_in_out']);
+    linkEmployee($user, $company);
+
+    $this->actingAs($user)
+        ->withHeaders(punchHeaders())
+        ->post('/api/attendance/check-in', attendanceEvidence([
+            'worked_at' => '2026-07-27T22:00:00+07:00',
+        ]))
+        ->assertCreated();
+
+    $response = $this->actingAs($user)
+        ->withHeaders(punchHeaders())
+        ->post('/api/attendance/check-out', attendanceEvidence([
+            'captured_at' => '2026-07-28T00:57:00+07:00',
+        ]));
+
+    $response->assertOk()
+        ->assertJsonPath('data.work_date', '2026-07-27');
+
+    $checkOutAt = CarbonImmutable::parse((string) $response->json('data.check_out_at'))
+        ->timezone('Asia/Ho_Chi_Minh');
+
+    expect($checkOutAt->format('Y-m-d H:i'))->toBe('2026-07-28 00:57');
 });
 
 test('correction approve and reject with audit', function () {

@@ -39,9 +39,9 @@
 | Field | Value |
 |-------|--------|
 | **Current phase** | ∞ Future |
-| **Current step** | `∞.attendance-punch-load-retry` |
+| **Current step** | `∞.prod-log-20260728-attendance-checkout` |
 | **Overall status** | Done |
-| **Last updated** | 2026-07-27 |
+| **Last updated** | 2026-08-03 |
 | **Last updated by** | agent |
 | **Next action** | Future backlog / discuss `v1.0.0` readiness |
 | **Blockers** | None |
@@ -2424,6 +2424,31 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 - types:check green
 ```
 
+### ∞.prod-log-20260728-attendance-checkout — Production log triage (Jul 28–30)
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-08-03 |
+| Completed | 2026-08-03 |
+| Docs | [ERROR_HANDLING.md](../04-backend/ERROR_HANDLING.md), [DEPLOYMENT.md](../08-development/DEPLOYMENT.md) |
+
+- [x] `DomainException` dontReport (stop ERROR noise + password in stacktraces)
+- [x] Check-out resolves open session across midnight / `captured_at` punch time
+- [x] FE: send `worked_at` + refresh/fallback open yesterday
+- [x] Ops checklist: `APP_ENV=production`, MySQL uptime
+- [x] Tests + types:check
+
+**Notes:**
+
+```
+- Source: storage/production_logs/03082026_laravel.log
+- bootstrap/app.php: dontReport DomainException
+- AttendanceService: resolvePunchAt + findCheckOutTargetRecord (1-day lookback)
+- FE: postPunch worked_at←captured_at; loadToday yesterday open; day-rollover refresh
+- DEPLOYMENT.md ops checklist; Attendance+Auth API tests 41 passed; types:check green
+```
+
 ---
 
 ## Activity log
@@ -2432,6 +2457,8 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-08-03 | `∞.prod-log-20260728-attendance-checkout` | Done: DomainException dontReport + post-midnight checkout + FE; tests green | agent |
+| 2026-08-03 | `∞.prod-log-20260728-attendance-checkout` | Started: fix DomainException logging + post-midnight checkout | agent |
 | 2026-07-27 | `∞.attendance-punch-load-retry` | Done: GPS load retry max 5 + attempt UI; types green | agent |
 | 2026-07-27 | `∞.attendance-punch-load-retry` | Started: GPS location load retry max 5 for punch dialog | agent |
 | 2026-07-27 | `∞.attendance-punch-resilience` | Done: Idempotency-Key + offline queue + 503 UX; tests + types green | agent |

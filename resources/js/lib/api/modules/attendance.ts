@@ -95,6 +95,9 @@ async function postPunch(
 
     if (payload.worked_at) {
         form.append('worked_at', payload.worked_at);
+    } else if (payload.captured_at) {
+        // Align punch work_date with evidence capture time (offline sync / SPA).
+        form.append('worked_at', payload.captured_at);
     }
 
     if (payload.note) {

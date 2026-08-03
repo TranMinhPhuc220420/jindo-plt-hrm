@@ -40,6 +40,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Domain rule failures are returned as stable API envelopes; do not
+        // flood logs (and avoid leaking auth args such as passwords in traces).
+        $exceptions->dontReport([
+            DomainException::class,
+        ]);
+
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request): bool => $request->is('api/*') || $request->expectsJson(),
         );

@@ -130,11 +130,21 @@ Minimum:
 ## Security Hardening (prod)
 
 - HTTPS only
+- **`APP_ENV=production`** (never leave `local` on a live host — log channel prefixes and tooling assume this)
 - Debug off (`APP_DEBUG=false`)
 - Least-privilege DB user
 - Restrict admin tooling
 - Rate-limit auth endpoints
 - Regular dependency updates
+
+### Production ops checklist (from live incidents)
+
+When Laravel logs show `local.ERROR` or `SQLSTATE[HY000] [2002] Connection refused` on session reads:
+
+1. Confirm production `.env`: `APP_ENV=production`, `APP_DEBUG=false`, then `php artisan config:clear` / rebuild `config:cache`.
+2. Check MySQL uptime around the error timestamp (`systemctl status` / process manager / hosting panel). Connection refused on `sessions` means the DB was unreachable while `SESSION_DRIVER=database`.
+3. Confirm `DB_HOST` / socket matches where MySQL actually listens (`127.0.0.1:3306` vs unix socket).
+4. Optional hardening: move sessions/cache to Redis so a brief MySQL blip does not fail every stateful request.
 
 ---
 

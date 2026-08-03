@@ -40,6 +40,17 @@ function todayIso(): string {
     return formatDateString(new Date());
 }
 
+function yesterdayIso(): string {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+
+    return formatDateString(d);
+}
+
+function isOpenSession(row: AttendanceRecord | null | undefined): boolean {
+    return !!row?.check_in_at && !row.check_out_at;
+}
+
 export default function AttendanceIndexPage() {
     const { t } = useTranslation(['attendance', 'common']);
     const { employeeId, can } = useAuth();
@@ -91,19 +102,34 @@ export default function AttendanceIndexPage() {
         }
 
         const day = todayIso();
+        const yesterday = yesterdayIso();
 
         try {
             const result = await attendanceApi.listRecords({
                 employee_id: employeeId,
-                date_from: day,
+                date_from: yesterday,
                 date_to: day,
-                per_page: 5,
+                per_page: 10,
             });
-            const row =
+            const todayRow =
                 result.data.find((item) => item.work_date === day) ?? null;
-            setTodayRecord(row);
 
-            return row;
+            if (todayRow) {
+                setTodayRecord(todayRow);
+
+                return todayRow;
+            }
+
+            // Post-midnight: still show yesterday's open session so Check-out stays available.
+            const openYesterday =
+                result.data.find(
+                    (item) =>
+                        item.work_date === yesterday && isOpenSession(item),
+                ) ?? null;
+
+            setTodayRecord(openYesterday);
+
+            return openYesterday;
         } catch {
             return null;
         }
@@ -190,6 +216,34 @@ export default function AttendanceIndexPage() {
 
     useLoadEffect(() => {
         void loadToday();
+    }, [loadToday]);
+
+    useEffect(() => {
+        const dayRef = { current: todayIso() };
+
+        function maybeRefreshToday() {
+            const next = todayIso();
+
+            if (next !== dayRef.current) {
+                dayRef.current = next;
+                void loadToday();
+            }
+        }
+
+        const id = window.setInterval(maybeRefreshToday, 30_000);
+
+        function onVisibility() {
+            if (document.visibilityState === 'visible') {
+                maybeRefreshToday();
+            }
+        }
+
+        document.addEventListener('visibilitychange', onVisibility);
+
+        return () => {
+            window.clearInterval(id);
+            document.removeEventListener('visibilitychange', onVisibility);
+        };
     }, [loadToday]);
 
     const refreshAll = useCallback(async () => {

@@ -98,6 +98,7 @@ Add codes when clients must distinguish handling; do not invent codes for every 
 ## Logging & Audit
 
 - Log 500s with stack traces server-side
+- Do **not** report `DomainException` (expected domain rule failures) — they are rendered as API envelopes only. Reporting them floods ERROR logs and can leak sensitive call-stack arguments (e.g. passwords on failed login).
 - Log authorization anomalies as needed (security)
 - Business audit logs are separate from error logs (see audit conventions)
 - Include request id/correlation id in logs when available

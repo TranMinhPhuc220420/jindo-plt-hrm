@@ -5,6 +5,7 @@ use App\Models\Company;
 use App\Models\User;
 use App\Services\Auth\AuthService;
 use App\Services\Settings\SettingsService;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 
 test('users can login via api and fetch me', function () {
     $user = User::factory()->create();
@@ -176,6 +177,29 @@ test('login fails with invalid credentials envelope', function () {
         ->assertJsonPath('error_code', 'AUTH_INVALID_CREDENTIALS');
 
     $this->assertGuest();
+});
+
+test('DomainException is not reported to the log', function () {
+    $handler = app(ExceptionHandler::class);
+
+    $domain = new DomainException(
+        message: 'Invalid credentials.',
+        errorCode: 'AUTH_INVALID_CREDENTIALS',
+        status: 401,
+    );
+
+    expect($handler->shouldReport($domain))->toBeFalse();
+
+    // Still returned as a stable API envelope (not a 500), without reporting.
+    $user = User::factory()->create();
+
+    $this->withHeaders(spaJsonHeaders())
+        ->postJson('/api/auth/login', [
+            'email' => $user->email,
+            'password' => 'wrong-password-should-not-appear-in-logs',
+        ])
+        ->assertUnauthorized()
+        ->assertJsonPath('error_code', 'AUTH_INVALID_CREDENTIALS');
 });
 
 test('unauthenticated me returns 401 envelope', function () {

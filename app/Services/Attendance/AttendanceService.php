@@ -156,14 +156,14 @@ class AttendanceService
         $this->assertEvidencePresent($data);
         $employee = $this->requireLinkedEmployee();
         $companyId = $this->companyContext->id();
-        $workedAt = $this->parseWorkedAt($data['worked_at'] ?? null);
-        $workDate = $workedAt->timezone($this->companyTimezone())->toDateString();
+        $workedAt = $this->resolvePunchAt($data);
+        $punchDate = $workedAt->timezone($this->companyTimezone())->toDateString();
 
-        $record = AttendanceRecord::query()
-            ->where('company_id', $companyId)
-            ->where('employee_id', $employee->id)
-            ->whereDate('work_date', $workDate)
-            ->first();
+        $record = $this->findCheckOutTargetRecord(
+            companyId: $companyId,
+            employeeId: $employee->id,
+            punchDate: $punchDate,
+        );
 
         if ($record === null || $record->check_in_at === null) {
             throw new DomainException(
@@ -189,6 +189,7 @@ class AttendanceService
             );
         }
 
+        $workDate = $record->work_date->format('Y-m-d');
         $storedPath = null;
 
         try {
@@ -620,6 +621,59 @@ class AttendanceService
         );
 
         $record->fill($metrics);
+    }
+
+    /**
+     * Resolve punch instant: worked_at → captured_at → now (company TZ).
+     *
+     * @param  array{worked_at?: string|null, captured_at?: string|null}  $data
+     */
+    private function resolvePunchAt(array $data): CarbonImmutable
+    {
+        foreach (['worked_at', 'captured_at'] as $key) {
+            $value = $data[$key] ?? null;
+
+            if (is_string($value) && trim($value) !== '') {
+                return $this->parseWorkedAt($value);
+            }
+        }
+
+        return $this->parseWorkedAt(null);
+    }
+
+    /**
+     * Prefer same calendar day; otherwise the latest still-open session within
+     * a one-day lookback (post-midnight / overnight checkout).
+     */
+    private function findCheckOutTargetRecord(
+        int $companyId,
+        int $employeeId,
+        string $punchDate,
+    ): ?AttendanceRecord {
+        $sameDay = AttendanceRecord::query()
+            ->where('company_id', $companyId)
+            ->where('employee_id', $employeeId)
+            ->whereDate('work_date', $punchDate)
+            ->first();
+
+        if ($sameDay !== null && $sameDay->check_in_at !== null) {
+            return $sameDay;
+        }
+
+        $windowStart = CarbonImmutable::parse($punchDate, $this->companyTimezone())
+            ->subDay()
+            ->toDateString();
+
+        return AttendanceRecord::query()
+            ->where('company_id', $companyId)
+            ->where('employee_id', $employeeId)
+            ->whereNotNull('check_in_at')
+            ->whereNull('check_out_at')
+            ->whereNotIn('status', ['locked', 'approved'])
+            ->whereDate('work_date', '>=', $windowStart)
+            ->whereDate('work_date', '<=', $punchDate)
+            ->orderByDesc('check_in_at')
+            ->first();
     }
 
     private function parseWorkedAt(?string $value): CarbonImmutable
