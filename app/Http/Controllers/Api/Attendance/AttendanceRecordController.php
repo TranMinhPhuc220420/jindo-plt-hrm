@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Attendance;
 
 use App\Exceptions\DomainException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Attendance\BulkApproveAttendanceRecordsRequest;
 use App\Http\Requests\Attendance\CheckInRequest;
 use App\Http\Requests\Attendance\CheckOutRequest;
 use App\Http\Requests\Attendance\LockAttendancePeriodRequest;
@@ -112,6 +113,19 @@ class AttendanceRecordController extends Controller
         return ApiResponse::success(
             (new AttendanceRecordResource($model))->resolve(),
             'Attendance record approved.',
+        );
+    }
+
+    public function bulkApprove(BulkApproveAttendanceRecordsRequest $request): JsonResponse
+    {
+        $result = $this->attendance->approveRecords(
+            $request->user(),
+            $request->validated('ids'),
+        );
+
+        return ApiResponse::success(
+            $result,
+            'Attendance records approved.',
         );
     }
 

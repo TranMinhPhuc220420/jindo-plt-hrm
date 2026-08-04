@@ -688,6 +688,109 @@ test('record approve path works', function () {
         ->assertJsonPath('data.status', 'approved');
 });
 
+test('bulk approve pending records', function () {
+    $company = Company::factory()->create();
+    $approver = attendanceUser(['can_view_attendance', 'can_approve_attendance']);
+    linkEmployee($approver, $company);
+
+    $pendingA = AttendanceRecord::factory()->create([
+        'company_id' => $company->id,
+        'status' => 'pending',
+        'work_date' => '2026-07-16',
+    ]);
+    $pendingB = AttendanceRecord::factory()->create([
+        'company_id' => $company->id,
+        'status' => 'pending',
+        'work_date' => '2026-07-17',
+    ]);
+
+    $this->actingAs($approver)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/attendance/records/bulk-approve', [
+            'ids' => [$pendingA->id, $pendingB->id],
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.approved_count', 2)
+        ->assertJsonPath('data.approved_ids', [$pendingA->id, $pendingB->id])
+        ->assertJsonPath('data.skipped_ids', []);
+
+    expect($pendingA->fresh()->status)->toBe('approved')
+        ->and($pendingB->fresh()->status)->toBe('approved')
+        ->and(AuditLog::query()->where('action', 'attendance.record_approved')->count())->toBe(2);
+});
+
+test('bulk approve skips non-pending and foreign company ids', function () {
+    $company = Company::factory()->create();
+    $otherCompany = Company::factory()->create();
+    $approver = attendanceUser(['can_view_attendance', 'can_approve_attendance']);
+    linkEmployee($approver, $company);
+
+    $pending = AttendanceRecord::factory()->create([
+        'company_id' => $company->id,
+        'status' => 'pending',
+        'work_date' => '2026-07-16',
+    ]);
+    $alreadyApproved = AttendanceRecord::factory()->create([
+        'company_id' => $company->id,
+        'status' => 'approved',
+        'work_date' => '2026-07-17',
+    ]);
+    $foreign = AttendanceRecord::factory()->create([
+        'company_id' => $otherCompany->id,
+        'status' => 'pending',
+        'work_date' => '2026-07-18',
+    ]);
+
+    $this->actingAs($approver)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/attendance/records/bulk-approve', [
+            'ids' => [$pending->id, $alreadyApproved->id, $foreign->id],
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.approved_count', 1)
+        ->assertJsonPath('data.approved_ids', [$pending->id]);
+
+    $skipped = $this->actingAs($approver)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/attendance/records/bulk-approve', [
+            'ids' => [$alreadyApproved->id, $foreign->id],
+        ])
+        ->assertStatus(422)
+        ->json('error_code');
+
+    expect($skipped)->toBe('ATTENDANCE_INVALID_TRANSITION')
+        ->and($pending->fresh()->status)->toBe('approved')
+        ->and($alreadyApproved->fresh()->status)->toBe('approved')
+        ->and($foreign->fresh()->status)->toBe('pending');
+});
+
+test('bulk approve requires permission and non-empty ids', function () {
+    $company = Company::factory()->create();
+    $viewer = attendanceUser(['can_view_attendance']);
+    $approver = attendanceUser(['can_view_attendance', 'can_approve_attendance']);
+    linkEmployee($viewer, $company);
+    linkEmployee($approver, $company);
+
+    $pending = AttendanceRecord::factory()->create([
+        'company_id' => $company->id,
+        'status' => 'pending',
+    ]);
+
+    $this->actingAs($viewer)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/attendance/records/bulk-approve', [
+            'ids' => [$pending->id],
+        ])
+        ->assertForbidden();
+
+    $this->actingAs($approver)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/attendance/records/bulk-approve', [
+            'ids' => [],
+        ])
+        ->assertStatus(422);
+});
+
 test('naive datetime-local correction is interpreted in company timezone', function () {
     Storage::fake('local');
     $company = Company::factory()->create();

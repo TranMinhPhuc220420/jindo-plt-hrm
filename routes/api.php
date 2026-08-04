@@ -254,6 +254,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->name('api.attendance.check-out');
     Route::get('/attendance/records', [AttendanceRecordController::class, 'index'])
         ->name('api.attendance.records.index');
+    Route::post('/attendance/records/bulk-approve', [AttendanceRecordController::class, 'bulkApprove'])
+        ->name('api.attendance.records.bulk-approve');
     Route::get('/attendance/records/{record}', [AttendanceRecordController::class, 'show'])
         ->name('api.attendance.records.show');
     Route::get('/attendance/records/{record}/evidences/{punchType}/photo', [AttendanceRecordController::class, 'evidencePhoto'])

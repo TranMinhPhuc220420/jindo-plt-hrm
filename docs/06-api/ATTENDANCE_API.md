@@ -42,6 +42,7 @@
 | `POST` | `/api/attendance/corrections/{id}/approve` | Approve correction |
 | `POST` | `/api/attendance/corrections/{id}/reject` | Reject correction |
 | `POST` | `/api/attendance/records/{id}/approve` | Approve record (if workflow requires) |
+| `POST` | `/api/attendance/records/bulk-approve` | Approve many pending records (`ids[]`, max 100) |
 
 Does **not** create payslips — Payroll consumes summaries via services.
 
@@ -140,6 +141,32 @@ Streams the private photo (`punchType` = `check_in` \| `check_out`). Authorized 
 ```
 
 Approve/reject → audited; notify requester.
+
+---
+
+## Bulk approve records
+
+`POST /api/attendance/records/bulk-approve`
+
+Requires `can_approve_attendance`.
+
+```json
+{ "ids": [12, 15, 18] }
+```
+
+- Max 100 distinct integer ids
+- Approves only **pending** records in the actor’s company; other ids are skipped
+- Response:
+
+```json
+{
+  "approved_count": 2,
+  "approved_ids": [12, 15],
+  "skipped_ids": [18]
+}
+```
+
+If none of the ids were approvable → `422` `ATTENDANCE_INVALID_TRANSITION`. Each approved record writes `attendance.record_approved` audit.
 
 ---
 

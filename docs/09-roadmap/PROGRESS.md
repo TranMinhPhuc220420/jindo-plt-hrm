@@ -39,9 +39,9 @@
 | Field | Value |
 |-------|--------|
 | **Current phase** | ∞ Future |
-| **Current step** | `∞.prod-log-20260728-attendance-checkout` |
+| **Current step** | `∞.attendance-bulk-approve` |
 | **Overall status** | Done |
-| **Last updated** | 2026-08-03 |
+| **Last updated** | 2026-08-04 |
 | **Last updated by** | agent |
 | **Next action** | Future backlog / discuss `v1.0.0` readiness |
 | **Blockers** | None |
@@ -2449,6 +2449,29 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 - DEPLOYMENT.md ops checklist; Attendance+Auth API tests 41 passed; types:check green
 ```
 
+### ∞.attendance-bulk-approve — Bulk approve selected attendance records
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-08-04 |
+| Completed | 2026-08-04 |
+| Docs | [ATTENDANCE_API.md](../06-api/ATTENDANCE_API.md), [TABLE_GUIDELINE.md](../05-frontend/TABLE_GUIDELINE.md) |
+
+- [x] `POST /api/attendance/records/bulk-approve` + service + tests
+- [x] FE API client `bulkApproveRecords`
+- [x] Checkbox selection + select-all pending + bulk action bar
+- [x] Confirm dialog + correction warning + i18n (en/vi)
+- [x] Docs + types:check
+
+**Notes:**
+
+```
+- AttendanceService::approveRecords (max 100 ids, skip non-pending/foreign)
+- FE: checkboxes desktop+mobile, select-all pending, confirm when ≥2
+- Tests: bulk approve / skip / permission; types:check green
+```
+
 ---
 
 ## Activity log
@@ -2457,6 +2480,8 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-08-04 | `∞.attendance-bulk-approve` | Done: bulk-approve API + checkbox selection UI; tests + types green | agent |
+| 2026-08-04 | `∞.attendance-bulk-approve` | Started: bulk-approve API + checkbox selection UI | agent |
 | 2026-08-03 | `∞.prod-log-20260728-attendance-checkout` | Done: DomainException dontReport + post-midnight checkout + FE; tests green | agent |
 | 2026-08-03 | `∞.prod-log-20260728-attendance-checkout` | Started: fix DomainException logging + post-midnight checkout | agent |
 | 2026-07-27 | `∞.attendance-punch-load-retry` | Done: GPS load retry max 5 + attempt UI; types green | agent |

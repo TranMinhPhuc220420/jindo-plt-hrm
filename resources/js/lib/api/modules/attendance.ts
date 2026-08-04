@@ -194,6 +194,16 @@ export async function approveRecord(id: number) {
     return res.data;
 }
 
+export async function bulkApproveRecords(ids: number[]) {
+    const res = await apiPost<{
+        approved_count: number;
+        approved_ids: number[];
+        skipped_ids: number[];
+    }>('/api/attendance/records/bulk-approve', { ids });
+
+    return res.data;
+}
+
 export async function listCorrections(
     params: {
         status?: string;

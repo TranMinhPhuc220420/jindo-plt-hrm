@@ -7,6 +7,7 @@ import { formatDuration } from '@/components/attendance/format-minutes';
 import { PermissionGate } from '@/components/shared/permission-gate';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type {
     AttendanceEvidence,
@@ -20,6 +21,10 @@ type Props = {
     pendingCorrectionCounts: Record<number, number>;
     onApprove: (id: number) => void;
     onSelectRecord?: (id: number) => void;
+    canApprove?: boolean;
+    selectedIds?: Set<number>;
+    onToggleSelect?: (id: number) => void;
+    onToggleSelectAllPending?: () => void;
 };
 
 function EvidenceHint({
@@ -71,16 +76,46 @@ function punchTime(value: string | null): string {
     return format(date, 'HH:mm');
 }
 
+function headerCheckboxState(
+    pendingIds: number[],
+    selectedIds: Set<number>,
+): boolean | 'indeterminate' {
+    if (pendingIds.length === 0) {
+        return false;
+    }
+
+    const selectedPending = pendingIds.filter((id) => selectedIds.has(id));
+
+    if (selectedPending.length === 0) {
+        return false;
+    }
+
+    if (selectedPending.length === pendingIds.length) {
+        return true;
+    }
+
+    return 'indeterminate';
+}
+
 export function AttendanceRecordsTable({
     records,
     pendingCorrectionCounts,
     onApprove,
     onSelectRecord,
+    canApprove = false,
+    selectedIds = new Set(),
+    onToggleSelect,
+    onToggleSelectAllPending,
 }: Props) {
     const { t, i18n } = useTranslation('attendance');
     const locale = dateFnsLocale(i18n.language);
     const today = new Date();
     const isMobile = useIsMobile();
+    const pendingIds = records
+        .filter((row) => row.status === 'pending')
+        .map((row) => row.id);
+    const showSelection = canApprove && pendingIds.length > 0;
+    const headerChecked = headerCheckboxState(pendingIds, selectedIds);
 
     if (isMobile) {
         return (
@@ -92,17 +127,38 @@ export function AttendanceRecordsTable({
                         ? format(date, 'EEE, d MMM yyyy', { locale })
                         : row.work_date;
                     const pendingCount = pendingCorrectionCounts[row.id] ?? 0;
+                    const isPending = row.status === 'pending';
+                    const isSelected = selectedIds.has(row.id);
 
                     return (
-                        <li key={row.id}>
+                        <li key={row.id} className="relative">
+                            {canApprove && isPending ? (
+                                <div
+                                    className="absolute top-3 left-3 z-10"
+                                    onClick={(event) => event.stopPropagation()}
+                                    onKeyDown={(event) =>
+                                        event.stopPropagation()
+                                    }
+                                >
+                                    <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={() =>
+                                            onToggleSelect?.(row.id)
+                                        }
+                                        aria-label={t('index.select_row')}
+                                    />
+                                </div>
+                            ) : null}
                             <button
                                 type="button"
                                 onClick={() => onSelectRecord?.(row.id)}
                                 className={cn(
                                     'flex min-h-11 w-full flex-col gap-2 rounded-lg border border-border bg-card px-3 py-3 text-left shadow-sm transition-colors active:bg-muted/50',
+                                    canApprove && isPending && 'pl-10',
                                     isToday && 'border-primary/40 bg-primary/5',
                                     pendingCount > 0 &&
                                         'border-destructive/30 bg-destructive/5',
+                                    isSelected && 'ring-1 ring-primary/40',
                                 )}
                             >
                                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -190,6 +246,21 @@ export function AttendanceRecordsTable({
             <table className="w-full text-sm">
                 <thead className="bg-muted/50 text-left">
                     <tr>
+                        {canApprove ? (
+                            <th className="w-10 px-3 py-2">
+                                {showSelection ? (
+                                    <Checkbox
+                                        checked={headerChecked}
+                                        onCheckedChange={() =>
+                                            onToggleSelectAllPending?.()
+                                        }
+                                        aria-label={t(
+                                            'index.select_all_pending',
+                                        )}
+                                    />
+                                ) : null}
+                            </th>
+                        ) : null}
                         <th className="px-3 py-2">{t('index.col_date')}</th>
                         <th className="px-3 py-2">{t('index.col_employee')}</th>
                         <th className="px-3 py-2">{t('index.col_in')}</th>
@@ -210,6 +281,8 @@ export function AttendanceRecordsTable({
                             : row.work_date;
                         const pendingCount =
                             pendingCorrectionCounts[row.id] ?? 0;
+                        const isPending = row.status === 'pending';
+                        const isSelected = selectedIds.has(row.id);
 
                         return (
                             <tr
@@ -218,8 +291,24 @@ export function AttendanceRecordsTable({
                                     'border-t',
                                     isToday && 'bg-primary/5',
                                     pendingCount > 0 && 'bg-destructive/5',
+                                    isSelected && 'bg-primary/10',
                                 )}
                             >
+                                {canApprove ? (
+                                    <td className="px-3 py-2">
+                                        {isPending ? (
+                                            <Checkbox
+                                                checked={isSelected}
+                                                onCheckedChange={() =>
+                                                    onToggleSelect?.(row.id)
+                                                }
+                                                aria-label={t(
+                                                    'index.select_row',
+                                                )}
+                                            />
+                                        ) : null}
+                                    </td>
+                                ) : null}
                                 <td className="px-3 py-2">
                                     <span className="capitalize">
                                         {dateLabel}
@@ -278,7 +367,7 @@ export function AttendanceRecordsTable({
                                 <td className="px-3 py-2">
                                     <div className="flex flex-wrap items-center gap-1">
                                         <PermissionGate permission="can_approve_attendance">
-                                            {row.status === 'pending' ? (
+                                            {isPending ? (
                                                 <Button
                                                     type="button"
                                                     size="sm"

@@ -336,6 +336,61 @@ class AttendanceService
             );
         }
 
+        $this->markRecordApproved($actor, $record);
+
+        return $record->fresh(['employee', 'evidences']);
+    }
+
+    /**
+     * @param  list<int>  $ids
+     * @return array{approved_count: int, approved_ids: list<int>, skipped_ids: list<int>}
+     */
+    public function approveRecords(User $actor, array $ids): array
+    {
+        $companyId = $this->companyContext->id();
+        $uniqueIds = array_values(array_unique(array_map('intval', $ids)));
+
+        $records = AttendanceRecord::query()
+            ->where('company_id', $companyId)
+            ->whereIn('id', $uniqueIds)
+            ->get()
+            ->keyBy('id');
+
+        $approvedIds = [];
+        $skippedIds = [];
+
+        DB::transaction(function () use ($actor, $uniqueIds, $records, &$approvedIds, &$skippedIds): void {
+            foreach ($uniqueIds as $id) {
+                $record = $records->get($id);
+
+                if ($record === null || $record->status !== 'pending') {
+                    $skippedIds[] = $id;
+
+                    continue;
+                }
+
+                $this->markRecordApproved($actor, $record);
+                $approvedIds[] = $id;
+            }
+        });
+
+        if ($approvedIds === []) {
+            throw new DomainException(
+                message: 'Only pending attendance records can be approved.',
+                errorCode: 'ATTENDANCE_INVALID_TRANSITION',
+                status: 422,
+            );
+        }
+
+        return [
+            'approved_count' => count($approvedIds),
+            'approved_ids' => $approvedIds,
+            'skipped_ids' => $skippedIds,
+        ];
+    }
+
+    private function markRecordApproved(User $actor, AttendanceRecord $record): void
+    {
         $record->status = 'approved';
         $record->approved_by = max(0, $actor->id);
         $record->approved_at = now();
@@ -344,10 +399,11 @@ class AttendanceService
         $this->audit->write(
             action: 'attendance.record_approved',
             subject: $record,
-            payload: ['employee_id' => $record->employee_id, 'work_date' => $record->work_date->toDateString()],
+            payload: [
+                'employee_id' => $record->employee_id,
+                'work_date' => $record->work_date->toDateString(),
+            ],
         );
-
-        return $record->fresh(['employee', 'evidences']);
     }
 
     /**

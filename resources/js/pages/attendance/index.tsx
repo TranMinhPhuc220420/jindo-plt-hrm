@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
@@ -19,6 +19,15 @@ import {
     ErrorState,
     LoadingState,
 } from '@/components/shared/async-state';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { useLoadEffect } from '@/hooks/use-load-effect';
 import {
     ApiError,
@@ -56,6 +65,7 @@ export default function AttendanceIndexPage() {
     const { employeeId, can } = useAuth();
     const canViewOthers =
         can('can_approve_attendance') || can('can_manage_attendance');
+    const canApprove = can('can_approve_attendance');
     const canSeeCorrections =
         canViewOthers || can('can_request_attendance_correction');
     const initial = rangeForPreset('today');
@@ -76,6 +86,9 @@ export default function AttendanceIndexPage() {
     const [error, setError] = useState<string | null>(null);
     const [summaryError, setSummaryError] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
+    const [bulkBusy, setBulkBusy] = useState(false);
+    const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+    const [confirmBulkOpen, setConfirmBulkOpen] = useState(false);
     const [punchMode, setPunchMode] = useState<'check_in' | 'check_out' | null>(
         null,
     );
@@ -340,6 +353,118 @@ export default function AttendanceIndexPage() {
         setPeriodPreset(preset);
         setDateFrom(range.from);
         setDateTo(range.to);
+        setSelectedIds(new Set());
+    }
+
+    const pendingRecordIds = useMemo(
+        () =>
+            records
+                .filter((row) => row.status === 'pending')
+                .map((row) => row.id),
+        [records],
+    );
+
+    const activeSelectedIds = useMemo(() => {
+        if (selectedIds.size === 0) {
+            return selectedIds;
+        }
+
+        const pendingSet = new Set(pendingRecordIds);
+        const next = new Set<number>();
+
+        for (const id of selectedIds) {
+            if (pendingSet.has(id)) {
+                next.add(id);
+            }
+        }
+
+        return next.size === selectedIds.size ? selectedIds : next;
+    }, [selectedIds, pendingRecordIds]);
+
+    function toggleSelect(id: number) {
+        setSelectedIds((prev) => {
+            const next = new Set(prev);
+
+            if (next.has(id)) {
+                next.delete(id);
+            } else {
+                next.add(id);
+            }
+
+            return next;
+        });
+    }
+
+    function toggleSelectAllPending() {
+        setSelectedIds((prev) => {
+            const allSelected =
+                pendingRecordIds.length > 0 &&
+                pendingRecordIds.every((id) => prev.has(id));
+
+            if (allSelected) {
+                return new Set();
+            }
+
+            return new Set(pendingRecordIds);
+        });
+    }
+
+    function clearSelection() {
+        setSelectedIds(new Set());
+    }
+
+    const selectedCorrectionWarnCount = useMemo(() => {
+        let count = 0;
+
+        for (const id of activeSelectedIds) {
+            if ((pendingCorrectionCounts[id] ?? 0) > 0) {
+                count += 1;
+            }
+        }
+
+        return count;
+    }, [activeSelectedIds, pendingCorrectionCounts]);
+
+    async function runBulkApprove(ids: number[]) {
+        if (ids.length === 0 || bulkBusy) {
+            return;
+        }
+
+        setBulkBusy(true);
+
+        try {
+            const result = await attendanceApi.bulkApproveRecords(ids);
+            toast.success(
+                t('index.toast_bulk_approved', {
+                    count: result.approved_count,
+                }),
+            );
+            setSelectedIds(new Set());
+            setConfirmBulkOpen(false);
+            await loadRecords();
+        } catch (err) {
+            toast.error(
+                err instanceof ApiError ? err.message : t('index.toast_error'),
+            );
+        } finally {
+            setBulkBusy(false);
+        }
+    }
+
+    function requestBulkApprove() {
+        const ids = [...activeSelectedIds];
+
+        if (ids.length === 0) {
+            return;
+        }
+
+        if (ids.length >= 2) {
+            setConfirmBulkOpen(true);
+
+            return;
+        }
+
+        void runBulkApprove(ids);
     }
 
     async function queuePunch(
@@ -419,6 +544,17 @@ export default function AttendanceIndexPage() {
     async function handleApprove(id: number) {
         try {
             await attendanceApi.approveRecord(id);
+            toast.success(t('index.toast_approved'));
+            setSelectedIds((prev) => {
+                if (!prev.has(id)) {
+                    return prev;
+                }
+
+                const next = new Set(prev);
+                next.delete(id);
+
+                return next;
+            });
             await loadRecords();
         } catch (err) {
             toast.error(
@@ -437,6 +573,10 @@ export default function AttendanceIndexPage() {
     const pendingCheckOut = pendingPunches.some(
         (row) => row.mode === 'check_out',
     );
+    const allPendingSelected =
+        pendingRecordIds.length > 0 &&
+        pendingRecordIds.every((id) => activeSelectedIds.has(id));
+    const showBulkBar = canApprove && activeSelectedIds.size > 0;
 
     return (
         <AdminPageShell
@@ -490,6 +630,57 @@ export default function AttendanceIndexPage() {
 
             <h2 className="mb-2 text-lg font-medium">{t('index.recent')}</h2>
 
+            {showBulkBar ? (
+                <div className="mb-3 flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/40 px-3 py-2">
+                    <p className="mr-auto text-sm font-medium">
+                        {t('index.selected_count', {
+                            count: activeSelectedIds.size,
+                        })}
+                    </p>
+                    {!allPendingSelected ? (
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            disabled={bulkBusy || pendingRecordIds.length === 0}
+                            onClick={toggleSelectAllPending}
+                        >
+                            {t('index.select_all_pending')}
+                        </Button>
+                    ) : null}
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        disabled={bulkBusy}
+                        onClick={clearSelection}
+                    >
+                        {t('index.clear_selection')}
+                    </Button>
+                    <Button
+                        type="button"
+                        size="sm"
+                        disabled={bulkBusy}
+                        onClick={requestBulkApprove}
+                    >
+                        {bulkBusy
+                            ? t('index.bulk_approving')
+                            : t('index.bulk_approve')}
+                    </Button>
+                </div>
+            ) : canApprove && pendingRecordIds.length > 0 && !loading ? (
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={toggleSelectAllPending}
+                    >
+                        {t('index.select_all_pending')}
+                    </Button>
+                </div>
+            ) : null}
+
             {loading ? (
                 <LoadingState label={t('index.loading')} />
             ) : error ? (
@@ -502,8 +693,53 @@ export default function AttendanceIndexPage() {
                     pendingCorrectionCounts={pendingCorrectionCounts}
                     onApprove={(id) => void handleApprove(id)}
                     onSelectRecord={setSelectedRecordId}
+                    canApprove={canApprove}
+                    selectedIds={activeSelectedIds}
+                    onToggleSelect={toggleSelect}
+                    onToggleSelectAllPending={toggleSelectAllPending}
                 />
             )}
+
+            <Dialog open={confirmBulkOpen} onOpenChange={setConfirmBulkOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>
+                            {t('index.bulk_approve_confirm_title')}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {t('index.bulk_approve_confirm', {
+                                count: activeSelectedIds.size,
+                            })}
+                            {selectedCorrectionWarnCount > 0
+                                ? ` ${t('index.bulk_approve_correction_warn', {
+                                      count: selectedCorrectionWarnCount,
+                                  })}`
+                                : null}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            disabled={bulkBusy}
+                            onClick={() => setConfirmBulkOpen(false)}
+                        >
+                            {t('cancel', { ns: 'common' })}
+                        </Button>
+                        <Button
+                            type="button"
+                            disabled={bulkBusy}
+                            onClick={() =>
+                                void runBulkApprove([...activeSelectedIds])
+                            }
+                        >
+                            {bulkBusy
+                                ? t('index.bulk_approving')
+                                : t('index.bulk_approve')}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <AttendanceRecordSheet
                 open={selectedRecordId !== null}
