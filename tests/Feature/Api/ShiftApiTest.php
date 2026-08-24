@@ -501,3 +501,37 @@ test('WorkingCalendarService smoke resolve without HTTP', function () {
         ->and($days[0]['shift_name'])->toBe('Morning')
         ->and($days[0]['rest_kind'])->toBe('none');
 });
+
+test('cannot assign a shift to an inactive employee', function () {
+    $company = Company::factory()->create();
+    $employee = Employee::factory()->create([
+        'company_id' => $company->id,
+        'status' => 'resigned',
+    ]);
+    $hr = shiftUser([
+        'can_view_shifts',
+        'can_manage_shift_definitions',
+        'can_assign_shifts',
+    ]);
+
+    $shiftId = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shifts', [
+            'name' => 'Morning',
+            'code' => 'MOR-INACT',
+            'start_time' => '08:00',
+            'end_time' => '17:00',
+        ])
+        ->assertCreated()
+        ->json('data.id');
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shift-assignments', [
+            'employee_id' => $employee->id,
+            'shift_id' => $shiftId,
+            'start_date' => '2026-08-01',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonPath('error_code', 'SHIFT_EMPLOYEE_INACTIVE');
+});

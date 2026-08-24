@@ -20,6 +20,9 @@ use App\Models\Position;
 use App\Models\Team;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
+use App\Services\Shift\ShiftAssignmentService;
+use App\Support\SettingsDefaults;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -30,6 +33,8 @@ class EmployeeService
     public function __construct(
         private readonly CompanyContext $companyContext,
         private readonly AuditLogger $audit,
+        private readonly EmployeeOffboardingService $offboarding,
+        private readonly ShiftAssignmentService $shiftAssignments,
     ) {}
 
     /**
@@ -67,7 +72,7 @@ class EmployeeService
     {
         return Employee::query()
             ->where('company_id', $this->companyContext->id())
-            ->with(['department', 'position', 'branch', 'team'])
+            ->with(['department', 'position', 'branch', 'team', 'activeAssetAssignments.asset'])
             ->findOrFail($id);
     }
 
@@ -155,7 +160,7 @@ class EmployeeService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param  array{status: string, reason?: string|null, effective_on?: string|null, confirm_asset_return?: bool}  $data
      */
     public function changeStatus(Employee $employee, array $data): Employee
     {
@@ -175,24 +180,50 @@ class EmployeeService
             );
         }
 
-        $employee->status = $to;
-        $employee->save();
+        $effectiveOn = $this->resolveEffectiveOn($data['effective_on'] ?? null);
+        $confirmAssetReturn = (bool) ($data['confirm_asset_return'] ?? false);
 
-        $action = $to === 'archived' ? 'employee.archived' : 'employee.status_changed';
+        return DB::transaction(function () use (
+            $employee,
+            $data,
+            $from,
+            $to,
+            $effectiveOn,
+            $confirmAssetReturn,
+        ): Employee {
+            if (Employee::isOffboardingStatus($to)) {
+                $this->offboarding->assertAssetsReturnedOrConfirmed($employee, $confirmAssetReturn);
+            }
 
-        $this->audit->write(
-            action: $action,
-            subject: $employee,
-            payload: [
-                'from' => $from,
-                'to' => $to,
-                'reason' => $data['reason'] ?? null,
-            ],
-        );
+            $employee->status = $to;
+            $this->applyTerminationDate($employee, $from, $to, $effectiveOn);
+            $employee->save();
 
-        EmployeeStatusChanged::dispatch($employee, $from, $to);
+            if (Employee::isOffboardingStatus($to)) {
+                $this->shiftAssignments->closeFrom($employee, $effectiveOn);
 
-        return $employee->fresh(['department', 'position', 'branch']);
+                if ($confirmAssetReturn) {
+                    $this->offboarding->returnOutstanding($employee);
+                }
+            }
+
+            $action = $to === 'archived' ? 'employee.archived' : 'employee.status_changed';
+
+            $this->audit->write(
+                action: $action,
+                subject: $employee,
+                payload: [
+                    'from' => $from,
+                    'to' => $to,
+                    'reason' => $data['reason'] ?? null,
+                    'effective_on' => $effectiveOn,
+                ],
+            );
+
+            EmployeeStatusChanged::dispatch($employee, $from, $to);
+
+            return $employee->fresh(['department', 'position', 'branch', 'activeAssetAssignments.asset']);
+        });
     }
 
     public function archive(Employee $employee): void
@@ -200,23 +231,34 @@ class EmployeeService
         $this->assertCompanyScope($employee->company_id);
 
         $from = $employee->status;
+        $effectiveOn = $this->resolveEffectiveOn(null);
 
-        if ($from !== 'archived') {
-            $employee->status = 'archived';
-            $employee->save();
+        DB::transaction(function () use ($employee, $from, $effectiveOn): void {
+            if ($from !== 'archived') {
+                $this->offboarding->assertAssetsReturnedOrConfirmed($employee, confirmAssetReturn: false);
 
-            $this->audit->write(
-                action: 'employee.archived',
-                subject: $employee,
-                payload: [
-                    'from' => $from,
-                    'to' => 'archived',
-                    'reason' => 'Soft-deleted via API',
-                ],
-            );
-        }
+                $employee->status = 'archived';
+                $this->applyTerminationDate($employee, $from, 'archived', $effectiveOn);
+                $employee->save();
 
-        $employee->delete();
+                $this->shiftAssignments->closeFrom($employee, $effectiveOn);
+
+                $this->audit->write(
+                    action: 'employee.archived',
+                    subject: $employee,
+                    payload: [
+                        'from' => $from,
+                        'to' => 'archived',
+                        'reason' => 'Soft-deleted via API',
+                        'effective_on' => $effectiveOn,
+                    ],
+                );
+
+                EmployeeStatusChanged::dispatch($employee, $from, 'archived');
+            }
+
+            $employee->delete();
+        });
     }
 
     /**
@@ -664,5 +706,33 @@ class EmployeeService
     {
         return str_contains(strtolower($e->getMessage()), 'unique')
             || (string) $e->getCode() === '23000';
+    }
+
+    protected function resolveEffectiveOn(?string $effectiveOn): string
+    {
+        if ($effectiveOn !== null && $effectiveOn !== '') {
+            return CarbonImmutable::parse($effectiveOn)->toDateString();
+        }
+
+        $timezone = SettingsDefaults::all()['company']['timezone'] ?? 'UTC';
+
+        return CarbonImmutable::now(is_string($timezone) ? $timezone : 'UTC')->toDateString();
+    }
+
+    protected function applyTerminationDate(
+        Employee $employee,
+        string $from,
+        string $to,
+        string $effectiveOn,
+    ): void {
+        if ($to === 'resigned' || ($to === 'archived' && $employee->terminated_at === null)) {
+            $employee->terminated_at = $effectiveOn;
+
+            return;
+        }
+
+        if (in_array($to, ['active', 'probation'], true) && in_array($from, ['suspended', 'resigned'], true)) {
+            $employee->terminated_at = null;
+        }
     }
 }

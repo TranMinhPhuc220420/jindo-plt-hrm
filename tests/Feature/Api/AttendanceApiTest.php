@@ -31,13 +31,28 @@ function attendanceUser(array $permissionKeys): User
     return actingUser($permissionKeys, prefix: 'att');
 }
 
-function linkEmployee(User $user, Company $company): Employee
+function linkEmployee(User $user, Company $company, bool $withShift = true): Employee
 {
-    return Employee::factory()->create([
+    $employee = Employee::factory()->create([
         'company_id' => $company->id,
         'user_id' => $user->id,
         'code' => 'E-ATT-'.uniqid(),
     ]);
+
+    if ($withShift) {
+        $shift = Shift::factory()->create([
+            'company_id' => $company->id,
+        ]);
+        ShiftAssignment::factory()->create([
+            'company_id' => $company->id,
+            'employee_id' => $employee->id,
+            'shift_id' => $shift->id,
+            'start_date' => '2020-01-01',
+            'end_date' => null,
+        ]);
+    }
+
+    return $employee;
 }
 
 /**
@@ -90,7 +105,7 @@ test('employee can check in and out with metrics from shift', function () {
         'can_check_in_out',
         'can_view_attendance',
     ]);
-    $employee = linkEmployee($user, $company);
+    $employee = linkEmployee($user, $company, withShift: false);
 
     $shift = Shift::factory()->create([
         'company_id' => $company->id,
@@ -841,7 +856,7 @@ test('full-day approved leave suppresses late and overtime metrics', function ()
     Storage::fake('local');
     $company = Company::factory()->create();
     $user = attendanceUser(['can_check_in_out', 'can_view_attendance']);
-    $employee = linkEmployee($user, $company);
+    $employee = linkEmployee($user, $company, withShift: false);
 
     $shift = Shift::factory()->create([
         'company_id' => $company->id,
@@ -901,7 +916,7 @@ test('am half-day leave evaluates late against afternoon window', function () {
     Storage::fake('local');
     $company = Company::factory()->create();
     $user = attendanceUser(['can_check_in_out', 'can_view_attendance']);
-    $employee = linkEmployee($user, $company);
+    $employee = linkEmployee($user, $company, withShift: false);
 
     $shift = Shift::factory()->create([
         'company_id' => $company->id,
@@ -1036,4 +1051,39 @@ test('domain failure does not cache an idempotency success response', function (
 
     expect(AttendancePunchIdempotency::query()->count())->toBe(0)
         ->and(AttendanceRecord::query()->count())->toBe(0);
+});
+
+test('cannot check in without a shift assignment for the work date', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $user = attendanceUser(['can_check_in_out']);
+    linkEmployee($user, $company, withShift: false);
+
+    $this->actingAs($user)
+        ->withHeaders(punchHeaders())
+        ->post('/api/attendance/check-in', attendanceEvidence([
+            'worked_at' => '2026-07-16T08:00:00+07:00',
+        ]))
+        ->assertStatus(422)
+        ->assertJsonPath('error_code', 'ATTENDANCE_NO_SHIFT');
+
+    expect(AttendanceRecord::query()->count())->toBe(0);
+});
+
+test('inactive employee cannot check in', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $user = attendanceUser(['can_check_in_out']);
+    $employee = linkEmployee($user, $company);
+    $employee->update(['status' => 'suspended']);
+
+    $this->actingAs($user)
+        ->withHeaders(punchHeaders())
+        ->post('/api/attendance/check-in', attendanceEvidence([
+            'worked_at' => '2026-07-16T08:00:00+07:00',
+        ]))
+        ->assertForbidden()
+        ->assertJsonPath('error_code', 'AUTH_ACCOUNT_INACTIVE');
+
+    expect(AttendanceRecord::query()->count())->toBe(0);
 });

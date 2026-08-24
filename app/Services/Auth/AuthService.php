@@ -4,6 +4,7 @@ namespace App\Services\Auth;
 
 use App\Exceptions\DomainException;
 use App\Models\User;
+use App\Support\EmployeeAccountGate;
 use App\Support\Locale\LocaleResolver;
 use App\Support\Locale\SupportedLocales;
 use Illuminate\Auth\Events\PasswordReset;
@@ -43,6 +44,8 @@ class AuthService
         }
 
         RateLimiter::clear($this->throttleKey($email));
+
+        EmployeeAccountGate::assertUserCanAuthenticate($user);
 
         if ($this->requiresTwoFactorChallenge($user)) {
             session([
@@ -109,6 +112,8 @@ class AuthService
         }
 
         RateLimiter::clear($this->throttleKey($email));
+
+        EmployeeAccountGate::assertUserCanAuthenticate($user);
 
         $remember = (bool) session('login.remember', false);
         session()->forget(['login.id', 'login.remember']);

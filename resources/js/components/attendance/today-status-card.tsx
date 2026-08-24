@@ -21,6 +21,7 @@ type Props = {
     busy: boolean;
     pendingCheckIn?: boolean;
     pendingCheckOut?: boolean;
+    hasShiftToday?: boolean | null;
     onCheckIn: () => void;
     onCheckOut: () => void;
 };
@@ -56,6 +57,7 @@ export function TodayStatusCard({
     busy,
     pendingCheckIn = false,
     pendingCheckOut = false,
+    hasShiftToday = null,
     onCheckIn,
     onCheckOut,
 }: Props) {
@@ -101,6 +103,11 @@ export function TodayStatusCard({
                     <p className="text-sm font-medium">
                         {t(`index.${stateKey}`)}
                     </p>
+                    {employeeId && hasShiftToday === false ? (
+                        <p className="text-sm text-destructive" role="status">
+                            {t('index.no_shift_banner')}
+                        </p>
+                    ) : null}
 
                     {today ? (
                         <div className="flex flex-wrap items-center gap-2 pt-1 text-sm">
@@ -169,7 +176,8 @@ export function TodayStatusCard({
                                     disabled={
                                         busy ||
                                         !!today?.check_in_at ||
-                                        pendingCheckIn
+                                        pendingCheckIn ||
+                                        hasShiftToday === false
                                     }
                                     onClick={onCheckIn}
                                 >

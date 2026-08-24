@@ -57,6 +57,15 @@ class ShiftAssignmentService
     {
         $companyId = $this->companyContext->id();
         $employee = $this->assertEmployeeInCompany((int) $data['employee_id'], $companyId);
+
+        if (! $employee->canPunch()) {
+            throw new DomainException(
+                message: 'Cannot assign a shift to an inactive employee.',
+                errorCode: 'SHIFT_EMPLOYEE_INACTIVE',
+                status: 422,
+            );
+        }
+
         $shift = $this->assertShiftInCompany((int) $data['shift_id'], $companyId);
 
         $startDate = CarbonImmutable::parse($data['start_date'])->toDateString();
@@ -138,6 +147,65 @@ class ShiftAssignmentService
         ShiftAssignmentChanged::dispatch($assignment);
 
         return $assignment->fresh(['shift', 'employee']);
+    }
+
+    public function closeFrom(Employee $employee, string $effectiveOn): void
+    {
+        $this->assertCompanyScope($employee->company_id);
+
+        $assignments = ShiftAssignment::query()
+            ->where('company_id', $employee->company_id)
+            ->where('employee_id', $employee->id)
+            ->where(function ($query) use ($effectiveOn): void {
+                $query->where('start_date', '>', $effectiveOn)
+                    ->orWhere(function ($running) use ($effectiveOn): void {
+                        $running->where('start_date', '<=', $effectiveOn)
+                            ->where(function ($end) use ($effectiveOn): void {
+                                $end->whereNull('end_date')
+                                    ->orWhere('end_date', '>', $effectiveOn);
+                            });
+                    });
+            })
+            ->orderBy('start_date')
+            ->get();
+
+        foreach ($assignments as $assignment) {
+            $startDate = $assignment->start_date->toDateString();
+
+            if ($startDate > $effectiveOn) {
+                $assignment->delete();
+
+                $this->audit->write(
+                    action: 'shift.assignment_deleted',
+                    subject: $assignment,
+                    payload: [
+                        'employee_id' => $assignment->employee_id,
+                        'shift_id' => $assignment->shift_id,
+                        'reason' => 'Closed during employee offboarding',
+                    ],
+                );
+
+                ShiftAssignmentChanged::dispatch($assignment);
+
+                continue;
+            }
+
+            $assignment->end_date = $effectiveOn;
+            $assignment->save();
+
+            $this->audit->write(
+                action: 'shift.assignment_updated',
+                subject: $assignment,
+                payload: [
+                    'employee_id' => $assignment->employee_id,
+                    'shift_id' => $assignment->shift_id,
+                    'end_date' => $effectiveOn,
+                    'reason' => 'Closed during employee offboarding',
+                ],
+            );
+
+            ShiftAssignmentChanged::dispatch($assignment);
+        }
     }
 
     public function delete(ShiftAssignment $assignment): void

@@ -28,8 +28,15 @@ export type Employee = {
     position_id: number | null;
     manager_id: number | null;
     hired_at: string | null;
+    terminated_at: string | null;
     status: EmployeeStatus;
     avatar_url?: string | null;
+    outstanding_assets?: Array<{
+        id: number;
+        code: string | null;
+        name: string | null;
+    }>;
+    outstanding_assets_count?: number;
     department?: { id: number; name: string; code: string } | null;
     position?: { id: number; name: string; code: string } | null;
     branch?: { id: number; name: string; code: string } | null;
@@ -112,7 +119,12 @@ export async function updateEmployeePassword(
 
 export async function changeEmployeeStatus(
     id: number,
-    payload: { status: EmployeeStatus; reason?: string },
+    payload: {
+        status: EmployeeStatus;
+        reason?: string;
+        effective_on?: string;
+        confirm_asset_return?: boolean;
+    },
 ) {
     const res = await apiPost<Employee>(`/api/employees/${id}/status`, payload);
 

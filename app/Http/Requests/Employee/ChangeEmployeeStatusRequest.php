@@ -21,6 +21,8 @@ class ChangeEmployeeStatusRequest extends FormRequest
         return [
             'status' => ['required', 'string', Rule::in(Employee::STATUSES)],
             'reason' => ['nullable', 'string', 'max:500'],
+            'effective_on' => ['nullable', 'date'],
+            'confirm_asset_return' => ['sometimes', 'boolean'],
         ];
     }
 }

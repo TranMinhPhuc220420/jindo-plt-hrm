@@ -2,6 +2,7 @@
 
 use App\Exceptions\DomainException;
 use App\Models\Company;
+use App\Models\Employee;
 use App\Models\User;
 use App\Services\Auth\AuthService;
 use App\Services\Settings\SettingsService;
@@ -276,4 +277,75 @@ test('login with two factor enabled requires challenge then accepts recovery cod
         ->assertJsonPath('data.two_factor_required', false);
 
     $this->assertAuthenticated();
+});
+
+test('users without an employee profile can still login', function () {
+    User::factory()->create([
+        'email' => 'admin-only@example.com',
+        'password' => 'password',
+    ]);
+
+    $this->withHeaders(spaJsonHeaders())
+        ->postJson('/api/auth/login', [
+            'email' => 'admin-only@example.com',
+            'password' => 'password',
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.employee_id', null);
+
+    $this->assertAuthenticated();
+});
+
+test('blocked employee statuses cannot login', function (string $status) {
+    $company = Company::factory()->create();
+    $user = User::factory()->create(['password' => 'password']);
+    Employee::factory()->create([
+        'company_id' => $company->id,
+        'user_id' => $user->id,
+        'status' => $status,
+    ]);
+
+    $this->withHeaders(spaJsonHeaders())
+        ->postJson('/api/auth/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])
+        ->assertForbidden()
+        ->assertJsonPath('error_code', 'AUTH_ACCOUNT_INACTIVE');
+
+    $this->assertGuest();
+})->with(['suspended', 'resigned', 'archived']);
+
+test('blocked employee with wrong password still receives invalid credentials', function () {
+    $company = Company::factory()->create();
+    $user = User::factory()->create(['password' => 'password']);
+    Employee::factory()->create([
+        'company_id' => $company->id,
+        'user_id' => $user->id,
+        'status' => 'resigned',
+    ]);
+
+    $this->withHeaders(spaJsonHeaders())
+        ->postJson('/api/auth/login', [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ])
+        ->assertUnauthorized()
+        ->assertJsonPath('error_code', 'AUTH_INVALID_CREDENTIALS');
+});
+
+test('middleware blocks an already authenticated inactive employee', function () {
+    $company = Company::factory()->create();
+    $user = User::factory()->create();
+    Employee::factory()->create([
+        'company_id' => $company->id,
+        'user_id' => $user->id,
+        'status' => 'resigned',
+    ]);
+
+    $this->actingAs($user)
+        ->withHeaders(spaJsonHeaders())
+        ->getJson('/api/me')
+        ->assertForbidden()
+        ->assertJsonPath('error_code', 'AUTH_ACCOUNT_INACTIVE');
 });

@@ -113,12 +113,36 @@ Does **not** create a login `User` — that happens during onboarding (`create_a
 `POST /api/employees/{id}/status`
 
 ```json
-{ "status": "active", "reason": "Probation completed" }
+{
+  "status": "resigned",
+  "reason": "Nghỉ việc 24/08/2026",
+  "effective_on": "2026-08-24",
+  "confirm_asset_return": true
+}
 ```
 
-Statuses (logical): `probation`, `active`, `suspended`, `resigned`, `archived`, …
+| Field | Required | Notes |
+|-------|----------|--------|
+| `status` | yes | `probation`, `active`, `suspended`, `resigned`, `archived` |
+| `reason` | no | Audit note, max 500 |
+| `effective_on` | no | Date used to close shift assignments. Defaults to today (company timezone). |
+| `confirm_asset_return` | no | Required `true` when moving to `resigned` / `archived` while assets are still assigned |
 
-Invalid transitions → `409` + `error_code`.
+Show payload includes `terminated_at`, `outstanding_assets`, and `outstanding_assets_count`.
+
+Statuses (logical): `probation`, `active`, `suspended`, `resigned`, `archived`.
+
+Invalid transitions → `409` `EMPLOYEE_INVALID_STATUS_TRANSITION`.
+
+`suspended`, `resigned`, and `archived` block login and kick other sessions. `resigned` / `archived` also:
+
+- set `terminated_at` (cleared when returning `suspended` → `active`)
+- close future shift assignments from `effective_on` (delete not-yet-started; set `end_date` on running assignments)
+- require outstanding assets to be confirmed returned (`409` `EMPLOYEE_HAS_OUTSTANDING_ASSETS` + `meta.assets` / `errors.assets` if not)
+
+`suspended` keeps shifts and assets so the employee can return.
+
+`DELETE /api/employees/{id}` archives (soft-delete). Outstanding assets still block with `409` — use `POST /status` with `confirm_asset_return` first.
 
 ---
 
@@ -172,6 +196,7 @@ Salary belongs to Payroll API — do not embed payslip math here.
 |------|------|
 | `EMPLOYEE_CODE_DUPLICATE` | Code unique per company |
 | `EMPLOYEE_INVALID_STATUS_TRANSITION` | Illegal status change |
+| `EMPLOYEE_HAS_OUTSTANDING_ASSETS` | Resign/archive while assets are still assigned |
 | `EMPLOYEE_NO_USER_ACCOUNT` | Password change without linked user |
 | `EMPLOYEE_DEFAULT_PASSWORD_MISSING` | Default password env not configured |
 | `EMPLOYEE_NOT_LINKED` | Self avatar without linked employee |

@@ -75,6 +75,14 @@ Infrastructure failures (`502` `BAD_GATEWAY`, `503` `SERVICE_UNAVAILABLE`, `500`
 
 **200/201** → attendance record for the day/session, including nested `evidences`.
 
+Check-in requires:
+
+- Linked employee status `probation` or `active`. Blocked statuses (`suspended` / `resigned` / `archived`) fail authenticated routes with **403** `AUTH_ACCOUNT_INACTIVE` (or `EMPLOYEE_ACCOUNT_INACTIVE` if the punch service is reached without that middleware).
+- A `ShiftAssignment` covering `work_date` (else **422** `ATTENDANCE_NO_SHIFT`)
+
+Check-out does **not** require a current shift assignment — only an open check-in for that work date.
+
+
 `GET /api/attendance/records/{id}/evidences/{punchType}/photo`  
 Streams the private photo (`punchType` = `check_in` \| `check_out`). Authorized via attendance view policy.
 
@@ -175,6 +183,8 @@ If none of the ids were approvable → `422` `ATTENDANCE_INVALID_TRANSITION`. Ea
 | Code | When |
 |------|------|
 | `ATTENDANCE_EVIDENCE_REQUIRED` | Missing/invalid location or camera photo |
+| `ATTENDANCE_NO_SHIFT` | No shift assignment covers the work date |
+| `EMPLOYEE_ACCOUNT_INACTIVE` | Employee status cannot punch |
 | `ATTENDANCE_ALREADY_CHECKED_IN` | Duplicate check-in |
 | `ATTENDANCE_PERIOD_LOCKED` | Cannot correct/approve |
 | `ATTENDANCE_INVALID_TRANSITION` | Bad status change |

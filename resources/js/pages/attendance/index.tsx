@@ -40,6 +40,8 @@ import type {
     AttendanceRecord,
     AttendanceSummary,
 } from '@/lib/api/modules/attendance';
+import * as shiftApi from '@/lib/api/modules/shifts';
+import type { WorkingCalendarDay } from '@/lib/api/modules/shifts';
 import * as punchQueue from '@/lib/attendance/punch-queue';
 import type { PendingPunch } from '@/lib/attendance/punch-queue';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -80,6 +82,7 @@ export default function AttendanceIndexPage() {
     const [todayRecord, setTodayRecord] = useState<AttendanceRecord | null>(
         null,
     );
+    const [hasShiftToday, setHasShiftToday] = useState<boolean | null>(null);
     const [summary, setSummary] = useState<AttendanceSummary | null>(null);
     const [loading, setLoading] = useState(true);
     const [summaryLoading, setSummaryLoading] = useState(false);
@@ -110,6 +113,7 @@ export default function AttendanceIndexPage() {
     const loadToday = useCallback(async () => {
         if (!employeeId) {
             setTodayRecord(null);
+            setHasShiftToday(null);
 
             return null as AttendanceRecord | null;
         }
@@ -118,12 +122,30 @@ export default function AttendanceIndexPage() {
         const yesterday = yesterdayIso();
 
         try {
-            const result = await attendanceApi.listRecords({
-                employee_id: employeeId,
-                date_from: yesterday,
-                date_to: day,
-                per_page: 10,
-            });
+            const [result, calendar] = await Promise.all([
+                attendanceApi.listRecords({
+                    employee_id: employeeId,
+                    date_from: yesterday,
+                    date_to: day,
+                    per_page: 10,
+                }),
+                shiftApi
+                    .getWorkingCalendar({
+                        employee_id: employeeId,
+                        date_from: day,
+                        date_to: day,
+                    })
+                    .catch((): WorkingCalendarDay[] | null => null),
+            ]);
+
+            if (calendar === null) {
+                setHasShiftToday(true);
+            } else {
+                const todayCal = calendar.find((row) => row.date === day);
+                setHasShiftToday(
+                    todayCal != null && todayCal.shift_id != null,
+                );
+            }
             const todayRow =
                 result.data.find((item) => item.work_date === day) ?? null;
 
@@ -596,6 +618,7 @@ export default function AttendanceIndexPage() {
                 busy={busy || syncingQueue}
                 pendingCheckIn={pendingCheckIn}
                 pendingCheckOut={pendingCheckOut}
+                hasShiftToday={hasShiftToday}
                 onCheckIn={() => setPunchMode('check_in')}
                 onCheckOut={() => setPunchMode('check_out')}
             />

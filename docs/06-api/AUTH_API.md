@@ -94,6 +94,8 @@ If 2FA required, return a challenge state (still authenticated only after challe
 
 **401/422** — invalid credentials (do not reveal which field was wrong beyond standard validation).
 
+Linked employee in `suspended` / `resigned` / `archived` → **403** `AUTH_ACCOUNT_INACTIVE` after a correct password (does not leak “wrong password”). Users **without** an employee profile can still sign in. Authenticated `/api/*` routes (except logout) re-check eligibility so an already-open session is blocked after HR changes status.
+
 ---
 
 ## Current User
@@ -158,6 +160,7 @@ Company-wide default remains `PUT /api/settings` (`can_manage_settings`).
 | Code | When |
 |------|------|
 | `AUTH_INVALID_CREDENTIALS` | Login failed |
+| `AUTH_ACCOUNT_INACTIVE` | Linked employee is `suspended`, `resigned`, or `archived` (403). Users without an employee profile can still sign in. |
 | `AUTH_TWO_FACTOR_REQUIRED` | Challenge needed |
 | `AUTH_TWO_FACTOR_INVALID` | Bad 2FA code |
 

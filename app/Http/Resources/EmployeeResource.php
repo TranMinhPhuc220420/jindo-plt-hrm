@@ -34,8 +34,24 @@ class EmployeeResource extends JsonResource
             'hr_owner_id' => $this->hr_owner_id,
             'user_id' => $this->user_id,
             'hired_at' => $this->hired_at?->toDateString(),
+            'terminated_at' => $this->terminated_at?->toDateString(),
             'status' => $this->status,
             'avatar_url' => $this->avatarUrl(),
+            'outstanding_assets' => $this->whenLoaded(
+                'activeAssetAssignments',
+                fn () => $this->activeAssetAssignments
+                    ->map(fn ($assignment) => [
+                        'id' => $assignment->asset?->id ?? $assignment->asset_id,
+                        'code' => $assignment->asset?->code,
+                        'name' => $assignment->asset?->name,
+                    ])
+                    ->values()
+                    ->all(),
+            ),
+            'outstanding_assets_count' => $this->when(
+                $this->relationLoaded('activeAssetAssignments'),
+                fn () => $this->activeAssetAssignments->count(),
+            ),
             'department' => $this->whenLoaded('department', fn () => $this->department ? [
                 'id' => $this->department->id,
                 'name' => $this->department->name,

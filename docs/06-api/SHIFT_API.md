@@ -83,7 +83,8 @@
 }
 ```
 
-Overlap conflicts → `409` / `SHIFT_ASSIGNMENT_OVERLAP`.
+Overlap conflicts → `409` / `SHIFT_ASSIGNMENT_OVERLAP`.  
+Inactive employees (`suspended`, `resigned`, `archived`) cannot receive new assignments → `422` / `SHIFT_EMPLOYEE_INACTIVE`.
 
 ---
 
@@ -165,6 +166,7 @@ Consumed by Attendance/Leave validation via services (not only by clients).
 | Code | When |
 |------|------|
 | `SHIFT_ASSIGNMENT_OVERLAP` | Conflicting assignment window |
+| `SHIFT_EMPLOYEE_INACTIVE` | Assigning a shift to a non-punchable employee |
 | `SHIFT_IN_USE` | Cannot delete definition still assigned |
 | `SHIFT_INVALID_TIME_RANGE` | Bad start/end |
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\DomainException;
+use App\Http\Middleware\EnsureEmployeeAccountEligible;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SetLocale;
@@ -37,6 +38,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->api(append: [
             SetLocale::class,
+        ]);
+
+        $middleware->alias([
+            'employee.eligible' => EnsureEmployeeAccountEligible::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

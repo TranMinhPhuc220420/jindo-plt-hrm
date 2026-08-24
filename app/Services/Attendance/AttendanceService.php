@@ -14,6 +14,8 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
+use App\Services\Shift\WorkingCalendarService;
+use App\Support\EmployeeAccountGate;
 use App\Support\SettingsDefaults;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
@@ -29,6 +31,7 @@ class AttendanceService
         private readonly AuditLogger $audit,
         private readonly AttendanceMetricsCalculator $metrics,
         private readonly AttendanceEvidenceStorage $evidenceStorage,
+        private readonly WorkingCalendarService $calendar,
     ) {}
 
     /**
@@ -48,9 +51,18 @@ class AttendanceService
     {
         $this->assertEvidencePresent($data);
         $employee = $this->requireLinkedEmployee();
+        EmployeeAccountGate::assertCanPunch($employee);
         $companyId = $this->companyContext->id();
         $workedAt = $this->parseWorkedAt($data['worked_at'] ?? null);
         $workDate = $workedAt->timezone($this->companyTimezone())->toDateString();
+
+        if ($this->calendar->assignmentForDate($employee->id, $workDate) === null) {
+            throw new DomainException(
+                message: 'No shift is assigned for this work date.',
+                errorCode: 'ATTENDANCE_NO_SHIFT',
+                status: 422,
+            );
+        }
 
         $existing = AttendanceRecord::query()
             ->where('company_id', $companyId)

@@ -1,0 +1,87 @@
+APP_NAME=HRM
+APP_ENV=local
+APP_KEY=base64:8zR+rV4Xcx7XmJ0rmX+tJEuXRNwwo1efBxr1Wi2Ja3Y=
+APP_DEBUG=true
+APP_URL=https://hrm.plt.pro.vn
+
+# Brand / social share (Open Graph for Facebook, Zalo, etc.)
+BRAND_COMPANY="PLT Solutions"
+BRAND_DESCRIPTION="HRM by PLT Solutions — human resource management for people operations, attendance, leave, and payroll."
+BRAND_OG_IMAGE=/images/welcome-hero.jpg
+
+APP_LOCALE=vi
+APP_FALLBACK_LOCALE=en
+APP_FAKER_LOCALE=en_US
+
+APP_MAINTENANCE_DRIVER=file
+# APP_MAINTENANCE_STORE=database
+
+# PHP_CLI_SERVER_WORKERS=4
+
+BCRYPT_ROUNDS=12
+
+# Default password assigned when an employee login account is provisioned (onboarding)
+EMPLOYEE_DEFAULT_PASSWORD=pltsolutions2026@@
+
+# Production bootstrap seed (ProductionBootstrapSeeder). Company has defaults; admin is required.
+SEED_COMPANY_CODE=PLT_SOLUTIONS
+SEED_COMPANY_NAME="PLT Solutions"
+SEED_ADMIN_EMAIL=admin@plt-solutions.com
+SEED_ADMIN_PASSWORD=pltsolutions2026!!
+
+LOG_CHANNEL=stack
+LOG_STACK=single
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=debug
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=pltprov1_jindo_plt_hrm
+# Requires SEED_ADMIN_EMAIL + SEED_ADMIN_PASSWORD in .env
+DB_USERNAME=pltprov1_jindo_plt_hrm
+DB_PASSWORD="6UZ&@K9T?]y#7k!9"
+
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+SESSION_ENCRYPT=false
+SESSION_PATH=/
+SESSION_DOMAIN=null
+
+# First-party SPA (Sanctum cookie). APP_URL host is always merged in config/sanctum.php.
+# Still list every SPA host (no scheme) here — production example: hrm.example.com
+SANCTUM_STATEFUL_DOMAINS=localhost,localhost:5173,localhost:8000,127.0.0.1,127.0.0.1:5173,127.0.0.1:8000,::1
+# Full origins (with scheme) for cross-origin SPA; same-origin deploy can leave local defaults
+CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:8000,http://127.0.0.1:8000
+# Production HTTPS: SESSION_SECURE_COOKIE=true
+
+BROADCAST_CONNECTION=log
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=database
+
+CACHE_STORE=database
+# CACHE_PREFIX=
+
+MEMCACHED_HOST=127.0.0.1
+
+REDIS_CLIENT=phpredis
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+MAIL_MAILER=log
+MAIL_SCHEME=null
+MAIL_HOST=127.0.0.1
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_FROM_ADDRESS="hello@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
+
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=us-east-1
+AWS_BUCKET=
+AWS_USE_PATH_STYLE_ENDPOINT=false
+
+VITE_APP_NAME="${APP_NAME}"

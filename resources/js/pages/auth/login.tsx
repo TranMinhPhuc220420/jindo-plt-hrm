@@ -85,7 +85,11 @@ export default function Login({ status }: Props) {
             }
         } catch (error) {
             if (error instanceof ApiError) {
-                setFormError(error.message);
+                setFormError(
+                    error.errorCode === 'AUTH_ACCOUNT_INACTIVE'
+                        ? error.message || t('login.error_account_inactive')
+                        : error.message,
+                );
                 setFieldErrors(error.fieldErrors);
             } else {
                 setFormError(t('login.error_generic'));
@@ -111,7 +115,11 @@ export default function Login({ status }: Props) {
             router.visit('/dashboard');
         } catch (error) {
             if (error instanceof ApiError) {
-                setFormError(error.message);
+                setFormError(
+                    error.errorCode === 'AUTH_ACCOUNT_INACTIVE'
+                        ? error.message || t('login.error_account_inactive')
+                        : error.message,
+                );
                 setFieldErrors(error.fieldErrors);
             } else {
                 setFormError(t('two_factor.error_verify'));

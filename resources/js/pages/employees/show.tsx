@@ -6,11 +6,13 @@ import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
 import { ErrorState, LoadingState } from '@/components/shared/async-state';
 import { AvatarEditor } from '@/components/shared/avatar-editor';
+import { DatePicker } from '@/components/shared/date-picker';
 import EmployeeOrgPlacementFields, {
     orgIdOrNull,
 } from '@/components/shared/employee-org-placement-fields';
 import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useLoadEffect } from '@/hooks/use-load-effect';
@@ -21,6 +23,14 @@ import * as shiftApi from '@/lib/api/modules/shifts';
 import type { ShiftAssignment } from '@/lib/api/modules/shifts';
 import { useAuth } from '@/lib/auth/auth-context';
 import { formatDateString } from '@/lib/datetime';
+
+const OFFBOARDING_STATUSES: EmployeeStatus[] = ['resigned', 'archived'];
+
+type OutstandingAsset = {
+    id: number;
+    code: string | null;
+    name: string | null;
+};
 
 type Props = {
     id: number;
@@ -40,6 +50,10 @@ export default function EmployeeShowPage({ id }: Props) {
     const [positionId, setPositionId] = useState('');
     const [status, setStatus] = useState<EmployeeStatus>('active');
     const [statusReason, setStatusReason] = useState('');
+    const [effectiveOn, setEffectiveOn] = useState(() =>
+        formatDateString(new Date()),
+    );
+    const [confirmAssetReturn, setConfirmAssetReturn] = useState(false);
 
     const [contactName, setContactName] = useState('');
     const [contactPhone, setContactPhone] = useState('');
@@ -158,13 +172,38 @@ export default function EmployeeShowPage({ id }: Props) {
         setSaving(true);
 
         try {
+            const isOffboarding = OFFBOARDING_STATUSES.includes(status);
             const updated = await employeeApi.changeEmployeeStatus(id, {
                 status,
                 reason: statusReason || undefined,
+                effective_on: isOffboarding ? effectiveOn : undefined,
+                confirm_asset_return: isOffboarding
+                    ? confirmAssetReturn
+                    : undefined,
             });
             setEmployee(updated);
+            setConfirmAssetReturn(false);
             toast.success(t('show.toast_status_updated'));
         } catch (err) {
+            if (
+                err instanceof ApiError &&
+                err.errorCode === 'EMPLOYEE_HAS_OUTSTANDING_ASSETS'
+            ) {
+                const assets = Array.isArray(err.meta.assets)
+                    ? (err.meta.assets as OutstandingAsset[])
+                    : [];
+
+                setEmployee((current) =>
+                    current
+                        ? {
+                              ...current,
+                              outstanding_assets: assets,
+                              outstanding_assets_count: assets.length,
+                          }
+                        : current,
+                );
+            }
+
             toast.error(
                 err instanceof ApiError
                     ? err.message
@@ -548,12 +587,19 @@ export default function EmployeeShowPage({ id }: Props) {
                                         id="new-status"
                                         className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
                                         value={status}
-                                        onChange={(e) =>
-                                            setStatus(
-                                                e.target
-                                                    .value as EmployeeStatus,
-                                            )
-                                        }
+                                        onChange={(e) => {
+                                            const next = e.target
+                                                .value as EmployeeStatus;
+                                            setStatus(next);
+
+                                            if (
+                                                !OFFBOARDING_STATUSES.includes(
+                                                    next,
+                                                )
+                                            ) {
+                                                setConfirmAssetReturn(false);
+                                            }
+                                        }}
                                     >
                                         <option value="probation">
                                             {t('status_probation', {
@@ -595,7 +641,90 @@ export default function EmployeeShowPage({ id }: Props) {
                                     />
                                 </div>
                             </div>
-                            <Button type="submit" disabled={saving} size="sm">
+                            {OFFBOARDING_STATUSES.includes(status) ? (
+                                <>
+                                    <div className="space-y-1">
+                                        <Label htmlFor="effective-on">
+                                            {t('show.effective_on')}
+                                        </Label>
+                                        <DatePicker
+                                            id="effective-on"
+                                            value={effectiveOn}
+                                            onChange={setEffectiveOn}
+                                            disabled={saving}
+                                        />
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">
+                                        {t('show.offboarding_shifts_note')}
+                                    </p>
+                                    <div className="space-y-2">
+                                        <p className="text-sm font-medium">
+                                            {t('show.outstanding_assets')}
+                                        </p>
+                                        {(
+                                            employee.outstanding_assets ?? []
+                                        ).length === 0 ? (
+                                            <p className="text-sm text-muted-foreground">
+                                                {t(
+                                                    'show.outstanding_assets_empty',
+                                                )}
+                                            </p>
+                                        ) : (
+                                            <ul className="space-y-1 text-sm">
+                                                {(
+                                                    employee.outstanding_assets ??
+                                                    []
+                                                ).map((asset) => (
+                                                    <li key={asset.id}>
+                                                        {asset.code
+                                                            ? `${asset.code} · `
+                                                            : ''}
+                                                        {asset.name ?? ''}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                    {(employee.outstanding_assets ?? [])
+                                        .length > 0 ? (
+                                        <div className="flex items-start gap-3">
+                                            <Checkbox
+                                                id="confirm-asset-return"
+                                                checked={confirmAssetReturn}
+                                                onCheckedChange={(checked) =>
+                                                    setConfirmAssetReturn(
+                                                        checked === true,
+                                                    )
+                                                }
+                                                disabled={saving}
+                                            />
+                                            <div className="space-y-1">
+                                                <Label htmlFor="confirm-asset-return">
+                                                    {t(
+                                                        'show.confirm_asset_return',
+                                                    )}
+                                                </Label>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {t(
+                                                        'show.confirm_asset_return_hint',
+                                                    )}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ) : null}
+                                </>
+                            ) : null}
+                            <Button
+                                type="submit"
+                                disabled={
+                                    saving ||
+                                    (OFFBOARDING_STATUSES.includes(status) &&
+                                        (employee.outstanding_assets ?? [])
+                                            .length > 0 &&
+                                        !confirmAssetReturn)
+                                }
+                                size="sm"
+                            >
                                 {t('show.change_status')}
                             </Button>
                         </form>

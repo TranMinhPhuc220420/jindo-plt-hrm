@@ -58,6 +58,7 @@
         "state_working": "Checked in — working",
         "state_done": "Checked out for today",
         "state_no_employee": "Link an employee record to punch",
+        "no_shift_banner": "No shift is assigned for today. Check-in is unavailable until a shift is assigned.",
         "summary_present": "Days present",
         "summary_worked": "Worked",
         "summary_late": "Late",

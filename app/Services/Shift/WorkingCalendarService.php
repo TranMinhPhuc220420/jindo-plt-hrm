@@ -87,6 +87,23 @@ class WorkingCalendarService
         return $days;
     }
 
+    public function assignmentForDate(int $employeeId, string $date): ?ShiftAssignment
+    {
+        [$companyId] = $this->assertEmployeeRange($employeeId, $date, $date);
+
+        return ShiftAssignment::query()
+            ->where('company_id', $companyId)
+            ->where('employee_id', $employeeId)
+            ->with('shift')
+            ->where('start_date', '<=', $date)
+            ->where(function ($q) use ($date): void {
+                $q->whereNull('end_date')
+                    ->orWhere('end_date', '>=', $date);
+            })
+            ->orderBy('start_date')
+            ->first();
+    }
+
     /**
      * Rest / holiday days in range that have no shift assignment (for schedule UI).
      *

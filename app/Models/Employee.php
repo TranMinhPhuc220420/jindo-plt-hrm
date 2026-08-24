@@ -24,6 +24,25 @@ class Employee extends Model
         'archived',
     ];
 
+    /** @var list<string> */
+    public const LOGIN_BLOCKED_STATUSES = [
+        'suspended',
+        'resigned',
+        'archived',
+    ];
+
+    /** @var list<string> */
+    public const PUNCH_ALLOWED_STATUSES = [
+        'probation',
+        'active',
+    ];
+
+    /** @var list<string> */
+    public const OFFBOARDING_STATUSES = [
+        'resigned',
+        'archived',
+    ];
+
     protected $fillable = [
         'company_id',
         'code',
@@ -41,6 +60,7 @@ class Employee extends Model
         'hr_owner_id',
         'user_id',
         'hired_at',
+        'terminated_at',
         'status',
         'avatar_path',
     ];
@@ -52,6 +72,7 @@ class Employee extends Model
     {
         return [
             'hired_at' => 'date',
+            'terminated_at' => 'date',
         ];
     }
 
@@ -197,6 +218,31 @@ class Employee extends Model
     public function attendanceCorrections(): HasMany
     {
         return $this->hasMany(AttendanceCorrection::class);
+    }
+
+    /**
+     * @return HasMany<AssetAssignment, $this>
+     */
+    public function activeAssetAssignments(): HasMany
+    {
+        return $this->hasMany(AssetAssignment::class)
+            ->where('status', 'active')
+            ->whereNull('returned_at');
+    }
+
+    public function isLoginBlocked(): bool
+    {
+        return in_array($this->status, self::LOGIN_BLOCKED_STATUSES, true);
+    }
+
+    public function canPunch(): bool
+    {
+        return in_array($this->status, self::PUNCH_ALLOWED_STATUSES, true);
+    }
+
+    public static function isOffboardingStatus(string $status): bool
+    {
+        return in_array($status, self::OFFBOARDING_STATUSES, true);
     }
 
     public function avatarUrl(): ?string

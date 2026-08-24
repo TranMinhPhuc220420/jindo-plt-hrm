@@ -121,7 +121,20 @@ export async function apiRequest<T>(
     if (!response.ok) {
         const error = normalizeError(response.status, body);
 
+        const isAuthAttempt =
+            path.includes('/api/auth/login') ||
+            path.includes('/api/auth/two-factor');
+
         if (response.status === 401 && !options.skipUnauthorized) {
+            onUnauthorized?.();
+        }
+
+        if (
+            response.status === 403 &&
+            error.errorCode === 'AUTH_ACCOUNT_INACTIVE' &&
+            !isAuthAttempt &&
+            !options.skipUnauthorized
+        ) {
             onUnauthorized?.();
         }
 

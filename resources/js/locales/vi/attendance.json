@@ -58,6 +58,7 @@
         "state_working": "Đã vào ca — đang làm việc",
         "state_done": "Đã ra ca hôm nay",
         "state_no_employee": "Cần gắn hồ sơ nhân viên để điểm danh",
+        "no_shift_banner": "Chưa được phân ca làm việc hôm nay. Không thể vào ca cho đến khi được phân ca.",
         "summary_present": "Ngày có mặt",
         "summary_worked": "Giờ làm",
         "summary_late": "Đi muộn",

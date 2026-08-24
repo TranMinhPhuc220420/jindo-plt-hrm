@@ -89,22 +89,22 @@ Route::prefix('auth')->group(function (): void {
 });
 
 Route::get('/me', MeController::class)
-    ->middleware('auth:sanctum')
+    ->middleware(['auth:sanctum', 'employee.eligible'])
     ->name('api.me');
 
 Route::put('/me/locale', MeLocaleController::class)
-    ->middleware('auth:sanctum')
+    ->middleware(['auth:sanctum', 'employee.eligible'])
     ->name('api.me.locale');
 
 Route::post('/me/avatar', [MeAvatarController::class, 'store'])
-    ->middleware('auth:sanctum')
+    ->middleware(['auth:sanctum', 'employee.eligible'])
     ->name('api.me.avatar.store');
 
 Route::delete('/me/avatar', [MeAvatarController::class, 'destroy'])
-    ->middleware('auth:sanctum')
+    ->middleware(['auth:sanctum', 'employee.eligible'])
     ->name('api.me.avatar.destroy');
 
-Route::middleware('auth:sanctum')->group(function (): void {
+Route::middleware(['auth:sanctum', 'employee.eligible'])->group(function (): void {
     Route::get('/permissions', [PermissionController::class, 'index'])
         ->name('api.permissions.index');
 

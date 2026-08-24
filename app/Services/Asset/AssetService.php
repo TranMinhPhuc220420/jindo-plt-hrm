@@ -286,6 +286,38 @@ class AssetService
     }
 
     /**
+     * @return Collection<int, AssetAssignment>
+     */
+    public function listOutstandingForEmployee(Employee $employee): Collection
+    {
+        $this->assertCompanyScope($employee->company_id);
+
+        return AssetAssignment::query()
+            ->where('company_id', $employee->company_id)
+            ->where('employee_id', $employee->id)
+            ->where('status', 'active')
+            ->whereNull('returned_at')
+            ->with('asset')
+            ->orderBy('id')
+            ->get();
+    }
+
+    public function returnOutstandingForEmployee(Employee $employee): void
+    {
+        foreach ($this->listOutstandingForEmployee($employee) as $assignment) {
+            $asset = $assignment->asset;
+
+            if ($asset === null) {
+                continue;
+            }
+
+            $this->returnAsset($asset, [
+                'note' => 'Returned during employee offboarding.',
+            ]);
+        }
+    }
+
+    /**
      * @param  array<string, mixed>  $filters
      * @return LengthAwarePaginator<int, AssetAssignment>
      */
