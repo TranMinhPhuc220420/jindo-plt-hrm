@@ -661,9 +661,8 @@ export default function EmployeeShowPage({ id }: Props) {
                                         <p className="text-sm font-medium">
                                             {t('show.outstanding_assets')}
                                         </p>
-                                        {(
-                                            employee.outstanding_assets ?? []
-                                        ).length === 0 ? (
+                                        {(employee.outstanding_assets ?? [])
+                                            .length === 0 ? (
                                             <p className="text-sm text-muted-foreground">
                                                 {t(
                                                     'show.outstanding_assets_empty',

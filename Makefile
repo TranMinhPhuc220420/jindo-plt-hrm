@@ -1,6 +1,6 @@
 # Makefile
 
-.PHONY: start build clear test migrate seed seed-local seed-admin migrate_and_seed deploy run_xampp format pre-commit ci-check
+.PHONY: start build clear test migrate seed seed-local seed-admin migrate_and_seed deploy run_xampp format pre-commit ci-check ensure-js-deps
 
 # Start the development server
 start:
@@ -60,8 +60,15 @@ run_xampp:
 # Pre-commit / CI helpers
 # ---------------------------------------------------------------------------
 
+# Install JS deps when Prettier/ESLint are missing (`npm run format` looks for
+# binaries on PATH; without node_modules that fails with "prettier: not found").
+# Wayfinder route types are gitignored and required by `tsc`.
+ensure-js-deps:
+	@test -x node_modules/.bin/prettier -a -x node_modules/.bin/eslint || npm install
+	php artisan wayfinder:generate --with-form --no-interaction
+
 # Auto-fix Prettier, ESLint, and Pint (fixes the usual format:check CI failure)
-format:
+format: ensure-js-deps
 	npm run format
 	npm run lint
 	composer lint

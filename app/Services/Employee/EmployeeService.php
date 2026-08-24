@@ -726,7 +726,7 @@ class EmployeeService
         string $effectiveOn,
     ): void {
         if ($to === 'resigned' || ($to === 'archived' && $employee->terminated_at === null)) {
-            $employee->terminated_at = $effectiveOn;
+            $employee->terminated_at = CarbonImmutable::parse($effectiveOn);
 
             return;
         }

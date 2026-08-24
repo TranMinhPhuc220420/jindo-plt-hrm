@@ -95,10 +95,7 @@ class EmployeeController extends Controller
         $model = $this->employees->find($employee);
         $this->authorize('changeStatus', $model);
 
-        $model = $this->employees->changeStatus($model, [
-            ...$request->validated(),
-            'confirm_asset_return' => $request->boolean('confirm_asset_return'),
-        ]);
+        $model = $this->employees->changeStatus($model, $request->payload());
 
         return ApiResponse::success(
             (new EmployeeResource($model))->resolve(),

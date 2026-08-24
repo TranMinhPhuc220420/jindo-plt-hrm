@@ -190,7 +190,7 @@ class ShiftAssignmentService
                 continue;
             }
 
-            $assignment->end_date = $effectiveOn;
+            $assignment->end_date = CarbonImmutable::parse($effectiveOn);
             $assignment->save();
 
             $this->audit->write(

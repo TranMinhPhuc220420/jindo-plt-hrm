@@ -142,10 +142,9 @@ export default function AttendanceIndexPage() {
                 setHasShiftToday(true);
             } else {
                 const todayCal = calendar.find((row) => row.date === day);
-                setHasShiftToday(
-                    todayCal != null && todayCal.shift_id != null,
-                );
+                setHasShiftToday(todayCal != null && todayCal.shift_id != null);
             }
+
             const todayRow =
                 result.data.find((item) => item.work_date === day) ?? null;
 
