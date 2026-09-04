@@ -128,17 +128,29 @@ Does **not** create a login `User` — that happens during onboarding (`create_a
 | `effective_on` | no | Date used to close shift assignments. Defaults to today (company timezone). |
 | `confirm_asset_return` | no | Required `true` when moving to `resigned` / `archived` while assets are still assigned |
 
-Show payload includes `terminated_at`, `outstanding_assets`, and `outstanding_assets_count`.
+Show payload includes `terminated_at`, `outstanding_assets`, `outstanding_assets_count`, and `allowed_next_statuses` (current status plus legal next values for the status select).
 
 Statuses (logical): `probation`, `active`, `suspended`, `resigned`, `archived`.
+
+Allowed transitions (same-status posts are idempotent):
+
+| From | To |
+|------|----|
+| `probation` | `active`, `suspended`, `resigned` |
+| `active` | `suspended`, `resigned` |
+| `suspended` | `active`, `resigned` |
+| `resigned` | `archived`, `active`, `probation` |
+| `archived` | `active`, `probation` |
 
 Invalid transitions → `409` `EMPLOYEE_INVALID_STATUS_TRANSITION`.
 
 `suspended`, `resigned`, and `archived` block login and kick other sessions. `resigned` / `archived` also:
 
-- set `terminated_at` (cleared when returning `suspended` → `active`)
+- set `terminated_at` (cleared when returning to `active` / `probation` from `suspended`, `resigned`, or `archived`)
 - close future shift assignments from `effective_on` (delete not-yet-started; set `end_date` on running assignments)
 - require outstanding assets to be confirmed returned (`409` `EMPLOYEE_HAS_OUTSTANDING_ASSETS` + `meta.assets` / `errors.assets` if not)
+
+Rehire (`archived` / `resigned` → `active` / `probation`) does **not** recreate shift assignments or assets. `hired_at` is unchanged. `reason` is recommended in the audit note. Soft-deleted rows (`DELETE /api/employees/{id}`) stay 404 until a separate restore flow exists.
 
 `suspended` keeps shifts and assets so the employee can return.
 

@@ -15,8 +15,8 @@ final class EmployeeStatusTransitions
         'probation' => ['active', 'suspended', 'resigned'],
         'active' => ['suspended', 'resigned'],
         'suspended' => ['active', 'resigned'],
-        'resigned' => ['archived'],
-        'archived' => [],
+        'resigned' => ['archived', 'active', 'probation'],
+        'archived' => ['active', 'probation'],
     ];
 
     public static function canTransition(string $from, string $to): bool
@@ -30,5 +30,21 @@ final class EmployeeStatusTransitions
         }
 
         return in_array($to, self::ALLOWED[$from], true);
+    }
+
+    /**
+     * Current status plus legal next statuses (for show/select UI).
+     *
+     * @return list<string>
+     */
+    public static function allowedNextStatuses(string $from): array
+    {
+        if (! in_array($from, Employee::STATUSES, true)) {
+            return [];
+        }
+
+        $next = [$from, ...self::ALLOWED[$from]];
+
+        return array_values(array_unique($next));
     }
 }

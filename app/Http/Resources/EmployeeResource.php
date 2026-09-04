@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Employee;
+use App\Services\Employee\EmployeeStatusTransitions;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -36,6 +37,7 @@ class EmployeeResource extends JsonResource
             'hired_at' => $this->hired_at?->toDateString(),
             'terminated_at' => $this->terminated_at?->toDateString(),
             'status' => $this->status,
+            'allowed_next_statuses' => EmployeeStatusTransitions::allowedNextStatuses($this->status),
             'avatar_url' => $this->avatarUrl(),
             'outstanding_assets' => $this->whenLoaded(
                 'activeAssetAssignments',

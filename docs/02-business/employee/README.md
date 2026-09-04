@@ -97,6 +97,19 @@ Resignation / termination trigger
       → Retain history for reports/audit
 ```
 
+### Rehire / reactivation
+
+```
+HR with can_change_employee_status
+  → POST /api/employees/{id}/status to active or probation
+    → from archived or resigned (row not soft-deleted)
+      → Clear terminated_at (hired_at unchanged)
+        → Audit employee.status_changed
+          → Login and punch allowed again; assign a new shift if needed
+```
+
+Soft-deleted employees (`DELETE`) are out of this flow until an explicit restore exists.
+
 ---
 
 ## Dependencies
@@ -141,6 +154,7 @@ Never authorize by role name strings in services.
 - Full public employee self-service portal (later)
 - Deep ESS mobile experiences (later)
 - Treating candidate records as employees before hire (belongs to Recruitment)
+- Restoring **soft-deleted** employees (`DELETE /api/employees/{id}`) — status `archived` on a living row can be rehired; trashed rows stay 404
 
 ---
 

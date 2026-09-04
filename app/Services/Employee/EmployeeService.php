@@ -731,7 +731,7 @@ class EmployeeService
             return;
         }
 
-        if (in_array($to, ['active', 'probation'], true) && in_array($from, ['suspended', 'resigned'], true)) {
+        if (in_array($to, ['active', 'probation'], true) && in_array($from, ['suspended', 'resigned', 'archived'], true)) {
             $employee->terminated_at = null;
         }
     }

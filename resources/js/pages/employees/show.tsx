@@ -25,6 +25,27 @@ import { useAuth } from '@/lib/auth/auth-context';
 import { formatDateString } from '@/lib/datetime';
 
 const OFFBOARDING_STATUSES: EmployeeStatus[] = ['resigned', 'archived'];
+const REHIRE_STATUSES: EmployeeStatus[] = ['resigned', 'archived'];
+const EMPLOYEE_STATUSES: EmployeeStatus[] = [
+    'probation',
+    'active',
+    'suspended',
+    'resigned',
+    'archived',
+];
+
+function statusChoices(employee: Employee): EmployeeStatus[] {
+    const allowed = employee.allowed_next_statuses;
+
+    if (!allowed || allowed.length === 0) {
+        return EMPLOYEE_STATUSES;
+    }
+
+    const allowedSet = new Set<string>(allowed);
+    allowedSet.add(employee.status);
+
+    return EMPLOYEE_STATUSES.filter((status) => allowedSet.has(status));
+}
 
 type OutstandingAsset = {
     id: number;
@@ -182,6 +203,7 @@ export default function EmployeeShowPage({ id }: Props) {
                     : undefined,
             });
             setEmployee(updated);
+            setStatus(updated.status);
             setConfirmAssetReturn(false);
             toast.success(t('show.toast_status_updated'));
         } catch (err) {
@@ -578,6 +600,11 @@ export default function EmployeeShowPage({ id }: Props) {
                             <h3 className="text-sm font-semibold">
                                 {t('show.section_status')}
                             </h3>
+                            {REHIRE_STATUSES.includes(employee.status) ? (
+                                <p className="text-sm text-muted-foreground">
+                                    {t('show.rehire_note')}
+                                </p>
+                            ) : null}
                             <div className="grid gap-3 sm:grid-cols-2">
                                 <div className="space-y-1">
                                     <Label htmlFor="new-status">
@@ -601,31 +628,18 @@ export default function EmployeeShowPage({ id }: Props) {
                                             }
                                         }}
                                     >
-                                        <option value="probation">
-                                            {t('status_probation', {
-                                                ns: 'common',
-                                            })}
-                                        </option>
-                                        <option value="active">
-                                            {t('status_active', {
-                                                ns: 'common',
-                                            })}
-                                        </option>
-                                        <option value="suspended">
-                                            {t('status_suspended', {
-                                                ns: 'common',
-                                            })}
-                                        </option>
-                                        <option value="resigned">
-                                            {t('status_resigned', {
-                                                ns: 'common',
-                                            })}
-                                        </option>
-                                        <option value="archived">
-                                            {t('status_archived', {
-                                                ns: 'common',
-                                            })}
-                                        </option>
+                                        {statusChoices(employee).map(
+                                            (value) => (
+                                                <option
+                                                    key={value}
+                                                    value={value}
+                                                >
+                                                    {t(`status_${value}`, {
+                                                        ns: 'common',
+                                                    })}
+                                                </option>
+                                            ),
+                                        )}
                                     </select>
                                 </div>
                                 <div className="space-y-1">
