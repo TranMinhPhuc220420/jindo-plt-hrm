@@ -21,19 +21,23 @@ test('probation can move to active, suspended, or resigned', function () {
     expect(EmployeeStatusTransitions::canTransition('probation', 'archived'))->toBeFalse();
 });
 
-test('archived is a terminal state with no outgoing transitions', function () {
-    foreach (Employee::STATUSES as $to) {
-        if ($to === 'archived') {
-            continue;
-        }
-        expect(EmployeeStatusTransitions::canTransition('archived', $to))->toBeFalse();
-    }
+test('archived can be rehired to active or probation', function () {
+    expect(EmployeeStatusTransitions::canTransition('archived', 'active'))->toBeTrue();
+    expect(EmployeeStatusTransitions::canTransition('archived', 'probation'))->toBeTrue();
+    expect(EmployeeStatusTransitions::canTransition('archived', 'suspended'))->toBeFalse();
+    expect(EmployeeStatusTransitions::canTransition('archived', 'resigned'))->toBeFalse();
 });
 
-test('resigned can only move to archived', function () {
+test('resigned can move to archived or be rehired', function () {
     expect(EmployeeStatusTransitions::canTransition('resigned', 'archived'))->toBeTrue();
-    expect(EmployeeStatusTransitions::canTransition('resigned', 'active'))->toBeFalse();
-    expect(EmployeeStatusTransitions::canTransition('resigned', 'probation'))->toBeFalse();
+    expect(EmployeeStatusTransitions::canTransition('resigned', 'active'))->toBeTrue();
+    expect(EmployeeStatusTransitions::canTransition('resigned', 'probation'))->toBeTrue();
+    expect(EmployeeStatusTransitions::canTransition('resigned', 'suspended'))->toBeFalse();
+});
+
+test('active cannot skip to archived or go back to probation', function () {
+    expect(EmployeeStatusTransitions::canTransition('active', 'archived'))->toBeFalse();
+    expect(EmployeeStatusTransitions::canTransition('active', 'probation'))->toBeFalse();
 });
 
 test('unknown status values are always rejected', function () {
@@ -46,4 +50,15 @@ test('every status is idempotent to itself', function () {
     foreach (Employee::STATUSES as $status) {
         expect(EmployeeStatusTransitions::canTransition($status, $status))->toBeTrue();
     }
+});
+
+test('allowed next statuses include current plus legal targets', function () {
+    expect(EmployeeStatusTransitions::allowedNextStatuses('archived'))
+        ->toBe(['archived', 'active', 'probation'])
+        ->and(EmployeeStatusTransitions::allowedNextStatuses('resigned'))
+        ->toBe(['resigned', 'archived', 'active', 'probation'])
+        ->and(EmployeeStatusTransitions::allowedNextStatuses('active'))
+        ->toBe(['active', 'suspended', 'resigned'])
+        ->and(EmployeeStatusTransitions::allowedNextStatuses('bogus'))
+        ->toBe([]);
 });

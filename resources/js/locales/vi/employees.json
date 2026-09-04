@@ -52,6 +52,7 @@
         "confirm_asset_return": "Xác nhận đã thu hồi tài sản",
         "confirm_asset_return_hint": "Bắt buộc khi chuyển sang Đã nghỉ hoặc Lưu trữ nếu nhân viên còn tài sản công ty.",
         "offboarding_shifts_note": "Phân ca sau ngày hiệu lực sẽ được cắt.",
+        "rehire_note": "Nhân viên này có thể được kích hoạt lại. Gán ca sau khi đổi sang Đang làm việc hoặc Thử việc. Tài khoản đăng nhập sẽ dùng được lại nếu đã có tài khoản.",
         "change_status": "Đổi trạng thái",
         "toast_status_updated": "Đã cập nhật trạng thái",
         "toast_status_failed": "Đổi trạng thái thất bại",

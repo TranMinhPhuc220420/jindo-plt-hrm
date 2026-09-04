@@ -52,6 +52,7 @@
         "confirm_asset_return": "Confirm assets have been returned",
         "confirm_asset_return_hint": "Required before resigning or archiving an employee who still holds company assets.",
         "offboarding_shifts_note": "Future shift assignments will be closed from the effective date.",
+        "rehire_note": "This employee can be reactivated. Assign a shift after changing status to Active or Probation. Their login will work again if they already have an account.",
         "change_status": "Change status",
         "toast_status_updated": "Status updated",
         "toast_status_failed": "Status change failed",

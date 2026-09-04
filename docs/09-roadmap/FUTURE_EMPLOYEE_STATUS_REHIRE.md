@@ -137,6 +137,12 @@ No migration. No new permission. No new route.
 
 ---
 
+## Shipped (2026-09-04)
+
+Implemented as `∞.employee-status-rehire`. `archived`/`resigned` → `active`/`probation` is allowed; `terminated_at` clears; show payload includes `allowed_next_statuses`. Soft-delete restore remains out of scope.
+
+---
+
 ## Out of scope
 
 - Soft-delete restore (`DELETE` then show 404).

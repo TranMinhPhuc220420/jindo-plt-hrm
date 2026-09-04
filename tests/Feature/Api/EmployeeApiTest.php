@@ -614,3 +614,118 @@ test('changing status to resigned invalidates the employee session', function ()
         ->assertForbidden()
         ->assertJsonPath('error_code', 'AUTH_ACCOUNT_INACTIVE');
 });
+
+test('archived employee can be rehired to active and can sign in', function () {
+    $company = Company::factory()->create();
+    $hr = employeeUser(['can_view_employee', 'can_change_employee_status']);
+    $employeeUser = User::factory()->create();
+    $employee = Employee::factory()->create([
+        'company_id' => $company->id,
+        'user_id' => $employeeUser->id,
+        'status' => 'archived',
+        'hired_at' => '2025-01-15',
+        'terminated_at' => '2026-08-01',
+    ]);
+
+    $this->actingAs($employeeUser)
+        ->withHeaders(spaJsonHeaders())
+        ->getJson('/api/me')
+        ->assertForbidden()
+        ->assertJsonPath('error_code', 'AUTH_ACCOUNT_INACTIVE');
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->getJson("/api/employees/{$employee->id}")
+        ->assertOk()
+        ->assertJsonPath('data.allowed_next_statuses', ['archived', 'active', 'probation']);
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson("/api/employees/{$employee->id}/status", [
+            'status' => 'active',
+            'reason' => 'Rehired',
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.status', 'active')
+        ->assertJsonPath('data.terminated_at', null)
+        ->assertJsonPath('data.hired_at', '2025-01-15')
+        ->assertJsonPath('data.allowed_next_statuses', ['active', 'suspended', 'resigned']);
+
+    expect($employee->fresh()->hired_at?->toDateString())->toBe('2025-01-15');
+
+    expect(AuditLog::query()->where('action', 'employee.status_changed')->count())->toBe(1);
+
+    $this->actingAs($employeeUser->fresh())
+        ->withHeaders(spaJsonHeaders())
+        ->getJson('/api/me')
+        ->assertOk();
+});
+
+test('resigned employee can be rehired to active and terminated_at is cleared', function () {
+    $company = Company::factory()->create();
+    $hr = employeeUser(['can_view_employee', 'can_change_employee_status']);
+    $employee = Employee::factory()->create([
+        'company_id' => $company->id,
+        'status' => 'resigned',
+        'terminated_at' => '2026-08-24',
+    ]);
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson("/api/employees/{$employee->id}/status", [
+            'status' => 'active',
+            'reason' => 'Returned to work',
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.status', 'active')
+        ->assertJsonPath('data.terminated_at', null);
+});
+
+test('archived employee can be rehired to probation', function () {
+    $company = Company::factory()->create();
+    $hr = employeeUser(['can_view_employee', 'can_change_employee_status']);
+    $employee = Employee::factory()->create([
+        'company_id' => $company->id,
+        'status' => 'archived',
+        'terminated_at' => '2026-08-01',
+    ]);
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson("/api/employees/{$employee->id}/status", [
+            'status' => 'probation',
+            'reason' => 'Rehired on probation',
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.status', 'probation')
+        ->assertJsonPath('data.terminated_at', null);
+});
+
+test('rehire does not allow skip-to-archive or archived to resigned', function () {
+    $company = Company::factory()->create();
+    $hr = employeeUser(['can_view_employee', 'can_change_employee_status']);
+    $active = Employee::factory()->create([
+        'company_id' => $company->id,
+        'status' => 'active',
+    ]);
+    $archived = Employee::factory()->create([
+        'company_id' => $company->id,
+        'status' => 'archived',
+    ]);
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson("/api/employees/{$active->id}/status", [
+            'status' => 'archived',
+        ])
+        ->assertStatus(409)
+        ->assertJsonPath('error_code', 'EMPLOYEE_INVALID_STATUS_TRANSITION');
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson("/api/employees/{$archived->id}/status", [
+            'status' => 'resigned',
+        ])
+        ->assertStatus(409)
+        ->assertJsonPath('error_code', 'EMPLOYEE_INVALID_STATUS_TRANSITION');
+});

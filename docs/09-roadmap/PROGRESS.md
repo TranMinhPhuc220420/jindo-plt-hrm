@@ -40,10 +40,10 @@
 |-------|--------|
 | **Current phase** | ∞ Future |
 | **Current step** | `∞.employee-status-rehire` |
-| **Overall status** | Todo |
+| **Overall status** | In progress |
 | **Last updated** | 2026-09-04 |
 | **Last updated by** | agent |
-| **Next action** | Implement `∞.employee-status-rehire` (plan in FUTURE_EMPLOYEE_STATUS_REHIRE.md) |
+| **Next action** | Implement rehire transitions + show-page status select + tests |
 | **Blockers** | None |
 
 ---
@@ -2476,8 +2476,8 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Field | Value |
 |-------|--------|
-| Status | `Todo` |
-| Started | — |
+| Status | `In progress` |
+| Started | 2026-09-04 |
 | Completed | — |
 | Docs | [FUTURE_EMPLOYEE_STATUS_REHIRE.md](./FUTURE_EMPLOYEE_STATUS_REHIRE.md), [EMPLOYEE_API.md](../06-api/EMPLOYEE_API.md) |
 
@@ -2504,6 +2504,7 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-09-04 | `∞.employee-status-rehire` | Started: implement archived/resigned rehire to active | agent |
 | 2026-09-04 | `∞.employee-status-rehire` | Plan recorded: archived/resigned rehire to active; implementation not started | agent |
 | 2026-08-04 | `∞.attendance-bulk-approve` | Done: bulk-approve API + checkbox selection UI; tests + types green | agent |
 | 2026-08-04 | `∞.attendance-bulk-approve` | Started: bulk-approve API + checkbox selection UI | agent |

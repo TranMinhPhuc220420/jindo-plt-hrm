@@ -30,6 +30,7 @@ export type Employee = {
     hired_at: string | null;
     terminated_at: string | null;
     status: EmployeeStatus;
+    allowed_next_statuses?: EmployeeStatus[];
     avatar_url?: string | null;
     outstanding_assets?: Array<{
         id: number;
