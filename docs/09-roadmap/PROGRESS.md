@@ -39,11 +39,11 @@
 | Field | Value |
 |-------|--------|
 | **Current phase** | ∞ Future |
-| **Current step** | `∞.attendance-bulk-approve` |
-| **Overall status** | Done |
-| **Last updated** | 2026-08-04 |
+| **Current step** | `∞.employee-status-rehire` |
+| **Overall status** | Todo |
+| **Last updated** | 2026-09-04 |
 | **Last updated by** | agent |
-| **Next action** | Future backlog / discuss `v1.0.0` readiness |
+| **Next action** | Implement `∞.employee-status-rehire` (plan in FUTURE_EMPLOYEE_STATUS_REHIRE.md) |
 | **Blockers** | None |
 
 ---
@@ -2472,6 +2472,30 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 - Tests: bulk approve / skip / permission; types:check green
 ```
 
+### ∞.employee-status-rehire — Reactivate archived/resigned employees
+
+| Field | Value |
+|-------|--------|
+| Status | `Todo` |
+| Started | — |
+| Completed | — |
+| Docs | [FUTURE_EMPLOYEE_STATUS_REHIRE.md](./FUTURE_EMPLOYEE_STATUS_REHIRE.md), [EMPLOYEE_API.md](../06-api/EMPLOYEE_API.md) |
+
+- [ ] Allow `archived`/`resigned` → `active`/`probation` in `EmployeeStatusTransitions`
+- [ ] Clear `terminated_at` on rehire; keep `hired_at`
+- [ ] Expose `allowed_next_statuses` on employee show; filter `/employees/:id` status select
+- [ ] Helper copy (en/vi): rehire does not restore shifts — assign after status change
+- [ ] Feature tests: rehire + login; still 409 for skip-to-archive; unit matrix
+- [ ] Update EMPLOYEE_API.md + employee README
+
+**Notes:**
+
+```
+- Symptom: admin UI already posts POST /api/employees/{id}/status; archived is terminal → 409
+- Soft-deleted DELETE archive remains 404 (out of scope)
+- No new permission/route/migration
+```
+
 ---
 
 ## Activity log
@@ -2480,6 +2504,7 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-09-04 | `∞.employee-status-rehire` | Plan recorded: archived/resigned rehire to active; implementation not started | agent |
 | 2026-08-04 | `∞.attendance-bulk-approve` | Done: bulk-approve API + checkbox selection UI; tests + types green | agent |
 | 2026-08-04 | `∞.attendance-bulk-approve` | Started: bulk-approve API + checkbox selection UI | agent |
 | 2026-08-03 | `∞.prod-log-20260728-attendance-checkout` | Done: DomainException dontReport + post-midnight checkout + FE; tests green | agent |
@@ -2633,4 +2658,5 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 - [MASTER_ROADMAP.md](./MASTER_ROADMAP.md)
 - [PHASE_01_FOUNDATION.md](./PHASE_01_FOUNDATION.md)
+- [FUTURE_EMPLOYEE_STATUS_REHIRE.md](./FUTURE_EMPLOYEE_STATUS_REHIRE.md) — admin rehire / status reactivation plan
 - [../10-ai/AI_WORKFLOW.md](../10-ai/AI_WORKFLOW.md) — agents must update this file when finishing a step

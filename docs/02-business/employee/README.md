@@ -141,6 +141,7 @@ Never authorize by role name strings in services.
 - Full public employee self-service portal (later)
 - Deep ESS mobile experiences (later)
 - Treating candidate records as employees before hire (belongs to Recruitment)
+- **Rehire / reactivation** of `archived` or `resigned` employees on the same master record — planned: [FUTURE_EMPLOYEE_STATUS_REHIRE.md](../../09-roadmap/FUTURE_EMPLOYEE_STATUS_REHIRE.md). Today those transitions return `EMPLOYEE_INVALID_STATUS_TRANSITION`. Soft-deleted (`DELETE`) rows stay out of that plan.
 
 ---
 
