@@ -203,6 +203,7 @@ export default function EmployeeShowPage({ id }: Props) {
                     : undefined,
             });
             setEmployee(updated);
+            setStatus(updated.status);
             setConfirmAssetReturn(false);
             toast.success(t('show.toast_status_updated'));
         } catch (err) {

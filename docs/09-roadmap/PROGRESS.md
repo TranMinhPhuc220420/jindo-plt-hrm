@@ -40,10 +40,10 @@
 |-------|--------|
 | **Current phase** | ∞ Future |
 | **Current step** | `∞.employee-status-rehire` |
-| **Overall status** | In progress |
+| **Overall status** | Done |
 | **Last updated** | 2026-09-04 |
 | **Last updated by** | agent |
-| **Next action** | Implement rehire transitions + show-page status select + tests |
+| **Next action** | Future backlog / discuss `v1.0.0` readiness |
 | **Blockers** | None |
 
 ---
@@ -2476,17 +2476,17 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Field | Value |
 |-------|--------|
-| Status | `In progress` |
+| Status | `Done` |
 | Started | 2026-09-04 |
-| Completed | — |
+| Completed | 2026-09-04 |
 | Docs | [FUTURE_EMPLOYEE_STATUS_REHIRE.md](./FUTURE_EMPLOYEE_STATUS_REHIRE.md), [EMPLOYEE_API.md](../06-api/EMPLOYEE_API.md) |
 
-- [ ] Allow `archived`/`resigned` → `active`/`probation` in `EmployeeStatusTransitions`
-- [ ] Clear `terminated_at` on rehire; keep `hired_at`
-- [ ] Expose `allowed_next_statuses` on employee show; filter `/employees/:id` status select
-- [ ] Helper copy (en/vi): rehire does not restore shifts — assign after status change
-- [ ] Feature tests: rehire + login; still 409 for skip-to-archive; unit matrix
-- [ ] Update EMPLOYEE_API.md + employee README
+- [x] Allow `archived`/`resigned` → `active`/`probation` in `EmployeeStatusTransitions`
+- [x] Clear `terminated_at` on rehire; keep `hired_at`
+- [x] Expose `allowed_next_statuses` on employee show; filter `/employees/:id` status select
+- [x] Helper copy (en/vi): rehire does not restore shifts — assign after status change
+- [x] Feature tests: rehire + login; still 409 for skip-to-archive; unit matrix
+- [x] Update EMPLOYEE_API.md + employee README
 
 **Notes:**
 
@@ -2494,6 +2494,9 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 - Symptom: admin UI already posts POST /api/employees/{id}/status; archived is terminal → 409
 - Soft-deleted DELETE archive remains 404 (out of scope)
 - No new permission/route/migration
+- EmployeeStatusTransitions + applyTerminationDate clear terminated_at on archived/resigned rehire
+- EmployeeResource.allowed_next_statuses; show select filtered; en/vi rehire_note
+- Pest: EmployeeStatusTransitionsTest + EmployeeApiTest 31 passed; tsc --noEmit clean
 ```
 
 ---
@@ -2504,6 +2507,7 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-09-04 | `∞.employee-status-rehire` | Done: archived/resigned → active/probation; tests + types green | agent |
 | 2026-09-04 | `∞.employee-status-rehire` | Started: implement archived/resigned rehire to active | agent |
 | 2026-09-04 | `∞.employee-status-rehire` | Plan recorded: archived/resigned rehire to active; implementation not started | agent |
 | 2026-08-04 | `∞.attendance-bulk-approve` | Done: bulk-approve API + checkbox selection UI; tests + types green | agent |
