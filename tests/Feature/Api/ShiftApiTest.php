@@ -168,8 +168,7 @@ test('cannot delete shift with active assignment', function () {
         ->postJson('/api/shift-assignments', [
             'employee_id' => $employee->id,
             'shift_id' => $shiftId,
-            'start_date' => '2026-08-01',
-            'end_date' => '2026-08-31',
+            'start_date' => now()->toDateString(),
         ])
         ->assertCreated();
 

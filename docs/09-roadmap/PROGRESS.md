@@ -2497,6 +2497,7 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 - EmployeeStatusTransitions + applyTerminationDate clear terminated_at on archived/resigned rehire
 - EmployeeResource.allowed_next_statuses; show select filtered; en/vi rehire_note
 - Pest: EmployeeStatusTransitionsTest + EmployeeApiTest 31 passed; tsc --noEmit clean
+- Follow-up: ShiftApiTest SHIFT_IN_USE used a past Aug 2026 window; open-ended assignment so delete stays 422
 ```
 
 ---
@@ -2507,6 +2508,7 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-09-04 | `∞.employee-status-rehire` | CI: SHIFT_IN_USE test used expired Aug 2026 dates; open-ended assignment | agent |
 | 2026-09-04 | `∞.employee-status-rehire` | Done: archived/resigned → active/probation; tests + types green | agent |
 | 2026-09-04 | `∞.employee-status-rehire` | Started: implement archived/resigned rehire to active | agent |
 | 2026-09-04 | `∞.employee-status-rehire` | Plan recorded: archived/resigned rehire to active; implementation not started | agent |
