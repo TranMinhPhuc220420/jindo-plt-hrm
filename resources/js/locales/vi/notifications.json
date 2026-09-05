@@ -16,6 +16,7 @@
     "prefs_email": "Email",
     "prefs_push": "Thông báo đẩy",
     "prefs_system": "Trong ứng dụng",
+    "push_multi_device_hint": "Bật thông báo đẩy trên từng máy tính và điện thoại bạn dùng. Đăng xuất không gỡ các thiết bị khác. Bỏ chọn Push chỉ tắt trên trình duyệt này.",
     "toast_all_read": "Đã đánh dấu tất cả là đã đọc.",
     "toast_prefs_saved": "Đã cập nhật tùy chọn.",
     "toast_push_unavailable": "Trình duyệt này không hỗ trợ thông báo đẩy (cần HTTPS).",

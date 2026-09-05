@@ -18,9 +18,10 @@ class PushSubscriptionService
         }
 
         return PushSubscription::query()->updateOrCreate(
-            ['endpoint' => $data['endpoint']],
+            ['endpoint_hash' => hash('sha256', $data['endpoint'])],
             [
                 'user_id' => $user->id,
+                'endpoint' => $data['endpoint'],
                 'public_key' => $data['public_key'],
                 'auth_token' => $data['auth_token'],
                 'content_encoding' => $encoding,
@@ -28,12 +29,14 @@ class PushSubscriptionService
         );
     }
 
-    public function deleteByEndpoint(User $user, string $endpoint): void
+    public function deleteByEndpoint(User $user, string $endpoint): int
     {
         PushSubscription::query()
             ->where('user_id', $user->id)
             ->where('endpoint', $endpoint)
             ->delete();
+
+        return PushSubscription::query()->where('user_id', $user->id)->count();
     }
 
     public function deleteAllFor(User $user): void

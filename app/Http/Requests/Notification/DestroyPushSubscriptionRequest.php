@@ -17,7 +17,7 @@ class DestroyPushSubscriptionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'endpoint' => ['required', 'string', 'max:500'],
+            'endpoint' => ['required', 'string', 'max:2048'],
         ];
     }
 }

@@ -236,9 +236,81 @@ test('push subscription can be registered and removed', function () {
         ->deleteJson('/api/push-subscriptions', [
             'endpoint' => 'https://push.example.test/sub/1',
         ])
-        ->assertOk();
+        ->assertOk()
+        ->assertJsonPath('data.remaining', 0);
 
     expect(PushSubscription::query()->count())->toBe(0);
+});
+
+test('two browsers can register push and notify still queues one job', function () {
+    Queue::fake();
+
+    $company = Company::factory()->create();
+    $user = actingUser(['can_view_own_notifications'], prefix: 'push2dev');
+    NotificationPreference::query()->create([
+        'user_id' => $user->id,
+        'email' => false,
+        'push' => true,
+        'system' => true,
+    ]);
+
+    $this->actingAs($user)->withHeaders(spaJsonHeaders())
+        ->postJson('/api/push-subscriptions', [
+            'endpoint' => 'https://push.example.test/pc',
+            'keys' => ['p256dh' => 'pk-pc', 'auth' => 'at-pc'],
+        ])
+        ->assertOk();
+
+    $this->actingAs($user)->withHeaders(spaJsonHeaders())
+        ->postJson('/api/push-subscriptions', [
+            'endpoint' => 'https://push.example.test/phone',
+            'keys' => ['p256dh' => 'pk-phone', 'auth' => 'at-phone'],
+        ])
+        ->assertOk();
+
+    expect(PushSubscription::query()->where('user_id', $user->id)->count())->toBe(2);
+
+    $notification = app(NotificationService::class)->notify(
+        user: $user,
+        type: 'attendance.check_in_reminder',
+        companyId: $company->id,
+    );
+
+    Queue::assertPushedOn('notifications', SendWebPushJob::class, fn ($job) => $job->notificationId === $notification->id);
+    Queue::assertPushed(SendWebPushJob::class, 1);
+
+    $this->actingAs($user)->withHeaders(spaJsonHeaders())
+        ->deleteJson('/api/push-subscriptions', [
+            'endpoint' => 'https://push.example.test/pc',
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.remaining', 1);
+
+    expect(NotificationPreference::query()->where('user_id', $user->id)->value('push'))->toBeTrue()
+        ->and(PushSubscription::query()->where('user_id', $user->id)->count())->toBe(1);
+
+    $this->actingAs($user)->withHeaders(spaJsonHeaders())
+        ->deleteJson('/api/push-subscriptions', [
+            'endpoint' => 'https://push.example.test/phone',
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.remaining', 0);
+
+    expect(NotificationPreference::query()->where('user_id', $user->id)->value('push'))->toBeFalse();
+});
+
+test('push subscription accepts a long mozilla-style endpoint', function () {
+    Company::factory()->create();
+    $user = actingUser(['can_view_own_notifications'], prefix: 'pushlong');
+    $endpoint = 'https://updates.push.services.mozilla.com/wpush/v2/'.str_repeat('A', 1800);
+
+    $this->actingAs($user)->withHeaders(spaJsonHeaders())
+        ->postJson('/api/push-subscriptions', [
+            'endpoint' => $endpoint,
+            'keys' => ['p256dh' => 'pk', 'auth' => 'at'],
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.endpoint', $endpoint);
 });
 
 test('notify queues web push when the user opted in and has a subscription', function () {

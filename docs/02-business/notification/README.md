@@ -20,7 +20,7 @@ Deliver messages about domain events and scheduled reminders. Notification is a 
 |------|-------------|
 | Email | Email channel delivery |
 | System Notification | In-app notification inbox |
-| Push Notification | Push channel (mobile-ready / future) |
+| Push Notification | Web Push (VAPID) to every registered browser |
 | Reminder | Reminder messages for upcoming actions |
 | Scheduled Notification | Send-at / cron-like scheduled messages |
 
@@ -59,7 +59,7 @@ Scheduler finds due reminders
     → Mark reminder sent (`attendance_punch_reminders`)
 ```
 
-Missed punch reminders (v1): check-in after shift start + grace if not punched; check-out after shift end + grace if still open. Skip rest days and full-day approved leave. Night-shift check-out is due the following morning.
+Missed punch reminders (v1): check-in after shift start + grace if not punched; check-out after shift end + grace if still open. Skip rest days and full-day approved leave. Night-shift check-out is due the following morning. Web Push is stored per browser: enable on each PC and phone; logging out does not drop other devices. Unchecking Push on one browser deletes only that subscription.
 
 ### Inbox read state
 

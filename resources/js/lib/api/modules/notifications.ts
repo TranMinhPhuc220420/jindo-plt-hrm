@@ -100,8 +100,15 @@ export async function savePushSubscription(payload: {
     await apiPost('/api/push-subscriptions', payload);
 }
 
-export async function deletePushSubscription(endpoint: string): Promise<void> {
-    await apiDelete('/api/push-subscriptions', { body: { endpoint } });
+export async function deletePushSubscription(
+    endpoint: string,
+): Promise<number> {
+    const res = await apiDelete<{ remaining: number }>(
+        '/api/push-subscriptions',
+        { body: { endpoint } },
+    );
+
+    return res.data?.remaining ?? 0;
 }
 
 export async function sendTestPush(): Promise<Notification> {

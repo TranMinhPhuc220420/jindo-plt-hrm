@@ -39,7 +39,7 @@
 | Field | Value |
 |-------|--------|
 | **Current phase** | ∞ Future |
-| **Current step** | `∞.test-push-button` |
+| **Current step** | `∞.multi-device-web-push` |
 | **Overall status** | Done |
 | **Last updated** | 2026-09-05 |
 | **Last updated by** | agent |
@@ -1443,6 +1443,27 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 ## Future backlog
 
+### ∞.multi-device-web-push — Keep Web Push on every browser
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-09-05 |
+| Completed | 2026-09-05 |
+| Docs | [NOTIFICATION_API.md](../06-api/NOTIFICATION_API.md), [notification/README.md](../02-business/notification/README.md) |
+
+- [x] Logout does not unsubscribe this browser (reminders while logged out)
+- [x] Uncheck Push deletes this endpoint only; `push` stays true if other devices remain
+- [x] Widen `push_subscriptions.endpoint`; two-device tests; i18n/docs
+
+**Notes:**
+
+```
+- DELETE /api/push-subscriptions returns remaining; last device sets push false
+- Unique index on endpoint_hash (MySQL cannot unique utf8mb4 VARCHAR(2048))
+- Tests: two endpoints, one SendWebPushJob, remaining 1 keeps push true
+```
+
 ### ∞.test-push-button — Admin send-test Web Push
 
 | Field | Value |
@@ -2609,6 +2630,8 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-09-05 | `∞.multi-device-web-push` | Done: per-browser Web Push; logout keeps subscriptions | agent |
+| 2026-09-05 | `∞.multi-device-web-push` | Started: keep Web Push per browser across logout | agent |
 | 2026-09-05 | `∞.test-push-button` | Done: admin test Web Push button + sync API | agent |
 | 2026-09-05 | `∞.test-push-button` | Started: admin immediate test Web Push | agent |
 | 2026-09-05 | `∞.attendance-punch-reminders` | Done: scheduler punch reminders + Web Push VAPID; tests green | agent |

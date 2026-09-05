@@ -17,7 +17,6 @@ import {
 } from '@/lib/auth/auth-context';
 import type { AuthContextValue, AuthSession } from '@/lib/auth/auth-context';
 import { applyLocale, DEFAULT_LOCALE } from '@/lib/i18n';
-import { unsubscribeFromPush } from '@/lib/push/web-push';
 
 type Props = {
     children: ReactNode;
@@ -88,7 +87,6 @@ export function AuthProvider({ children }: Props) {
 
     const logout = useCallback(async () => {
         try {
-            await unsubscribeFromPush({ updatePreference: false });
             await authApi.logout();
         } finally {
             clearSession();

@@ -46,7 +46,7 @@
 
 Domain modules do not need public “send email” endpoints — they dispatch events.
 
-Web Push (VAPID) is the lock-screen channel. The VAPID **public** key is on `GET /api/me` as `vapid_public_key`. Enable `push` in preferences after the browser grants notification permission. iOS Safari only delivers after “Add to Home Screen”. HTTPS is required in production.
+Web Push (VAPID) is the lock-screen channel. The VAPID **public** key is on `GET /api/me` as `vapid_public_key`. Each browser (PC and phone) must enable Push once; rows are unique on `endpoint` (up to 2048 characters). Logout does **not** remove subscriptions so punch reminders still arrive. `DELETE /api/push-subscriptions` removes **this** endpoint and returns `{ "remaining": N }`. The global `push` preference is set to false only when `remaining` is `0`. iOS Safari only delivers after “Add to Home Screen”. HTTPS is required in production.
 
 ---
 

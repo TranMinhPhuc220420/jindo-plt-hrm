@@ -111,10 +111,11 @@ export async function subscribeToPush(
     return true;
 }
 
-export async function unsubscribeFromPush(
-    options: { updatePreference?: boolean } = {},
-): Promise<void> {
-    const updatePreference = options.updatePreference ?? true;
+/**
+ * Unsubscribe this browser’s PushManager and delete only this endpoint.
+ * Does not change the global `push` preference.
+ */
+export async function unregisterThisDevice(): Promise<number> {
     let endpoint: string | null = null;
 
     try {
@@ -138,9 +139,11 @@ export async function unsubscribeFromPush(
         }
     }
 
+    let remaining = 0;
+
     if (endpoint) {
         try {
-            await notificationsApi.deletePushSubscription(endpoint);
+            remaining = await notificationsApi.deletePushSubscription(endpoint);
         } catch {
             // Best-effort; token may already be gone.
         }
@@ -148,7 +151,20 @@ export async function unsubscribeFromPush(
 
     storeEndpoint(null);
 
-    if (!updatePreference) {
+    return remaining;
+}
+
+/**
+ * Disable push on this device. Clears the global `push` pref only when
+ * this was the last remaining subscription.
+ */
+export async function unsubscribeFromPush(
+    options: { updatePreference?: boolean } = {},
+): Promise<void> {
+    const remaining = await unregisterThisDevice();
+    const updatePreference = options.updatePreference ?? true;
+
+    if (!updatePreference || remaining > 0) {
         return;
     }
 

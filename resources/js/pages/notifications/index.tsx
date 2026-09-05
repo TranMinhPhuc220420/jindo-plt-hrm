@@ -245,6 +245,9 @@ export default function NotificationsPage() {
                             </label>
                         ))}
                     </div>
+                    <p className="text-sm text-muted-foreground">
+                        {t('push_multi_device_hint')}
+                    </p>
                     {canTestPush && (
                         <div className="flex flex-col gap-2 border-t border-border pt-3">
                             <p className="text-sm text-muted-foreground">
