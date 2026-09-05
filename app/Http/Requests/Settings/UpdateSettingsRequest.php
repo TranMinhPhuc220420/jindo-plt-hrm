@@ -34,6 +34,18 @@ class UpdateSettingsRequest extends FormRequest
                     continue;
                 }
 
+                if ($group === 'attendance' && $key === 'punch_reminder_enabled') {
+                    $rules["{$group}.{$key}"] = ['sometimes', 'boolean'];
+
+                    continue;
+                }
+
+                if ($group === 'attendance' && str_ends_with($key, '_grace_minutes')) {
+                    $rules["{$group}.{$key}"] = ['sometimes', 'integer', 'min:0', 'max:180'];
+
+                    continue;
+                }
+
                 $rules["{$group}.{$key}"] = ['sometimes'];
             }
         }

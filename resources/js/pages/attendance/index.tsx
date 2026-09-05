@@ -12,6 +12,7 @@ import { MonthSummaryStrip } from '@/components/attendance/month-summary-strip';
 import { PunchEvidenceDialog } from '@/components/attendance/punch-evidence-dialog';
 import type { PunchEvidencePayload } from '@/components/attendance/punch-evidence-dialog';
 import { PunchPendingSyncBanner } from '@/components/attendance/punch-pending-sync-banner';
+import { PunchReminderBanner } from '@/components/attendance/punch-reminder-banner';
 import { TodayStatusCard } from '@/components/attendance/today-status-card';
 import AdminPageShell from '@/components/shared/admin-page-shell';
 import {
@@ -621,6 +622,7 @@ export default function AttendanceIndexPage() {
             description={t('index.description')}
             permission={permission}
         >
+            <PunchReminderBanner />
             <PunchPendingSyncBanner
                 pending={pendingPunches}
                 syncing={syncingQueue}

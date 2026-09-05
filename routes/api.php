@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\Leave\LeaveTypeController;
 use App\Http\Controllers\Api\Leave\WeekendRuleController;
 use App\Http\Controllers\Api\Notification\NotificationController;
 use App\Http\Controllers\Api\Notification\NotificationPreferenceController;
+use App\Http\Controllers\Api\Notification\PushSubscriptionController;
 use App\Http\Controllers\Api\Onboarding\OnboardingCaseController;
 use App\Http\Controllers\Api\Onboarding\OnboardingTaskController;
 use App\Http\Controllers\Api\Onboarding\OnboardingTemplateController;
@@ -431,6 +432,8 @@ Route::middleware(['auth:sanctum', 'employee.eligible'])->group(function (): voi
         ->name('api.notifications.unread-count');
     Route::post('/notifications/broadcast', [NotificationController::class, 'broadcast'])
         ->name('api.notifications.broadcast');
+    Route::post('/notifications/test-push', [NotificationController::class, 'testPush'])
+        ->name('api.notifications.test-push');
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])
         ->name('api.notifications.read-all');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])
@@ -442,6 +445,11 @@ Route::middleware(['auth:sanctum', 'employee.eligible'])->group(function (): voi
         ->name('api.notification-preferences.show');
     Route::put('/notification-preferences', [NotificationPreferenceController::class, 'update'])
         ->name('api.notification-preferences.update');
+
+    Route::post('/push-subscriptions', [PushSubscriptionController::class, 'store'])
+        ->name('api.push-subscriptions.store');
+    Route::delete('/push-subscriptions', [PushSubscriptionController::class, 'destroy'])
+        ->name('api.push-subscriptions.destroy');
 
     // Reports
     Route::get('/reports/attendance', [ReportController::class, 'attendance'])->name('api.reports.attendance');

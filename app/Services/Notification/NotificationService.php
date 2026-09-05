@@ -4,9 +4,11 @@ namespace App\Services\Notification;
 
 use App\Exceptions\DomainException;
 use App\Jobs\SendNotificationEmailJob;
+use App\Jobs\SendWebPushJob;
 use App\Models\Employee;
 use App\Models\Notification;
 use App\Models\NotificationPreference;
+use App\Models\PushSubscription;
 use App\Models\User;
 use App\Services\Organization\CompanyContext;
 use App\Support\Locale\LocaleResolver;
@@ -58,6 +60,10 @@ class NotificationService
 
         if ($this->wantsEmail($prefs, $category)) {
             SendNotificationEmailJob::dispatch($notification->id);
+        }
+
+        if ($this->wantsPush($prefs, $category) && $this->hasPushSubscription($user)) {
+            SendWebPushJob::dispatch($notification->id);
         }
 
         return $notification;
@@ -211,6 +217,73 @@ class NotificationService
         }
 
         return (bool) $prefs->email;
+    }
+
+    private function wantsPush(NotificationPreference $prefs, string $category): bool
+    {
+        $categories = $prefs->categories ?? [];
+
+        if (array_key_exists($category, $categories)) {
+            $override = $categories[$category];
+            if (is_array($override) && array_key_exists('push', $override)) {
+                return (bool) $override['push'];
+            }
+        }
+
+        return (bool) $prefs->push;
+    }
+
+    private function hasPushSubscription(User $user): bool
+    {
+        return PushSubscription::query()->where('user_id', $user->id)->exists();
+    }
+
+    /**
+     * Send an immediate Web Push to the current user (admin diagnostics).
+     * Bypasses the push preference so a granted browser subscription is enough.
+     */
+    public function sendTestPush(User $user): Notification
+    {
+        $publicKey = (string) config('webpush.vapid.public_key');
+        $privateKey = (string) config('webpush.vapid.private_key');
+
+        if ($publicKey === '' || $privateKey === '') {
+            throw new DomainException(
+                message: __('domain.push_vapid_not_configured'),
+                errorCode: 'PUSH_VAPID_NOT_CONFIGURED',
+                status: 422,
+            );
+        }
+
+        if (! $this->hasPushSubscription($user)) {
+            throw new DomainException(
+                message: __('domain.push_subscription_missing'),
+                errorCode: 'PUSH_SUBSCRIPTION_MISSING',
+                status: 422,
+            );
+        }
+
+        try {
+            $companyId = $this->companyContext->id();
+        } catch (\Throwable) {
+            $companyId = null;
+        }
+
+        [$title, $body] = $this->resolveCopy($user, 'push.test', null, null);
+
+        $notification = Notification::query()->create([
+            'company_id' => $companyId,
+            'user_id' => $user->id,
+            'type' => 'push.test',
+            'title' => $title,
+            'body' => $body,
+            'data' => ['url' => '/notifications', 'test' => true],
+            'read_at' => null,
+        ]);
+
+        SendWebPushJob::dispatchSync($notification->id);
+
+        return $notification;
     }
 
     /**

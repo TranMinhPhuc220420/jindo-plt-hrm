@@ -9,6 +9,7 @@ export type AuthSession = {
     locale: string | null;
     userLocale: string | null;
     companyLocale: string | null;
+    vapidPublicKey: string | null;
     isLoading: boolean;
 };
 
@@ -24,6 +25,7 @@ export type AuthContextValue = AuthSession & {
         locale?: string;
         user_locale?: string | null;
         company_locale?: string;
+        vapid_public_key?: string | null;
     }) => void;
     clearSession: () => void;
     refreshMe: () => Promise<void>;
@@ -38,6 +40,7 @@ export const emptyAuthSession: AuthSession = {
     locale: null,
     userLocale: null,
     companyLocale: null,
+    vapidPublicKey: null,
     isLoading: false,
 };
 

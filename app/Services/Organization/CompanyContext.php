@@ -10,8 +10,38 @@ use App\Models\Company;
  */
 class CompanyContext
 {
+    private ?int $forcedId = null;
+
+    /**
+     * Run a callback with a fixed company (CLI / scheduler). Nested calls restore the previous override.
+     *
+     * @template T
+     *
+     * @param  callable(): T  $callback
+     * @return T
+     */
+    public function using(int $companyId, callable $callback): mixed
+    {
+        $previous = $this->forcedId;
+        $this->forcedId = $companyId;
+
+        try {
+            return $callback();
+        } finally {
+            $this->forcedId = $previous;
+        }
+    }
+
     public function current(): Company
     {
+        if ($this->forcedId !== null) {
+            $forced = Company::query()->whereKey($this->forcedId)->where('is_active', true)->first();
+
+            if ($forced) {
+                return $forced;
+            }
+        }
+
         $companyId = session('company_id');
 
         if ($companyId) {

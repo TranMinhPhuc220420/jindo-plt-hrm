@@ -186,7 +186,7 @@ export function apiPatch<T>(
 
 export function apiDelete<T>(
     path: string,
-    options?: Omit<RequestOptions, 'method' | 'body'>,
+    options?: Omit<RequestOptions, 'method'>,
 ) {
     return apiRequest<T>(path, { ...options, method: 'DELETE' });
 }

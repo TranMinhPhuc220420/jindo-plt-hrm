@@ -86,4 +86,16 @@ class NotificationController extends Controller
             'Broadcast notification queued.',
         );
     }
+
+    public function testPush(Request $request): JsonResponse
+    {
+        $this->authorize('can_send_broadcast_notification');
+
+        $notification = $this->notifications->sendTestPush($request->user());
+
+        return ApiResponse::success(
+            (new NotificationResource($notification))->resolve(),
+            'Test push sent.',
+        );
+    }
 }

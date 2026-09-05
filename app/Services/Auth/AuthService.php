@@ -238,6 +238,7 @@ class AuthService
             'employee_id' => $user->employee?->id,
             'two_factor_required' => false,
             ...$this->localeResolver->payload($user),
+            'vapid_public_key' => config('webpush.vapid.public_key') ?: null,
         ];
     }
 

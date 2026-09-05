@@ -24,6 +24,11 @@ final class SettingsDefaults
                 'two_factor_required' => false,
                 'remember_me_enabled' => true,
             ],
+            'attendance' => [
+                'punch_reminder_enabled' => true,
+                'punch_reminder_check_in_grace_minutes' => 5,
+                'punch_reminder_check_out_grace_minutes' => 10,
+            ],
         ];
     }
 

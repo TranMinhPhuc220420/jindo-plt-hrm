@@ -40,6 +40,14 @@ return [
             'title' => 'Attendance correction rejected',
             'body' => 'Your attendance correction was rejected.',
         ],
+        'check_in_reminder' => [
+            'title' => 'Please check in',
+            'body' => 'You have not checked in for your shift yet.',
+        ],
+        'check_out_reminder' => [
+            'title' => 'Please check out',
+            'body' => 'You checked in but have not checked out yet.',
+        ],
     ],
     'shift' => [
         'assigned' => [
@@ -155,6 +163,12 @@ return [
         'announcement' => [
             'title' => 'Company announcement',
             'body' => 'You have a new company announcement.',
+        ],
+    ],
+    'push' => [
+        'test' => [
+            'title' => 'Test push notification',
+            'body' => 'If you see this banner, Web Push is working on this device.',
         ],
     ],
 ];

@@ -12,6 +12,7 @@
 ```
 /api/notifications
 /api/notification-preferences
+/api/push-subscriptions
 ```
 
 ---
@@ -39,8 +40,13 @@
 | `GET` | `/api/notification-preferences` | User channel prefs |
 | `PUT` | `/api/notification-preferences` | Update prefs |
 | `POST` | `/api/notifications/broadcast` | Admin broadcast (optional) |
+| `POST` | `/api/notifications/test-push` | Admin: send a Web Push **now** to the current user’s browser |
+| `POST` | `/api/push-subscriptions` | Save a Web Push subscription (`endpoint` + `keys.p256dh` / `keys.auth`) |
+| `DELETE` | `/api/push-subscriptions` | Remove a subscription (`endpoint` in JSON body) |
 
 Domain modules do not need public “send email” endpoints — they dispatch events.
+
+Web Push (VAPID) is the lock-screen channel. The VAPID **public** key is on `GET /api/me` as `vapid_public_key`. Enable `push` in preferences after the browser grants notification permission. iOS Safari only delivers after “Add to Home Screen”. HTTPS is required in production.
 
 ---
 
@@ -94,6 +100,8 @@ Mandatory HR notices may ignore suppress flags per policy.
 |------|------|
 | `NOTIFICATION_NOT_FOUND` | Missing/unauthorized id |
 | `NOTIFICATION_BROADCAST_FORBIDDEN` | Lacks broadcast permission |
+| `PUSH_VAPID_NOT_CONFIGURED` | Test push / delivery without VAPID keys |
+| `PUSH_SUBSCRIPTION_MISSING` | Test push but this user has no browser subscription |
 
 ---
 

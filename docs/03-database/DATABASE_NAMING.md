@@ -86,6 +86,7 @@ Prefer `employee_*` prefixes for satellite tables owned by the Employee module.
 |-------|---------|
 | `attendance_records` | Punches / daily attendance rows |
 | `attendance_corrections` | Correction requests |
+| `attendance_punch_reminders` | Idempotent missed check-in/out reminder sends |
 | `attendance_summaries` | Period summaries (if persisted) |
 | `leave_types` | Leave categories |
 | `leave_balances` | Balances |
@@ -138,6 +139,7 @@ Prefer `employee_*` prefixes for satellite tables owned by the Employee module.
 | `notifications` | In-app notifications |
 | `notification_deliveries` | Channel delivery status (if split) |
 | `notification_preferences` | Per-user notification channel/category preferences |
+| `push_subscriptions` | Web Push (VAPID) endpoints per user |
 | `report_exports` | Queued report export jobs and their output status |
 
 ---

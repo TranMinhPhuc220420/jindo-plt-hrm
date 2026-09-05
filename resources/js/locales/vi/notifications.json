@@ -18,7 +18,12 @@
     "prefs_system": "Trong ứng dụng",
     "toast_all_read": "Đã đánh dấu tất cả là đã đọc.",
     "toast_prefs_saved": "Đã cập nhật tùy chọn.",
+    "toast_push_unavailable": "Trình duyệt này không hỗ trợ thông báo đẩy (cần HTTPS).",
+    "toast_push_denied": "Bạn đã từ chối thông báo.",
     "toast_error": "Đã xảy ra lỗi.",
+    "test_push": "Gửi thông báo thử",
+    "test_push_hint": "Gửi ngay một thông báo khóa màn hình tới trình duyệt này. Hãy bật Push ở trên trước.",
+    "toast_test_push_sent": "Đã gửi thông báo thử. Kiểm tra banner trên thiết bị này.",
     "messages": {
         "leave": {
             "requested": {
@@ -58,6 +63,14 @@
             "correction_rejected": {
                 "title": "Hiệu chỉnh điểm danh bị từ chối",
                 "body": "Yêu cầu hiệu chỉnh điểm danh của bạn đã bị từ chối."
+            },
+            "check_in_reminder": {
+                "title": "Nhắc check-in",
+                "body": "Bạn chưa check-in cho ca làm việc của mình."
+            },
+            "check_out_reminder": {
+                "title": "Nhắc check-out",
+                "body": "Bạn đã check-in nhưng chưa check-out."
             }
         },
         "shift": {
@@ -175,6 +188,12 @@
                 "title": "Thông báo công ty",
                 "body": "Bạn có thông báo mới từ công ty."
             }
+        },
+        "push": {
+            "test": {
+                "title": "Thông báo đẩy thử",
+                "body": "Nếu bạn thấy banner này, Web Push đang hoạt động trên thiết bị."
+            }
         }
     },
     "types": {
@@ -190,6 +209,7 @@
         "recruitment": "Tuyển dụng",
         "document": "Tài liệu",
         "broadcast": "Thông báo chung",
+        "push": "Thông báo đẩy",
         "offer": "Offer"
     }
 }

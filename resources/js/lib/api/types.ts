@@ -35,6 +35,7 @@ export type AuthPayload = {
     locale: string;
     user_locale: string | null;
     company_locale: string;
+    vapid_public_key: string | null;
 };
 
 export type LoginPayload =

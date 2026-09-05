@@ -70,7 +70,7 @@ export function notificationHref(item: Notification): string | null {
         return '/documents';
     }
 
-    if (type.startsWith('broadcast.')) {
+    if (type.startsWith('broadcast.') || type.startsWith('push.')) {
         return '/notifications';
     }
 

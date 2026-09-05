@@ -92,6 +92,24 @@ export async function updatePreferences(payload: {
     return res.data;
 }
 
+export async function savePushSubscription(payload: {
+    endpoint: string;
+    keys: { p256dh: string; auth: string };
+    content_encoding?: string;
+}): Promise<void> {
+    await apiPost('/api/push-subscriptions', payload);
+}
+
+export async function deletePushSubscription(endpoint: string): Promise<void> {
+    await apiDelete('/api/push-subscriptions', { body: { endpoint } });
+}
+
+export async function sendTestPush(): Promise<Notification> {
+    const res = await apiPost<Notification>('/api/notifications/test-push');
+
+    return res.data as Notification;
+}
+
 export async function broadcastNotification(payload: {
     title: string;
     body?: string | null;

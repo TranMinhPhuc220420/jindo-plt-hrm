@@ -9,6 +9,8 @@ use App\Services\Settings\SettingsService;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 
 test('users can login via api and fetch me', function () {
+    config(['webpush.vapid.public_key' => null]);
+
     $user = User::factory()->create();
 
     $login = $this->withHeaders(spaJsonHeaders())
@@ -42,7 +44,19 @@ test('users can login via api and fetch me', function () {
         ->assertJsonPath('data.user.id', $user->id)
         ->assertJsonPath('data.locale', 'vi')
         ->assertJsonPath('data.user_locale', null)
-        ->assertJsonPath('data.company_locale', 'vi');
+        ->assertJsonPath('data.company_locale', 'vi')
+        ->assertJsonPath('data.vapid_public_key', null);
+});
+
+test('me includes vapid public key when web push is configured', function () {
+    config(['webpush.vapid.public_key' => 'test-vapid-public']);
+
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->withHeaders(spaJsonHeaders())
+        ->getJson('/api/me')
+        ->assertOk()
+        ->assertJsonPath('data.vapid_public_key', 'test-vapid-public');
 });
 
 test('spa login works for production Origin when APP_URL host is in stateful domains', function () {

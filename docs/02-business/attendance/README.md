@@ -59,6 +59,18 @@ Employee
 
 If evidence is missing/invalid, stop before writing the attendance record.
 
+### Missed punch reminders
+
+```
+Scheduler (every 5 minutes)
+  → For each assigned window that is not rest/leave
+    → If check-in overdue and no punch → notify once
+    → If check-out overdue and session still open → notify once
+      → Inbox + email + Web Push
+```
+
+Grace minutes are company settings (`attendance.punch_reminder_*`).
+
 ### Correction
 
 ```

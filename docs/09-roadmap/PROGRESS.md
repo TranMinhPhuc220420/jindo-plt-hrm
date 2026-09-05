@@ -39,7 +39,7 @@
 | Field | Value |
 |-------|--------|
 | **Current phase** | ∞ Future |
-| **Current step** | `∞.schedule-off-hover-label` |
+| **Current step** | `∞.test-push-button` |
 | **Overall status** | Done |
 | **Last updated** | 2026-09-05 |
 | **Last updated by** | agent |
@@ -1443,6 +1443,49 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 ## Future backlog
 
+### ∞.test-push-button — Admin send-test Web Push
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-09-05 |
+| Completed | 2026-09-05 |
+| Docs | [NOTIFICATION_API.md](../06-api/NOTIFICATION_API.md) |
+
+- [x] `POST /api/notifications/test-push` (broadcast permission, sync send to current user)
+- [x] Button on `/notifications`
+- [x] i18n + tests
+
+**Notes:**
+
+```
+- Immediate dispatchSync so cPanel queue drain delay does not hide failures
+- Requires VAPID keys + this browser’s push subscription
+```
+
+### ∞.attendance-punch-reminders — Check-in/out reminders via Web Push
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-09-05 |
+| Completed | 2026-09-05 |
+| Docs | [notification/README.md](../02-business/notification/README.md), [NOTIFICATION_API.md](../06-api/NOTIFICATION_API.md), [DEPLOYMENT.md](../08-development/DEPLOYMENT.md) |
+
+- [x] Laravel scheduler command for missed check-in/out (company timezone, grace minutes)
+- [x] Idempotent `attendance_punch_reminders` + inbox/email
+- [x] Web Push VAPID subscriptions (no Firebase); cPanel cron + queue drain
+- [x] Attendance enable banner + Service Worker; i18n en/vi
+- [x] Tests + deployment notes
+
+**Notes:**
+
+```
+- Channel: Web Push (VAPID) + existing inbox/email
+- cPanel: * * * * * php artisan schedule:run
+- Check-in reminders: today only; check-out: today + overnight night shifts
+```
+
 ### ∞.schedule-off-hover-label — Scheduled-off calendar hover label
 
 | Field | Value |
@@ -2566,6 +2609,10 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-09-05 | `∞.test-push-button` | Done: admin test Web Push button + sync API | agent |
+| 2026-09-05 | `∞.test-push-button` | Started: admin immediate test Web Push | agent |
+| 2026-09-05 | `∞.attendance-punch-reminders` | Done: scheduler punch reminders + Web Push VAPID; tests green | agent |
+| 2026-09-05 | `∞.attendance-punch-reminders` | Started: Web Push VAPID punch reminders for cPanel | agent |
 | 2026-09-05 | `∞.schedule-off-hover-label` | Done: scheduled-off hover uses Nghỉ theo lịch, not Weekend | agent |
 | 2026-09-05 | `∞.shift-assign-form-polish` | Done: compact assign card, weekday grid + presets; types green | agent |
 | 2026-09-05 | `∞.shift-assign-form-ux` | Done: stacked assign form with weekday chips in-form; types green | agent |

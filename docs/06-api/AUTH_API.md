@@ -111,7 +111,8 @@ Linked employee in `suspended` / `resigned` / `archived` → **403** `AUTH_ACCOU
     "employee_id": 10,
     "locale": "vi",
     "user_locale": null,
-    "company_locale": "vi"
+    "company_locale": "vi",
+    "vapid_public_key": null
   }
 }
 ```
@@ -121,6 +122,7 @@ Linked employee in `suspended` / `resigned` / `archived` → **403** `AUTH_ACCOU
 | `locale` | Effective locale for UI (`user_locale ?? company_locale ?? app default`) |
 | `user_locale` | Personal preference; `null` = follow company |
 | `company_locale` | From settings `company.locale` |
+| `vapid_public_key` | Web Push VAPID public key (`null` if not configured). Not a secret. |
 
 UI builds menus from `permissions`. SPA syncs `react-i18next` from `locale` — see [I18N.md](../05-frontend/I18N.md).
 

@@ -17,6 +17,7 @@ import {
 } from '@/lib/auth/auth-context';
 import type { AuthContextValue, AuthSession } from '@/lib/auth/auth-context';
 import { applyLocale, DEFAULT_LOCALE } from '@/lib/i18n';
+import { unsubscribeFromPush } from '@/lib/push/web-push';
 
 type Props = {
     children: ReactNode;
@@ -30,6 +31,7 @@ type SessionPayload = {
     locale?: string;
     user_locale?: string | null;
     company_locale?: string;
+    vapid_public_key?: string | null;
 };
 
 /**
@@ -64,6 +66,7 @@ export function AuthProvider({ children }: Props) {
             locale,
             userLocale: payload.user_locale ?? null,
             companyLocale: payload.company_locale ?? null,
+            vapidPublicKey: payload.vapid_public_key ?? null,
             isLoading: false,
         });
 
@@ -85,6 +88,7 @@ export function AuthProvider({ children }: Props) {
 
     const logout = useCallback(async () => {
         try {
+            await unsubscribeFromPush({ updatePreference: false });
             await authApi.logout();
         } finally {
             clearSession();

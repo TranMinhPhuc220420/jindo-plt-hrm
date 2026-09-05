@@ -1,12 +1,15 @@
 <?php
 
 use App\Jobs\SendNotificationEmailJob;
+use App\Jobs\SendWebPushJob;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Models\LeaveType;
 use App\Models\Notification;
 use App\Models\NotificationPreference;
+use App\Models\PushSubscription;
 use App\Models\User;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Queue;
 
 function notificationUser(array $permissionKeys): User
@@ -236,4 +239,65 @@ test('broadcast requires permission and fans out to company employees', function
         ->where('user_id', $recipientUser->id)
         ->where('type', 'broadcast.announcement')
         ->count())->toBe(1);
+});
+
+test('test push requires broadcast permission', function () {
+    Company::factory()->create();
+    $user = notificationUser(['can_view_own_notifications']);
+
+    $this->actingAs($user)->withHeaders(spaJsonHeaders())
+        ->postJson('/api/notifications/test-push')
+        ->assertForbidden();
+});
+
+test('test push requires vapid keys', function () {
+    Company::factory()->create();
+    $user = notificationUser(['can_send_broadcast_notification', 'can_view_own_notifications']);
+    config(['webpush.vapid.public_key' => '', 'webpush.vapid.private_key' => '']);
+
+    $this->actingAs($user)->withHeaders(spaJsonHeaders())
+        ->postJson('/api/notifications/test-push')
+        ->assertStatus(422)
+        ->assertJsonPath('error_code', 'PUSH_VAPID_NOT_CONFIGURED');
+});
+
+test('test push requires a browser subscription', function () {
+    Company::factory()->create();
+    $user = notificationUser(['can_send_broadcast_notification', 'can_view_own_notifications']);
+    config([
+        'webpush.vapid.public_key' => 'test-public',
+        'webpush.vapid.private_key' => 'test-private',
+    ]);
+
+    $this->actingAs($user)->withHeaders(spaJsonHeaders())
+        ->postJson('/api/notifications/test-push')
+        ->assertStatus(422)
+        ->assertJsonPath('error_code', 'PUSH_SUBSCRIPTION_MISSING');
+});
+
+test('test push creates an inbox row and sends web push immediately', function () {
+    Bus::fake([SendWebPushJob::class]);
+
+    Company::factory()->create();
+    $user = notificationUser(['can_send_broadcast_notification', 'can_view_own_notifications']);
+    config([
+        'webpush.vapid.public_key' => 'test-public',
+        'webpush.vapid.private_key' => 'test-private',
+    ]);
+    PushSubscription::query()->create([
+        'user_id' => $user->id,
+        'endpoint' => 'https://push.example.test/test',
+        'public_key' => 'pk',
+        'auth_token' => 'at',
+        'content_encoding' => 'aes128gcm',
+    ]);
+
+    $this->actingAs($user)->withHeaders(spaJsonHeaders())
+        ->postJson('/api/notifications/test-push')
+        ->assertOk()
+        ->assertJsonPath('data.type', 'push.test');
+
+    expect(Notification::query()->where('user_id', $user->id)->where('type', 'push.test')->count())->toBe(1);
+
+    Bus::assertDispatched(SendWebPushJob::class);
 });

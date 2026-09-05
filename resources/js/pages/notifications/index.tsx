@@ -17,16 +17,23 @@ import type {
     Notification,
     NotificationPreferences,
 } from '@/lib/api/modules/notifications';
+import { useAuth } from '@/lib/auth/auth-context';
 import {
     notificationBody,
     notificationTitle,
     notificationTypeLabel,
 } from '@/lib/i18n/notification-labels';
 import { notificationHref } from '@/lib/notifications/notification-href';
+import {
+    isPushSupported,
+    subscribeToPush,
+    unsubscribeFromPush,
+} from '@/lib/push/web-push';
 import { cn } from '@/lib/utils';
 
 export default function NotificationsPage() {
     const { t, i18n } = useTranslation(['notifications', 'common']);
+    const { vapidPublicKey, can } = useAuth();
     const isMobile = useIsMobile();
     const [items, setItems] = useState<Notification[]>([]);
     const [unread, setUnread] = useState(0);
@@ -35,6 +42,8 @@ export default function NotificationsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
+    const [testBusy, setTestBusy] = useState(false);
+    const canTestPush = can('can_send_broadcast_notification');
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -108,6 +117,39 @@ export default function NotificationsPage() {
         setPrefs(next);
 
         try {
+            if (key === 'push' && next.push) {
+                if (!isPushSupported() || !vapidPublicKey) {
+                    setPrefs(prefs);
+                    toast.error(t('toast_push_unavailable'));
+
+                    return;
+                }
+
+                const ok = await subscribeToPush(vapidPublicKey);
+
+                if (!ok) {
+                    setPrefs(prefs);
+                    toast.error(t('toast_push_denied'));
+
+                    return;
+                }
+
+                const saved = await notificationsApi.getPreferences();
+                setPrefs(saved);
+                toast.success(t('toast_prefs_saved'));
+
+                return;
+            }
+
+            if (key === 'push' && !next.push) {
+                await unsubscribeFromPush();
+                const saved = await notificationsApi.getPreferences();
+                setPrefs(saved);
+                toast.success(t('toast_prefs_saved'));
+
+                return;
+            }
+
             const saved = await notificationsApi.updatePreferences({
                 email: next.email,
                 push: next.push,
@@ -120,6 +162,22 @@ export default function NotificationsPage() {
             toast.error(
                 err instanceof ApiError ? err.message : t('toast_error'),
             );
+        }
+    }
+
+    async function handleTestPush() {
+        setTestBusy(true);
+
+        try {
+            await notificationsApi.sendTestPush();
+            toast.success(t('toast_test_push_sent'));
+            await load();
+        } catch (err) {
+            toast.error(
+                err instanceof ApiError ? err.message : t('toast_error'),
+            );
+        } finally {
+            setTestBusy(false);
         }
     }
 
@@ -187,6 +245,23 @@ export default function NotificationsPage() {
                             </label>
                         ))}
                     </div>
+                    {canTestPush && (
+                        <div className="flex flex-col gap-2 border-t border-border pt-3">
+                            <p className="text-sm text-muted-foreground">
+                                {t('test_push_hint')}
+                            </p>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className={cn(isMobile && 'min-h-11 w-full')}
+                                disabled={testBusy}
+                                onClick={() => void handleTestPush()}
+                            >
+                                {t('test_push')}
+                            </Button>
+                        </div>
+                    )}
                 </div>
             )}
 

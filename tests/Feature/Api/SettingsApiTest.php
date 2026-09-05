@@ -27,7 +27,8 @@ test('settings require view permission and return grouped defaults', function ()
         ->assertOk()
         ->assertJsonPath('data.company.timezone', 'Asia/Ho_Chi_Minh')
         ->assertJsonPath('data.company.locale', 'vi')
-        ->assertJsonPath('data.auth.two_factor_required', false);
+        ->assertJsonPath('data.auth.two_factor_required', false)
+        ->assertJsonPath('data.attendance.punch_reminder_enabled', true);
 });
 
 test('settings manager can update keys', function () {

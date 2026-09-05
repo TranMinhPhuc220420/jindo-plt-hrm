@@ -55,8 +55,11 @@ Domain success (e.g. LeaveApproved)
 ```
 Scheduler finds due reminders
   → Enqueue notification jobs
-    → Deliver → Mark reminder sent
+    → Deliver inbox + optional email + Web Push (VAPID)
+    → Mark reminder sent (`attendance_punch_reminders`)
 ```
+
+Missed punch reminders (v1): check-in after shift start + grace if not punched; check-out after shift end + grace if still open. Skip rest days and full-day approved leave. Night-shift check-out is due the following morning.
 
 ### Inbox read state
 
@@ -104,6 +107,7 @@ Notification mostly **consumes** events. It may emit operational events such as 
 | `leave.cancelled_pending` | Manager when a pending request is cancelled |
 | `attendance.correction_requested` | Approver |
 | `attendance.correction_approved` / `rejected` | Requester |
+| `attendance.check_in_reminder` / `check_out_reminder` | Employee (scheduler; once per shift window per day) |
 | `shift.assigned` / `shift.changed` | Employee |
 | `asset.assigned` / `asset.returned` | Employee |
 | `payroll.salary_changed` / `payroll.finalized` | Employee |
@@ -117,6 +121,7 @@ Notification mostly **consumes** events. It may emit operational events such as 
 | `recruitment.offer_sent` / `offer_accepted` / `stage_changed` | Recruiters |
 | `document.shared` / `document.uploaded` | Employee owner / document viewers |
 | `broadcast.announcement` | All company employees (via `POST /api/notifications/broadcast`) |
+| `push.test` | Current admin (`POST /api/notifications/test-push`, immediate Web Push) |
 
 ---
 

@@ -40,6 +40,14 @@ return [
             'title' => 'Hiệu chỉnh điểm danh bị từ chối',
             'body' => 'Yêu cầu hiệu chỉnh điểm danh của bạn đã bị từ chối.',
         ],
+        'check_in_reminder' => [
+            'title' => 'Nhắc check-in',
+            'body' => 'Bạn chưa check-in cho ca làm việc của mình.',
+        ],
+        'check_out_reminder' => [
+            'title' => 'Nhắc check-out',
+            'body' => 'Bạn đã check-in nhưng chưa check-out.',
+        ],
     ],
     'shift' => [
         'assigned' => [
@@ -155,6 +163,12 @@ return [
         'announcement' => [
             'title' => 'Thông báo công ty',
             'body' => 'Bạn có thông báo mới từ công ty.',
+        ],
+    ],
+    'push' => [
+        'test' => [
+            'title' => 'Thông báo đẩy thử',
+            'body' => 'Nếu bạn thấy banner này, Web Push đang hoạt động trên thiết bị.',
         ],
     ],
 ];

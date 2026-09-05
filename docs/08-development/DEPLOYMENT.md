@@ -88,12 +88,30 @@ This seeds permissions, roles, company, settings defaults, MORNING/NIGHT shifts 
 
 ## Workers & Scheduler
 
-| Process | Command (typical) |
-|---------|-------------------|
-| Queue | `php artisan queue:work` (supervisor/systemd) |
-| Scheduler | cron: `* * * * * php artisan schedule:run` |
+cPanel has no Supervisor requirement. Use **one** cron every minute:
 
-After deploy, workers must reload code (graceful restart).  
+```
+* * * * * cd /home/<cpanel-user>/<app> && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Laravel then runs:
+
+| Process | When |
+|---------|------|
+| `attendance:send-punch-reminders` | Every 5 minutes (`withoutOverlapping`) |
+| `queue:work --stop-when-empty --max-time=50 --tries=3` | Every minute (drains `database` queues without a long-lived worker) |
+
+Keep `QUEUE_CONNECTION=database`. If the host **does** run Supervisor, you may omit the scheduled `queue:work` and use a persistent worker instead.
+
+### Web Push (VAPID)
+
+Punch reminders use the Web Push API (not Firebase). After deploy:
+
+1. App must be served over **HTTPS**.
+2. Generate keys: `php artisan webpush:vapid` and set `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` in `.env`.
+3. Outbound HTTPS to browser push services (Mozilla / Google / Apple) must be allowed.
+4. Employees opt in from `/attendance` (or Notifications → Push). iOS only after adding the site to the Home Screen.
+
 Queues used: `default`, `notifications`, `payroll`, `exports` (see [QUEUES.md](../04-backend/QUEUES.md)).
 
 ---

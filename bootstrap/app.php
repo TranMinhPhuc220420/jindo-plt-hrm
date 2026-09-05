@@ -8,6 +8,7 @@ use App\Http\Middleware\SetLocale;
 use App\Support\ApiResponse;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -24,6 +25,15 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withSchedule(function (Schedule $schedule): void {
+        $schedule->command('attendance:send-punch-reminders')
+            ->everyFiveMinutes()
+            ->withoutOverlapping(10);
+
+        $schedule->command('queue:work --stop-when-empty --max-time=50 --tries=3')
+            ->everyMinute()
+            ->withoutOverlapping(2);
+    })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 

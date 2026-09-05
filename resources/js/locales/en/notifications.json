@@ -18,7 +18,12 @@
     "prefs_system": "In-app",
     "toast_all_read": "All notifications marked as read.",
     "toast_prefs_saved": "Preferences updated.",
+    "toast_push_unavailable": "This browser does not support push notifications (HTTPS is required).",
+    "toast_push_denied": "Notifications were not allowed.",
     "toast_error": "Something went wrong.",
+    "test_push": "Send test push",
+    "test_push_hint": "Sends a lock-screen notification to this browser now. Enable Push above first.",
+    "toast_test_push_sent": "Test push sent. Check this device’s notification banner.",
     "messages": {
         "leave": {
             "requested": {
@@ -58,6 +63,14 @@
             "correction_rejected": {
                 "title": "Attendance correction rejected",
                 "body": "Your attendance correction was rejected."
+            },
+            "check_in_reminder": {
+                "title": "Please check in",
+                "body": "You have not checked in for your shift yet."
+            },
+            "check_out_reminder": {
+                "title": "Please check out",
+                "body": "You checked in but have not checked out yet."
             }
         },
         "shift": {
@@ -175,6 +188,12 @@
                 "title": "Company announcement",
                 "body": "You have a new company announcement."
             }
+        },
+        "push": {
+            "test": {
+                "title": "Test push notification",
+                "body": "If you see this banner, Web Push is working on this device."
+            }
         }
     },
     "types": {
@@ -190,6 +209,7 @@
         "recruitment": "Recruitment",
         "document": "Document",
         "broadcast": "Broadcast",
+        "push": "Push",
         "offer": "Offer"
     }
 }
