@@ -14,6 +14,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
+use App\Services\Shift\ShiftSchedule;
 use App\Services\Shift\WorkingCalendarService;
 use App\Support\EmployeeAccountGate;
 use App\Support\SettingsDefaults;
@@ -44,7 +45,8 @@ class AttendanceService
      *     accuracy_meters?: float|int|string|null,
      *     address: string,
      *     captured_at?: string|null,
-     *     photo: UploadedFile
+     *     photo: UploadedFile,
+     *     shift_id?: int|null
      * }  $data
      */
     public function checkIn(array $data): AttendanceRecord
@@ -56,7 +58,8 @@ class AttendanceService
         $workedAt = $this->parseWorkedAt($data['worked_at'] ?? null);
         $workDate = $workedAt->timezone($this->companyTimezone())->toDateString();
 
-        if ($this->calendar->assignmentForDate($employee->id, $workDate) === null) {
+        $windows = $this->calendar->windowsForDate($employee->id, $workDate);
+        if ($windows === []) {
             throw new DomainException(
                 message: 'No shift is assigned for this work date.',
                 errorCode: 'ATTENDANCE_NO_SHIFT',
@@ -64,10 +67,20 @@ class AttendanceService
             );
         }
 
+        $shiftId = $this->resolveCheckInShiftId(
+            $employee->id,
+            $companyId,
+            $workDate,
+            $workedAt,
+            $windows,
+            isset($data['shift_id']) ? (int) $data['shift_id'] : null,
+        );
+
         $existing = AttendanceRecord::query()
             ->where('company_id', $companyId)
             ->where('employee_id', $employee->id)
             ->whereDate('work_date', $workDate)
+            ->where('shift_id', $shiftId)
             ->first();
 
         if ($existing !== null) {
@@ -98,16 +111,19 @@ class AttendanceService
                 $employee,
                 $workDate,
                 $workedAt,
+                $shiftId,
                 &$storedPath,
             ): AttendanceRecord {
                 $record = $existing ?? new AttendanceRecord([
                     'company_id' => $companyId,
                     'employee_id' => $employee->id,
+                    'shift_id' => $shiftId,
                     'work_date' => $workDate,
                     'source' => $data['source'] ?? 'manual',
                     'status' => 'open',
                 ]);
 
+                $record->shift_id = max(0, $shiftId);
                 $record->check_in_at = $workedAt;
                 $record->note = $data['note'] ?? $record->note;
                 $record->source = $data['source'] ?? $record->source ?? 'manual';
@@ -148,7 +164,7 @@ class AttendanceService
             throw $e;
         }
 
-        return $record->fresh(['employee', 'evidences']) ?? $record;
+        return $record->fresh(['employee', 'evidences', 'shift']) ?? $record;
     }
 
     /**
@@ -175,6 +191,7 @@ class AttendanceService
             companyId: $companyId,
             employeeId: $employee->id,
             punchDate: $punchDate,
+            workedAt: $workedAt,
         );
 
         if ($record === null || $record->check_in_at === null) {
@@ -254,7 +271,7 @@ class AttendanceService
             throw $e;
         }
 
-        return $record->fresh(['employee', 'evidences']) ?? $record;
+        return $record->fresh(['employee', 'evidences', 'shift']) ?? $record;
     }
 
     public function streamEvidencePhoto(User $actor, AttendanceRecord $record, string $punchType): StreamedResponse
@@ -298,8 +315,9 @@ class AttendanceService
         $companyId = $this->companyContext->id();
         $query = AttendanceRecord::query()
             ->where('company_id', $companyId)
-            ->with(['employee', 'evidences'])
-            ->orderByDesc('work_date');
+            ->with(['employee', 'evidences', 'shift'])
+            ->orderByDesc('work_date')
+            ->orderBy('id');
 
         $ownOnly = $this->mustScopeToOwn($actor);
         if ($ownOnly) {
@@ -328,7 +346,7 @@ class AttendanceService
     {
         $record = AttendanceRecord::query()
             ->where('company_id', $this->companyContext->id())
-            ->with(['employee', 'evidences'])
+            ->with(['employee', 'evidences', 'shift'])
             ->findOrFail($id);
 
         $this->assertCanViewRecord($actor, $record);
@@ -686,6 +704,7 @@ class AttendanceService
                 ? CarbonImmutable::parse($record->check_out_at)
                 : null,
             breakMinutesOverride: $record->break_minutes > 0 ? $record->break_minutes : null,
+            shiftId: $record->shift_id !== null ? (int) $record->shift_id : null,
         );
 
         $record->fill($metrics);
@@ -710,38 +729,154 @@ class AttendanceService
     }
 
     /**
-     * Prefer same calendar day; otherwise the latest still-open session within
-     * a one-day lookback (post-midnight / overnight checkout).
+     * Prefer an open session (check-in without check-out). Same calendar day first,
+     * then a one-day lookback for overnight / post-midnight checkout.
      */
     private function findCheckOutTargetRecord(
         int $companyId,
         int $employeeId,
         string $punchDate,
+        CarbonImmutable $workedAt,
     ): ?AttendanceRecord {
-        $sameDay = AttendanceRecord::query()
-            ->where('company_id', $companyId)
-            ->where('employee_id', $employeeId)
-            ->whereDate('work_date', $punchDate)
-            ->first();
-
-        if ($sameDay !== null && $sameDay->check_in_at !== null) {
-            return $sameDay;
-        }
-
         $windowStart = CarbonImmutable::parse($punchDate, $this->companyTimezone())
             ->subDay()
             ->toDateString();
 
-        return AttendanceRecord::query()
+        $open = AttendanceRecord::query()
             ->where('company_id', $companyId)
             ->where('employee_id', $employeeId)
             ->whereNotNull('check_in_at')
             ->whereNull('check_out_at')
-            ->whereNotIn('status', ['locked', 'approved'])
             ->whereDate('work_date', '>=', $windowStart)
             ->whereDate('work_date', '<=', $punchDate)
             ->orderByDesc('check_in_at')
-            ->first();
+            ->get();
+
+        if ($open->isEmpty()) {
+            return null;
+        }
+
+        if ($open->count() === 1) {
+            return $open->first();
+        }
+
+        $local = $workedAt->timezone($this->companyTimezone());
+        $minutes = ($local->hour * 60) + $local->minute;
+
+        foreach ($open as $record) {
+            if ($record->shift_id === null) {
+                continue;
+            }
+
+            $windows = $this->calendar->windowsForDate($employeeId, $record->work_date->toDateString());
+            foreach ($windows as $window) {
+                if ((int) $window['shift_id'] !== (int) $record->shift_id) {
+                    continue;
+                }
+
+                [$from, $to] = ShiftSchedule::windowMinutes(
+                    $window['start_time'],
+                    $window['end_time'],
+                );
+                $compare = $minutes;
+                if ($window['is_night'] && $compare < $from && $to > 24 * 60) {
+                    $compare += 24 * 60;
+                }
+
+                if ($compare >= $from && $compare < $to) {
+                    return $record;
+                }
+            }
+        }
+
+        return $open->first();
+    }
+
+    /**
+     * @param  list<array{shift_id: int, start_time: string, end_time: string, is_night: bool}>  $windows
+     */
+    private function resolveCheckInShiftId(
+        int $employeeId,
+        int $companyId,
+        string $workDate,
+        CarbonImmutable $workedAt,
+        array $windows,
+        ?int $requestedShiftId,
+    ): int {
+        $taken = AttendanceRecord::query()
+            ->where('company_id', $companyId)
+            ->where('employee_id', $employeeId)
+            ->whereDate('work_date', $workDate)
+            ->whereNotNull('check_in_at')
+            ->pluck('shift_id')
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $available = array_values(array_filter(
+            $windows,
+            fn (array $window): bool => ! in_array((int) $window['shift_id'], $taken, true),
+        ));
+
+        if ($requestedShiftId !== null) {
+            foreach ($windows as $window) {
+                if ((int) $window['shift_id'] === $requestedShiftId) {
+                    if (in_array($requestedShiftId, $taken, true)) {
+                        throw new DomainException(
+                            message: 'Already checked in for this work date.',
+                            errorCode: 'ATTENDANCE_ALREADY_CHECKED_IN',
+                            status: 409,
+                        );
+                    }
+
+                    return $requestedShiftId;
+                }
+            }
+
+            throw new DomainException(
+                message: 'No shift is assigned for this work date.',
+                errorCode: 'ATTENDANCE_NO_SHIFT',
+                status: 422,
+            );
+        }
+
+        if ($available === []) {
+            throw new DomainException(
+                message: 'Already checked in for this work date.',
+                errorCode: 'ATTENDANCE_ALREADY_CHECKED_IN',
+                status: 409,
+            );
+        }
+
+        $local = $workedAt->timezone($this->companyTimezone());
+        $minutes = ($local->hour * 60) + $local->minute;
+
+        foreach ($available as $window) {
+            [$from, $to] = ShiftSchedule::windowMinutes(
+                $window['start_time'],
+                $window['end_time'],
+            );
+            $compare = $minutes;
+            if ($window['is_night'] && $compare < $from && $to > 24 * 60) {
+                $compare += 24 * 60;
+            }
+
+            if ($compare >= $from && $compare < $to) {
+                return (int) $window['shift_id'];
+            }
+        }
+
+        foreach ($available as $window) {
+            $from = ShiftSchedule::windowMinutes(
+                $window['start_time'],
+                $window['end_time'],
+            )[0];
+            if ($minutes < $from) {
+                return (int) $window['shift_id'];
+            }
+        }
+
+        return (int) $available[array_key_last($available)]['shift_id'];
     }
 
     private function parseWorkedAt(?string $value): CarbonImmutable

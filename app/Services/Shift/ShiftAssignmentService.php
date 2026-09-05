@@ -74,7 +74,8 @@ class ShiftAssignmentService
             : null;
 
         $this->assertDateOrder($startDate, $endDate);
-        $this->assertNoOverlap($companyId, $employee->id, $startDate, $endDate);
+        $weekdays = $this->normalizeWeekdays($data['weekdays'] ?? null);
+        $this->assertNoOverlap($companyId, $employee->id, $startDate, $endDate, $weekdays, $shift);
 
         $assignment = ShiftAssignment::query()->create([
             'company_id' => $companyId,
@@ -82,6 +83,7 @@ class ShiftAssignmentService
             'shift_id' => $shift->id,
             'start_date' => $startDate,
             'end_date' => $endDate,
+            'weekdays' => $weekdays,
         ]);
 
         $this->audit->write(
@@ -92,6 +94,7 @@ class ShiftAssignmentService
                 'shift_id' => $assignment->shift_id,
                 'start_date' => $startDate,
                 'end_date' => $endDate,
+                'weekdays' => $weekdays,
             ],
         );
 
@@ -101,7 +104,7 @@ class ShiftAssignmentService
     }
 
     /**
-     * @param  array{employee_id?: int, shift_id?: int, start_date?: string, end_date?: string|null}  $data
+     * @param  array{employee_id?: int, shift_id?: int, start_date?: string, end_date?: string|null, weekdays?: list<int>|null}  $data
      */
     public function update(ShiftAssignment $assignment, array $data): ShiftAssignment
     {
@@ -111,7 +114,7 @@ class ShiftAssignmentService
         $employeeId = (int) ($data['employee_id'] ?? $assignment->employee_id);
         $shiftId = (int) ($data['shift_id'] ?? $assignment->shift_id);
         $this->assertEmployeeInCompany($employeeId, $companyId);
-        $this->assertShiftInCompany($shiftId, $companyId);
+        $shift = $this->assertShiftInCompany($shiftId, $companyId);
 
         $startDate = isset($data['start_date'])
             ? CarbonImmutable::parse($data['start_date'])->toDateString()
@@ -124,13 +127,17 @@ class ShiftAssignmentService
             : $assignment->end_date?->toDateString();
 
         $this->assertDateOrder($startDate, $endDate);
-        $this->assertNoOverlap($companyId, $employeeId, $startDate, $endDate, $assignment->id);
+        $weekdays = array_key_exists('weekdays', $data)
+            ? $this->normalizeWeekdays($data['weekdays'])
+            : $assignment->weekdays;
+        $this->assertNoOverlap($companyId, $employeeId, $startDate, $endDate, $weekdays, $shift, $assignment->id);
 
         $assignment->update([
             'employee_id' => $employeeId,
             'shift_id' => $shiftId,
             'start_date' => $startDate,
             'end_date' => $endDate,
+            'weekdays' => $weekdays,
         ]);
 
         $this->audit->write(
@@ -141,6 +148,7 @@ class ShiftAssignmentService
                 'shift_id' => $shiftId,
                 'start_date' => $startDate,
                 'end_date' => $endDate,
+                'weekdays' => $weekdays,
             ],
         );
 
@@ -224,16 +232,22 @@ class ShiftAssignmentService
         );
     }
 
+    /**
+     * @param  array<mixed>|null  $weekdays
+     */
     private function assertNoOverlap(
         int $companyId,
         int $employeeId,
         string $startDate,
         ?string $endDate,
+        ?array $weekdays,
+        Shift $shift,
         ?int $excludeId = null,
     ): void {
         $query = ShiftAssignment::query()
             ->where('company_id', $companyId)
-            ->where('employee_id', $employeeId);
+            ->where('employee_id', $employeeId)
+            ->with('shift');
 
         if ($excludeId !== null) {
             $query->where('id', '!=', $excludeId);
@@ -241,24 +255,68 @@ class ShiftAssignmentService
 
         $openEnd = $endDate ?? '9999-12-31';
 
-        $overlaps = $query->where(function ($q) use ($startDate, $openEnd): void {
-            $q->where(function ($inner) use ($startDate, $openEnd): void {
-                // existing.start <= new.end AND existing.end (or open) >= new.start
-                $inner->where('start_date', '<=', $openEnd)
-                    ->where(function ($endQ) use ($startDate): void {
-                        $endQ->whereNull('end_date')
-                            ->orWhere('end_date', '>=', $startDate);
-                    });
-            });
-        })->exists();
+        $candidates = $query->where(function ($q) use ($startDate, $openEnd): void {
+            $q->whereDate('start_date', '<=', $openEnd)
+                ->where(function ($endQ) use ($startDate): void {
+                    $endQ->whereNull('end_date')
+                        ->orWhereDate('end_date', '>=', $startDate);
+                });
+        })->get();
 
-        if ($overlaps) {
+        $newStart = ShiftSchedule::formatTime($shift->start_time);
+        $newEnd = ShiftSchedule::formatTime($shift->end_time);
+
+        foreach ($candidates as $existing) {
+            if (! ShiftSchedule::weekdaysIntersect($weekdays, $existing->weekdays)) {
+                continue;
+            }
+
+            $existingShift = $existing->shift;
+            if ($existingShift === null) {
+                continue;
+            }
+
+            if (ShiftSchedule::timesOverlap(
+                $newStart,
+                $newEnd,
+                ShiftSchedule::formatTime($existingShift->start_time),
+                ShiftSchedule::formatTime($existingShift->end_time),
+            )) {
+                throw new DomainException(
+                    message: 'Shift assignment overlaps an existing assignment for this employee.',
+                    errorCode: 'SHIFT_ASSIGNMENT_OVERLAP',
+                    status: 409,
+                );
+            }
+        }
+    }
+
+    /**
+     * @return list<int>|null
+     */
+    private function normalizeWeekdays(mixed $weekdays): ?array
+    {
+        if ($weekdays === null) {
+            return null;
+        }
+
+        if (! is_array($weekdays)) {
             throw new DomainException(
-                message: 'Shift assignment overlaps an existing assignment for this employee.',
-                errorCode: 'SHIFT_ASSIGNMENT_OVERLAP',
-                status: 409,
+                message: 'Assignment weekdays must be a list of weekday numbers.',
+                errorCode: 'SHIFT_INVALID_TIME_RANGE',
+                status: 422,
             );
         }
+
+        if ($weekdays === []) {
+            throw new DomainException(
+                message: 'Assignment weekdays cannot be empty.',
+                errorCode: 'SHIFT_INVALID_TIME_RANGE',
+                status: 422,
+            );
+        }
+
+        return ShiftSchedule::weekdaysOrAll($weekdays);
     }
 
     private function assertDateOrder(string $startDate, ?string $endDate): void

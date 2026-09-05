@@ -10,7 +10,10 @@ import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MonthSummaryStrip } from '@/components/attendance/month-summary-strip';
 import { ScheduleAgendaList } from '@/components/my-schedule/schedule-agenda-list';
-import { indexDaysByDate } from '@/components/my-schedule/schedule-day-helpers';
+import {
+    indexDaysByDate,
+    primaryAttendance,
+} from '@/components/my-schedule/schedule-day-helpers';
 import { ScheduleDaySheet } from '@/components/my-schedule/schedule-day-sheet';
 import { ScheduleMonthCalendar } from '@/components/my-schedule/schedule-month-calendar';
 import { ScheduleTable } from '@/components/my-schedule/schedule-table';
@@ -84,7 +87,7 @@ export function WorkingSchedulePreview({
     const [dateTo, setDateTo] = useState(weekInitial.to);
     const [days, setDays] = useState<WorkingCalendarDay[]>([]);
     const [attendanceByDate, setAttendanceByDate] = useState<
-        Map<string, AttendanceRecord>
+        Map<string, AttendanceRecord[]>
     >(() => new Map());
     const [summary, setSummary] = useState<AttendanceSummary | null>(null);
     const [summaryLoading, setSummaryLoading] = useState(false);
@@ -132,12 +135,12 @@ export function WorkingSchedulePreview({
             ]);
 
             if (attendanceResult.status === 'fulfilled') {
-                const map = new Map<string, AttendanceRecord>();
+                const map = new Map<string, AttendanceRecord[]>();
 
                 for (const row of attendanceResult.value.data) {
-                    if (!map.has(row.work_date)) {
-                        map.set(row.work_date, row);
-                    }
+                    const list = map.get(row.work_date) ?? [];
+                    list.push(row);
+                    map.set(row.work_date, list);
                 }
 
                 setAttendanceByDate(map);
@@ -263,7 +266,7 @@ export function WorkingSchedulePreview({
                 entry={selectedDate ? daysByDate.get(selectedDate) : undefined}
                 attendance={
                     selectedDate
-                        ? attendanceByDate.get(selectedDate)
+                        ? primaryAttendance(attendanceByDate.get(selectedDate))
                         : undefined
                 }
             />

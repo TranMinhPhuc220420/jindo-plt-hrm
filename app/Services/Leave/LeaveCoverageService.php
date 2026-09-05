@@ -129,7 +129,7 @@ class LeaveCoverageService
             return $this->expandHourly($request, $base, $from, $to);
         }
 
-        $nonWorking = $this->duration->nonWorkingDates($from, $to);
+        $nonWorking = $this->duration->nonWorkingDates($from, $to, $request->employee_id);
         $days = [];
 
         foreach (CarbonPeriod::create($from, $to) as $day) {
@@ -215,7 +215,7 @@ class LeaveCoverageService
             if ($date < $periodStart || $date > $periodEnd) {
                 return 0.0;
             }
-            if ($this->duration->isNonWorkingDate($date)) {
+            if ($this->duration->isNonWorkingDate($date, $request->employee_id)) {
                 return 0.0;
             }
 
@@ -235,7 +235,7 @@ class LeaveCoverageService
             return 0.0;
         }
 
-        $nonWorking = $this->duration->nonWorkingDates($from, $to);
+        $nonWorking = $this->duration->nonWorkingDates($from, $to, $request->employee_id);
         $quantity = 0.0;
 
         foreach (CarbonPeriod::create($from, $to) as $day) {
@@ -284,12 +284,24 @@ class LeaveCoverageService
         }
 
         $day = $days[0];
-        $start = CarbonImmutable::parse($day['date'].' '.$day['start_time']);
-        $end = CarbonImmutable::parse($day['date'].' '.$day['end_time']);
-        if ($end->lte($start)) {
-            $end = $end->addDay();
+        $minutes = 0;
+        foreach ($day['windows'] as $window) {
+            $start = CarbonImmutable::parse($day['date'].' '.$window['start_time']);
+            $end = CarbonImmutable::parse($day['date'].' '.$window['end_time']);
+            if ($end->lte($start)) {
+                $end = $end->addDay();
+            }
+            $minutes += max(0, $start->diffInMinutes($end));
+        }
+        if ($minutes === 0) {
+            $start = CarbonImmutable::parse($day['date'].' '.$day['start_time']);
+            $end = CarbonImmutable::parse($day['date'].' '.$day['end_time']);
+            if ($end->lte($start)) {
+                $end = $end->addDay();
+            }
+            $minutes = max(0, $start->diffInMinutes($end));
         }
 
-        return max(0.25, round($start->diffInMinutes($end) / 60, 2));
+        return max(0.25, round($minutes / 60, 2));
     }
 }

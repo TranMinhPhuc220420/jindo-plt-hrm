@@ -43,6 +43,7 @@ class AttendanceRecordController extends Controller
                 'address' => $validated['address'],
                 'captured_at' => $validated['captured_at'] ?? null,
                 'photo' => $this->requireEvidencePhoto($request),
+                'shift_id' => $validated['shift_id'] ?? null,
             ],
         );
     }

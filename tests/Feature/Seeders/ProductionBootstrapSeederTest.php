@@ -40,6 +40,8 @@ test('production bootstrap seeder creates company settings shifts and admin', fu
 
     expect(Shift::query()->where('company_id', $company->id)->where('code', 'MORNING')->exists())->toBeTrue();
     expect(Shift::query()->where('company_id', $company->id)->where('code', 'NIGHT')->exists())->toBeTrue();
+    expect(Shift::query()->where('company_id', $company->id)->where('code', 'MORNING_PT')->exists())->toBeTrue();
+    expect(Shift::query()->where('company_id', $company->id)->where('code', 'AFTERNOON_PT')->exists())->toBeTrue();
     expect(OvertimeRule::query()->where('company_id', $company->id)->where('code', 'STANDARD')->exists())->toBeTrue();
 
     expect(ShiftAssignment::query()->count())->toBe(0);
@@ -56,5 +58,5 @@ test('production bootstrap seeder creates company settings shifts and admin', fu
     $this->seed(ProductionBootstrapSeeder::class);
     expect(Company::query()->where('code', 'ACME')->count())->toBe(1);
     expect(User::query()->where('email', 'admin@acme.test')->count())->toBe(1);
-    expect(Shift::query()->where('company_id', $company->id)->count())->toBe(2);
+    expect(Shift::query()->where('company_id', $company->id)->count())->toBe(4);
 });

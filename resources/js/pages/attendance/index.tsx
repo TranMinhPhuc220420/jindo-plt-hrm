@@ -82,6 +82,10 @@ export default function AttendanceIndexPage() {
     const [todayRecord, setTodayRecord] = useState<AttendanceRecord | null>(
         null,
     );
+    const [todaySessions, setTodaySessions] = useState<AttendanceRecord[]>([]);
+    const [expectedSessionCount, setExpectedSessionCount] = useState<
+        number | null
+    >(null);
     const [hasShiftToday, setHasShiftToday] = useState<boolean | null>(null);
     const [summary, setSummary] = useState<AttendanceSummary | null>(null);
     const [loading, setLoading] = useState(true);
@@ -113,6 +117,8 @@ export default function AttendanceIndexPage() {
     const loadToday = useCallback(async () => {
         if (!employeeId) {
             setTodayRecord(null);
+            setTodaySessions([]);
+            setExpectedSessionCount(null);
             setHasShiftToday(null);
 
             return null as AttendanceRecord | null;
@@ -140,13 +146,23 @@ export default function AttendanceIndexPage() {
 
             if (calendar === null) {
                 setHasShiftToday(true);
+                setExpectedSessionCount(null);
             } else {
                 const todayCal = calendar.find((row) => row.date === day);
-                setHasShiftToday(todayCal != null && todayCal.shift_id != null);
+                const windowCount =
+                    todayCal?.windows?.length ??
+                    (todayCal?.shift_id != null ? 1 : 0);
+                setHasShiftToday(windowCount > 0);
+                setExpectedSessionCount(windowCount > 0 ? windowCount : 0);
             }
 
-            const todayRow =
-                result.data.find((item) => item.work_date === day) ?? null;
+            const todayRows = result.data.filter(
+                (item) => item.work_date === day,
+            );
+            setTodaySessions(todayRows);
+
+            const openToday = todayRows.find((item) => isOpenSession(item));
+            const todayRow = openToday ?? todayRows.at(-1) ?? null;
 
             if (todayRow) {
                 setTodayRecord(todayRow);
@@ -614,6 +630,8 @@ export default function AttendanceIndexPage() {
             <TodayStatusCard
                 employeeId={employeeId}
                 today={todayRecord}
+                sessions={todaySessions}
+                expectedSessionCount={expectedSessionCount}
                 busy={busy || syncingQueue}
                 pendingCheckIn={pendingCheckIn}
                 pendingCheckOut={pendingCheckOut}

@@ -12,7 +12,12 @@ import {
 import type { AttendanceRecord } from '@/lib/api/modules/attendance';
 import type { WorkingCalendarDay } from '@/lib/api/modules/shifts';
 import { dateFnsLocale, formatPunchTime } from '@/lib/datetime';
-import { leaveCoverageLabel, restLabel } from './schedule-day-helpers';
+import {
+    leaveCoverageLabel,
+    restLabel,
+    shiftNamesLabel,
+    shiftWindowsLabel,
+} from './schedule-day-helpers';
 
 type Props = {
     open: boolean;
@@ -58,17 +63,17 @@ export function ScheduleDaySheet({
                 </SheetHeader>
 
                 <div className="space-y-4 p-4 pt-4">
-                    {entry?.shift_name ? (
+                    {entry && shiftNamesLabel(entry) ? (
                         <section className="space-y-1">
                             <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                                 {t('my_schedule.col_shift')}
                             </p>
                             <p className="text-base font-semibold">
-                                {entry.shift_name}
+                                {shiftNamesLabel(entry)}
                             </p>
-                            {entry.start_time && entry.end_time ? (
+                            {shiftWindowsLabel(entry) ? (
                                 <p className="text-sm text-muted-foreground tabular-nums">
-                                    {entry.start_time} – {entry.end_time}
+                                    {shiftWindowsLabel(entry)}
                                 </p>
                             ) : null}
                         </section>

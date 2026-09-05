@@ -1070,6 +1070,115 @@ test('cannot check in without a shift assignment for the work date', function ()
     expect(AttendanceRecord::query()->count())->toBe(0);
 });
 
+test('two non-overlapping sessions on the same day create two records', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $user = attendanceUser(['can_check_in_out', 'can_view_own_attendance']);
+    $employee = Employee::factory()->create([
+        'company_id' => $company->id,
+        'user_id' => $user->id,
+        'code' => 'E-ATT-DUAL-'.uniqid(),
+    ]);
+    $morning = Shift::factory()->create([
+        'company_id' => $company->id,
+        'start_time' => '08:00:00',
+        'end_time' => '12:00:00',
+        'break_minutes' => 0,
+    ]);
+    $afternoon = Shift::factory()->create([
+        'company_id' => $company->id,
+        'start_time' => '13:00:00',
+        'end_time' => '17:00:00',
+        'break_minutes' => 0,
+    ]);
+    ShiftAssignment::factory()->create([
+        'company_id' => $company->id,
+        'employee_id' => $employee->id,
+        'shift_id' => $morning->id,
+        'start_date' => '2026-08-03',
+        'end_date' => '2026-08-03',
+        'weekdays' => [1],
+    ]);
+    ShiftAssignment::factory()->create([
+        'company_id' => $company->id,
+        'employee_id' => $employee->id,
+        'shift_id' => $afternoon->id,
+        'start_date' => '2026-08-03',
+        'end_date' => '2026-08-03',
+        'weekdays' => [1],
+    ]);
+
+    $this->actingAs($user)
+        ->withHeaders(punchHeaders())
+        ->post('/api/attendance/check-in', attendanceEvidence([
+            'worked_at' => '2026-08-03T09:00:00+07:00',
+        ]))
+        ->assertCreated()
+        ->assertJsonPath('data.shift_id', $morning->id);
+
+    $this->actingAs($user)
+        ->withHeaders(punchHeaders())
+        ->post('/api/attendance/check-out', attendanceEvidence([
+            'worked_at' => '2026-08-03T11:30:00+07:00',
+        ]))
+        ->assertOk();
+
+    $this->actingAs($user)
+        ->withHeaders(punchHeaders())
+        ->post('/api/attendance/check-in', attendanceEvidence([
+            'worked_at' => '2026-08-03T14:00:00+07:00',
+        ]))
+        ->assertCreated()
+        ->assertJsonPath('data.shift_id', $afternoon->id);
+
+    $this->actingAs($user)
+        ->withHeaders(punchHeaders())
+        ->post('/api/attendance/check-out', attendanceEvidence([
+            'worked_at' => '2026-08-03T17:00:00+07:00',
+        ]))
+        ->assertOk();
+
+    expect(AttendanceRecord::query()->where('employee_id', $employee->id)->count())->toBe(2);
+
+    session(['company_id' => $company->id]);
+
+    $summary = app(AttendanceSummaryService::class)->summarizeForPayroll(
+        $employee->id,
+        '2026-08-01',
+        '2026-08-31',
+    );
+
+    expect($summary['days_present'])->toBe(1);
+});
+
+test('weekday-masked assignment rejects punch on a scheduled-off day', function () {
+    Storage::fake('local');
+    $company = Company::factory()->create();
+    $user = attendanceUser(['can_check_in_out']);
+    $employee = Employee::factory()->create([
+        'company_id' => $company->id,
+        'user_id' => $user->id,
+        'code' => 'E-ATT-OFF-'.uniqid(),
+    ]);
+    $shift = Shift::factory()->create(['company_id' => $company->id]);
+    ShiftAssignment::factory()->create([
+        'company_id' => $company->id,
+        'employee_id' => $employee->id,
+        'shift_id' => $shift->id,
+        'start_date' => '2026-08-03',
+        'end_date' => '2026-08-07',
+        'weekdays' => [1, 3, 5],
+    ]);
+
+    $this->actingAs($user)
+        ->withHeaders(punchHeaders())
+        ->post('/api/attendance/check-in', attendanceEvidence([
+            'worked_at' => '2026-08-04T08:00:00+07:00',
+        ]))
+        ->assertStatus(422)
+        ->assertJsonPath('error_code', 'ATTENDANCE_NO_SHIFT');
+});
+
 test('inactive employee cannot check in', function () {
     Storage::fake('local');
     $company = Company::factory()->create();

@@ -109,6 +109,7 @@ erDiagram
   employees ||--o{ shift_assignments : assigned
   shifts ||--o{ shift_assignments : used_by
   employees ||--o{ attendance_records : punches
+  shifts ||--o{ attendance_records : session
   employees ||--o{ attendance_corrections : requests
   attendance_records ||--o{ attendance_corrections : corrects
   companies ||--o{ leave_types : defines

@@ -67,8 +67,14 @@ class WorkingCalendarController extends Controller
             $validated['date_to'],
             $assignedDates,
         );
+        $offOnly = $this->calendar->scheduledOffDays(
+            $employeeId,
+            $validated['date_from'],
+            $validated['date_to'],
+            array_merge($assignedDates, array_column($restOnly, 'date')),
+        );
 
-        $merged = array_merge($days, $restOnly);
+        $merged = array_merge($days, $restOnly, $offOnly);
         usort($merged, fn (array $a, array $b): int => strcmp($a['date'], $b['date']));
 
         $leaveMap = $this->leaveCoverage->coverageByDate(

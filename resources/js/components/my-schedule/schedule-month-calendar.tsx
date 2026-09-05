@@ -26,13 +26,16 @@ import { cn } from '@/lib/utils';
 import {
     indexDaysByDate,
     leaveCoverageLabel,
+    primaryAttendance,
     restLabel,
+    shiftNamesLabel,
+    shiftWindowsLabel,
 } from './schedule-day-helpers';
 
 type Props = {
     month: Date;
     days: WorkingCalendarDay[];
-    attendanceByDate: Map<string, AttendanceRecord>;
+    attendanceByDate: Map<string, AttendanceRecord[]>;
     onSelectDate?: (date: string) => void;
 };
 
@@ -48,6 +51,10 @@ function ScheduleLegend() {
             <span className="inline-flex shrink-0 items-center gap-1.5">
                 <span className="size-2.5 rounded-sm border border-dashed border-slate-400 bg-slate-500/15" />
                 {t('my_schedule.legend_weekend')}
+            </span>
+            <span className="inline-flex shrink-0 items-center gap-1.5">
+                <span className="size-2.5 rounded-sm border border-dashed border-sky-400 bg-sky-500/15" />
+                {t('my_schedule.legend_off')}
             </span>
             <span className="inline-flex shrink-0 items-center gap-1.5">
                 <span className="size-2.5 rounded-sm bg-rose-500/25 ring-1 ring-rose-500/40" />
@@ -106,6 +113,10 @@ function CompactDayCell({
             !onLeave &&
             entry?.rest_kind === 'weekend' &&
             'border border-dashed border-slate-400/60 bg-slate-500/10',
+        inMonth &&
+            !onLeave &&
+            entry?.rest_kind === 'off' &&
+            'border border-dashed border-sky-400/60 bg-sky-500/10',
         inMonth &&
             !onLeave &&
             entry?.rest_kind === 'none' &&
@@ -221,7 +232,9 @@ function RichDayCell({
                             'truncate text-[10px] font-medium',
                             entry?.rest_kind === 'holiday'
                                 ? 'text-rose-700 dark:text-rose-300'
-                                : 'text-slate-600 dark:text-slate-300',
+                                : entry?.rest_kind === 'off'
+                                  ? 'text-sky-700 dark:text-sky-300'
+                                  : 'text-slate-600 dark:text-slate-300',
                         )}
                         title={rest}
                     >
@@ -240,19 +253,21 @@ function RichDayCell({
                               ? 'bg-rose-500/10 ring-1 ring-rose-500/25'
                               : entry.rest_kind === 'weekend'
                                 ? 'border border-dashed border-slate-400/50 bg-slate-500/10'
-                                : entry.shift_id
-                                  ? 'bg-primary/10'
-                                  : 'bg-muted/40',
+                                : entry.rest_kind === 'off'
+                                  ? 'border border-dashed border-sky-400/50 bg-sky-500/10'
+                                  : entry.shift_id
+                                    ? 'bg-primary/10'
+                                    : 'bg-muted/40',
                     )}
                 >
-                    {entry.shift_name ? (
+                    {shiftNamesLabel(entry) ? (
                         <>
                             <p className="truncate text-xs leading-tight font-medium">
-                                {entry.shift_name}
+                                {shiftNamesLabel(entry)}
                             </p>
-                            {entry.start_time && entry.end_time ? (
+                            {shiftWindowsLabel(entry) ? (
                                 <p className="text-[10px] text-muted-foreground tabular-nums sm:text-xs">
-                                    {entry.start_time}–{entry.end_time}
+                                    {shiftWindowsLabel(entry)}
                                 </p>
                             ) : null}
                         </>
@@ -311,6 +326,7 @@ function RichDayCell({
         !inMonth && 'bg-muted/20 text-muted-foreground/60',
         inMonth && entry?.rest_kind === 'holiday' && 'bg-rose-500/5',
         inMonth && entry?.rest_kind === 'weekend' && 'bg-slate-500/5',
+        inMonth && entry?.rest_kind === 'off' && 'bg-sky-500/5',
         today && 'ring-2 ring-primary ring-inset',
         hasPunch && !today && 'border-b-emerald-500/40',
     );
@@ -344,14 +360,7 @@ function RichDayCell({
                         ) : null}
                     </>
                 ) : null}
-                {rest ? (
-                    <p className="opacity-90">
-                        {entry?.rest_kind === 'holiday'
-                            ? t('my_schedule.holiday')
-                            : t('my_schedule.weekend')}
-                        {entry?.holiday_name ? `: ${entry.holiday_name}` : ''}
-                    </p>
-                ) : null}
+                {rest ? <p className="opacity-90">{rest}</p> : null}
                 {entry?.leave ? (
                     <>
                         <p className="font-medium opacity-90">
@@ -463,7 +472,9 @@ export function ScheduleMonthCalendar({
                                         key={key}
                                         date={date}
                                         entry={byDate.get(key)}
-                                        attendance={attendanceByDate.get(key)}
+                                        attendance={primaryAttendance(
+                                            attendanceByDate.get(key),
+                                        )}
                                         inMonth={isSameMonth(date, month)}
                                         today={isToday(date)}
                                         isLastCol={(index + 1) % 7 === 0}
@@ -483,8 +494,8 @@ export function ScheduleMonthCalendar({
                                             key={key}
                                             date={date}
                                             entry={byDate.get(key)}
-                                            attendance={attendanceByDate.get(
-                                                key,
+                                            attendance={primaryAttendance(
+                                                attendanceByDate.get(key),
                                             )}
                                             inMonth={isSameMonth(date, month)}
                                             today={isToday(date)}

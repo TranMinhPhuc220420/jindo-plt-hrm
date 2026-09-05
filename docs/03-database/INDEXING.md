@@ -39,7 +39,8 @@ Primary keys are already indexed.
 | `roles` | `(company_id, name)` or global per product rule | Role identity |
 | `leave_balances` | `(employee_id, leave_type_id, period_key)` | One balance row per period |
 | `holidays` | `(company_id, date)` | One holiday definition per date |
-| `shift_assignments` | Controlled overlap via app + supportive indexes | Prevent double assignment windows |
+| `shift_assignments` | Controlled overlap via app (date ∩ weekday ∩ time) + supportive indexes | Prevent conflicting assignment windows |
+| `attendance_records` | `(company_id, employee_id, work_date, shift_id)` | One punch session per shift per day |
 | `payroll_runs` | `(company_id, period_start, period_end, run_type)` as designed | Avoid duplicate runs |
 | `users` | `email` (or login identifier) | Auth identity |
 

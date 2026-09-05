@@ -28,6 +28,7 @@ class CheckInRequest extends FormRequest
             'address' => ['required', 'string', 'max:500'],
             'photo' => ['required', 'file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
             'captured_at' => ['sometimes', 'nullable', 'date'],
+            'shift_id' => ['sometimes', 'nullable', 'integer'],
         ];
     }
 

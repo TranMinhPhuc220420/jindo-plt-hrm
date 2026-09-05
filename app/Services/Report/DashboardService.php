@@ -239,18 +239,18 @@ class DashboardService
             ->whereIn('work_date', $dates)
             ->whereNotNull('check_in_at')
             ->get()
-            ->keyBy(fn (AttendanceRecord $r) => $r->work_date->toDateString());
+            ->groupBy(fn (AttendanceRecord $r) => $r->work_date->toDateString());
 
         $series = [];
 
         foreach ($dates as $date) {
-            /** @var AttendanceRecord|null $record */
-            $record = $records->get($date);
+            /** @var Collection<int, AttendanceRecord>|null $dayRecords */
+            $dayRecords = $records->get($date);
             $series[] = [
                 'date' => $date,
                 'label' => Carbon::parse($date, $today->timezone)->format('D'),
-                'present' => $record !== null ? 1 : 0,
-                'worked_minutes' => $record?->worked_minutes,
+                'present' => $dayRecords !== null && $dayRecords->isNotEmpty() ? 1 : 0,
+                'worked_minutes' => $dayRecords === null ? null : (int) $dayRecords->sum('worked_minutes'),
             ];
         }
 

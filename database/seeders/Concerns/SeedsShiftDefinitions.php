@@ -41,6 +41,34 @@ trait SeedsShiftDefinitions
             ],
         );
 
+        Shift::query()->updateOrCreate(
+            ['company_id' => $companyId, 'code' => 'MORNING_PT'],
+            [
+                'name' => 'Morning part-time',
+                'start_time' => '08:00:00',
+                'end_time' => '12:00:00',
+                'break_minutes' => 0,
+                'kind' => 'standard',
+                'is_night' => false,
+                'is_flexible' => false,
+                'is_active' => true,
+            ],
+        );
+
+        Shift::query()->updateOrCreate(
+            ['company_id' => $companyId, 'code' => 'AFTERNOON_PT'],
+            [
+                'name' => 'Afternoon part-time',
+                'start_time' => '13:00:00',
+                'end_time' => '17:00:00',
+                'break_minutes' => 0,
+                'kind' => 'standard',
+                'is_night' => false,
+                'is_flexible' => false,
+                'is_active' => true,
+            ],
+        );
+
         OvertimeRule::query()->updateOrCreate(
             ['company_id' => $companyId, 'code' => 'STANDARD'],
             [

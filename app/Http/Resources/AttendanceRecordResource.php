@@ -21,6 +21,10 @@ class AttendanceRecordResource extends JsonResource
             'id' => $this->id,
             'company_id' => $this->company_id,
             'employee_id' => $this->employee_id,
+            'shift_id' => $this->shift_id,
+            'shift' => $this->whenLoaded('shift', fn () => $this->shift
+                ? (new ShiftResource($this->shift))->resolve()
+                : null),
             'work_date' => $this->work_date?->toDateString(),
             'check_in_at' => $this->check_in_at?->toIso8601String(),
             'check_out_at' => $this->check_out_at?->toIso8601String(),

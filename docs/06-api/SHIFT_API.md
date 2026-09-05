@@ -79,9 +79,14 @@
   "employee_id": 10,
   "shift_id": 3,
   "start_date": "2026-08-01",
-  "end_date": "2026-08-31"
+  "end_date": "2026-08-31",
+  "weekdays": [1, 3, 5]
 }
 ```
+
+`weekdays`: optional list of Carbon weekday numbers (`0` = Sunday … `6` = Saturday). Omit or `null` = every day in the range (full-time default). Empty array → `422`.
+
+Overlap is **date-range ∩ weekday ∩ shift time window**. Same employee may hold morning + afternoon assignments on the same dates when the clocks do not overlap.
 
 Overlap conflicts → `409` / `SHIFT_ASSIGNMENT_OVERLAP`.  
 Inactive employees (`suspended`, `resigned`, `archived`) cannot receive new assignments → `422` / `SHIFT_EMPLOYEE_INACTIVE`.
@@ -101,7 +106,10 @@ Each day includes:
 | Field | Meaning |
 |-------|---------|
 | `is_holiday` | `true` when the day is a weekend rest day or public holiday (BC flag) |
-| `rest_kind` | `none` \| `weekend` \| `holiday` (public holiday wins if both apply) |
+| `rest_kind` | `none` \| `weekend` \| `holiday` \| `off` (scheduled off weekday) |
+| `windows` | Zero or more `{ shift_id, shift_name, start_time, end_time }` for that date |
+
+Flat `shift_id` / `start_time` / `end_time` still mirror the **first** window (earliest start) for compatibility. Rest-only and `off` rows have `windows: []` and null shift fields.
 | `holiday_name` | Public holiday name when `rest_kind=holiday`, otherwise `null` |
 
 Rest-only rows have `shift_id` / `shift_name` / `start_time` / `end_time` = `null`.

@@ -150,7 +150,7 @@ class ShiftService
             ->whereNull('deleted_at')
             ->where(function ($q): void {
                 $q->whereNull('end_date')
-                    ->orWhere('end_date', '>=', now()->toDateString());
+                    ->orWhereDate('end_date', '>=', now()->toDateString());
             })
             ->exists();
 

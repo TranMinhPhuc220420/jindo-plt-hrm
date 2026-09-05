@@ -21,6 +21,8 @@ class StoreShiftAssignmentRequest extends FormRequest
             'shift_id' => ['required', 'integer'],
             'start_date' => ['required', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'weekdays' => ['sometimes', 'nullable', 'array', 'min:1', 'max:7'],
+            'weekdays.*' => ['integer', 'distinct', 'between:0,6'],
         ];
     }
 }

@@ -21,6 +21,8 @@ class UpdateShiftAssignmentRequest extends FormRequest
             'shift_id' => ['sometimes', 'integer'],
             'start_date' => ['sometimes', 'date'],
             'end_date' => ['nullable', 'date'],
+            'weekdays' => ['sometimes', 'nullable', 'array', 'min:1', 'max:7'],
+            'weekdays.*' => ['integer', 'distinct', 'between:0,6'],
         ];
     }
 }

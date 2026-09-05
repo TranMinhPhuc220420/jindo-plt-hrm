@@ -39,9 +39,9 @@
 | Field | Value |
 |-------|--------|
 | **Current phase** | ∞ Future |
-| **Current step** | `∞.employee-status-rehire` |
+| **Current step** | `∞.schedule-off-hover-label` |
 | **Overall status** | Done |
-| **Last updated** | 2026-09-04 |
+| **Last updated** | 2026-09-05 |
 | **Last updated by** | agent |
 | **Next action** | Future backlog / discuss `v1.0.0` readiness |
 | **Blockers** | None |
@@ -1443,6 +1443,92 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 ## Future backlog
 
+### ∞.schedule-off-hover-label — Scheduled-off calendar hover label
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-09-05 |
+| Completed | 2026-09-05 |
+| Docs | — |
+
+- [x] Month calendar tooltip uses restLabel (off vs weekend vs holiday)
+
+**Notes:**
+
+```
+- Hover on rest_kind=off showed Weekend because tooltip treated every non-holiday rest as weekend
+```
+
+### ∞.shift-assign-form-polish — Shift assignment form polish
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-09-05 |
+| Completed | 2026-09-05 |
+| Docs | — |
+
+- [x] Compact card layout + side list on wide screens
+- [x] Larger weekday grid + presets (weekdays / MWF)
+- [x] Clearer dual-session callout; types:check
+
+**Notes:**
+
+```
+- Form card + assigned list side-by-side from xl; weekday 7-col grid; Mon–Fri and MWF presets
+- Dual-session callout links to /shifts; tsc --noEmit green
+```
+
+### ∞.shift-assign-form-ux — Shift assignment form UX
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-09-05 |
+| Completed | 2026-09-05 |
+| Docs | — |
+
+- [x] Stacked assign form on `/shifts/{id}` (weekdays inside form)
+- [x] Mode toggle + weekday chips always visible
+- [x] EN/VI copy + assignment-list badges
+- [x] types:check + browser check
+
+**Notes:**
+
+```
+- Assign form is stacked; weekday chips sit between dates and submit
+- Mode: selected days vs every day in range (chips stay visible, disabled when every day)
+- Dual-session hint is on the shift summary, not buried under the old checkbox row
+- tsc --noEmit green; IDE browser MCP unavailable — confirm Assign UI in the running app
+```
+
+### ∞.flexible-parttime-assignments — Flexible part-time shift assignment
+
+| Field | Value |
+|-------|--------|
+| Status | `Done` |
+| Started | 2026-09-05 |
+| Completed | 2026-09-05 |
+| Docs | [SHIFT_API.md](../06-api/SHIFT_API.md), [ATTENDANCE_API.md](../06-api/ATTENDANCE_API.md), [shift/README.md](../02-business/shift/README.md) |
+
+- [x] Assignment `weekdays` + overlap by date ∩ weekday ∩ time
+- [x] Working calendar multi-window + `rest_kind=off`
+- [x] Attendance `shift_id` (one record per shift per day) + punch match
+- [x] Leave duration / AM-PM vs windows; `days_present` distinct dates
+- [x] Admin weekday picker + PT shift seed
+- [x] My Schedule + today card multi-session
+- [x] Tests + types:check
+
+**Notes:**
+
+```
+- Full-time: omit weekdays = every day in range (backward compatible)
+- Same calendar day: two non-overlapping shifts → two punch records
+- Unique attendance: (company_id, employee_id, work_date, shift_id)
+- ShiftApiTest + AttendanceApiTest + Leave/Payroll related tests green; tsc --noEmit clean
+```
+
 ### ∞.date-time-pickers — Shared date/time pickers
 
 | Field | Value |
@@ -2472,34 +2558,6 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 - Tests: bulk approve / skip / permission; types:check green
 ```
 
-### ∞.employee-status-rehire — Reactivate archived/resigned employees
-
-| Field | Value |
-|-------|--------|
-| Status | `Done` |
-| Started | 2026-09-04 |
-| Completed | 2026-09-04 |
-| Docs | [FUTURE_EMPLOYEE_STATUS_REHIRE.md](./FUTURE_EMPLOYEE_STATUS_REHIRE.md), [EMPLOYEE_API.md](../06-api/EMPLOYEE_API.md) |
-
-- [x] Allow `archived`/`resigned` → `active`/`probation` in `EmployeeStatusTransitions`
-- [x] Clear `terminated_at` on rehire; keep `hired_at`
-- [x] Expose `allowed_next_statuses` on employee show; filter `/employees/:id` status select
-- [x] Helper copy (en/vi): rehire does not restore shifts — assign after status change
-- [x] Feature tests: rehire + login; still 409 for skip-to-archive; unit matrix
-- [x] Update EMPLOYEE_API.md + employee README
-
-**Notes:**
-
-```
-- Symptom: admin UI already posts POST /api/employees/{id}/status; archived is terminal → 409
-- Soft-deleted DELETE archive remains 404 (out of scope)
-- No new permission/route/migration
-- EmployeeStatusTransitions + applyTerminationDate clear terminated_at on archived/resigned rehire
-- EmployeeResource.allowed_next_statuses; show select filtered; en/vi rehire_note
-- Pest: EmployeeStatusTransitionsTest + EmployeeApiTest 31 passed; tsc --noEmit clean
-- Follow-up: ShiftApiTest SHIFT_IN_USE used a past Aug 2026 window; open-ended assignment so delete stays 422
-```
-
 ---
 
 ## Activity log
@@ -2508,10 +2566,11 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
-| 2026-09-04 | `∞.employee-status-rehire` | CI: SHIFT_IN_USE test used expired Aug 2026 dates; open-ended assignment | agent |
-| 2026-09-04 | `∞.employee-status-rehire` | Done: archived/resigned → active/probation; tests + types green | agent |
-| 2026-09-04 | `∞.employee-status-rehire` | Started: implement archived/resigned rehire to active | agent |
-| 2026-09-04 | `∞.employee-status-rehire` | Plan recorded: archived/resigned rehire to active; implementation not started | agent |
+| 2026-09-05 | `∞.schedule-off-hover-label` | Done: scheduled-off hover uses Nghỉ theo lịch, not Weekend | agent |
+| 2026-09-05 | `∞.shift-assign-form-polish` | Done: compact assign card, weekday grid + presets; types green | agent |
+| 2026-09-05 | `∞.shift-assign-form-ux` | Done: stacked assign form with weekday chips in-form; types green | agent |
+| 2026-09-05 | `∞.flexible-parttime-assignments` | Done: weekday mask + same-day multi-session punch; tests + types green | agent |
+| 2026-09-05 | `∞.flexible-parttime-assignments` | Started: weekday mask + same-day multi-session shifts | agent |
 | 2026-08-04 | `∞.attendance-bulk-approve` | Done: bulk-approve API + checkbox selection UI; tests + types green | agent |
 | 2026-08-04 | `∞.attendance-bulk-approve` | Started: bulk-approve API + checkbox selection UI | agent |
 | 2026-08-03 | `∞.prod-log-20260728-attendance-checkout` | Done: DomainException dontReport + post-midnight checkout + FE; tests green | agent |
@@ -2665,5 +2724,4 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 - [MASTER_ROADMAP.md](./MASTER_ROADMAP.md)
 - [PHASE_01_FOUNDATION.md](./PHASE_01_FOUNDATION.md)
-- [FUTURE_EMPLOYEE_STATUS_REHIRE.md](./FUTURE_EMPLOYEE_STATUS_REHIRE.md) — admin rehire / status reactivation plan
 - [../10-ai/AI_WORKFLOW.md](../10-ai/AI_WORKFLOW.md) — agents must update this file when finishing a step

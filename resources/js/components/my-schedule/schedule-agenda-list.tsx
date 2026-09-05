@@ -6,11 +6,17 @@ import type { AttendanceRecord } from '@/lib/api/modules/attendance';
 import type { WorkingCalendarDay } from '@/lib/api/modules/shifts';
 import { dateFnsLocale, formatPunchTime } from '@/lib/datetime';
 import { cn } from '@/lib/utils';
-import { leaveCoverageLabel, restLabel } from './schedule-day-helpers';
+import {
+    leaveCoverageLabel,
+    primaryAttendance,
+    restLabel,
+    shiftNamesLabel,
+    shiftWindowsLabel,
+} from './schedule-day-helpers';
 
 type Props = {
     days: WorkingCalendarDay[];
-    attendanceByDate: Map<string, AttendanceRecord>;
+    attendanceByDate: Map<string, AttendanceRecord[]>;
     onSelectDate: (date: string) => void;
 };
 
@@ -57,7 +63,9 @@ export function ScheduleAgendaList({
                         const dateLabel = date
                             ? format(date, 'EEE d MMM', { locale })
                             : day.date;
-                        const attendance = attendanceByDate.get(day.date);
+                        const attendance = primaryAttendance(
+                            attendanceByDate.get(day.date),
+                        );
                         const rest = restLabel(day, t);
                         const isLate = Boolean(
                             attendance && attendance.late_minutes > 0,
@@ -89,10 +97,10 @@ export function ScheduleAgendaList({
                                             ) : null}
                                         </div>
                                         <p className="truncate text-sm text-muted-foreground">
-                                            {day.shift_name
-                                                ? day.start_time && day.end_time
-                                                    ? `${day.shift_name} · ${day.start_time}–${day.end_time}`
-                                                    : day.shift_name
+                                            {shiftNamesLabel(day)
+                                                ? shiftWindowsLabel(day)
+                                                    ? `${shiftNamesLabel(day)} · ${shiftWindowsLabel(day)}`
+                                                    : shiftNamesLabel(day)
                                                 : rest
                                                   ? rest
                                                   : t('my_schedule.no_shift')}

@@ -19,6 +19,7 @@ class ShiftAssignment extends Model
         'shift_id',
         'start_date',
         'end_date',
+        'weekdays',
     ];
 
     /**
@@ -29,6 +30,7 @@ class ShiftAssignment extends Model
         return [
             'start_date' => 'date',
             'end_date' => 'date',
+            'weekdays' => 'array',
         ];
     }
 

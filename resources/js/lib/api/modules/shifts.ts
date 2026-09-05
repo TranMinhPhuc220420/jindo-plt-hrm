@@ -24,11 +24,20 @@ export type ShiftAssignment = {
     shift_id: number;
     start_date: string;
     end_date: string | null;
+    weekdays: number[] | null;
     shift?: Shift | null;
     employee?: { id: number; code: string; full_name: string } | null;
 };
 
-export type WorkingCalendarRestKind = 'none' | 'weekend' | 'holiday';
+export type WorkingCalendarRestKind = 'none' | 'weekend' | 'holiday' | 'off';
+
+export type WorkingCalendarWindow = {
+    shift_id: number;
+    shift_name: string;
+    start_time: string;
+    end_time: string;
+    assignment_id?: number;
+};
 
 export type WorkingCalendarLeave = {
     request_id: number;
@@ -50,6 +59,7 @@ export type WorkingCalendarDay = {
     rest_kind: WorkingCalendarRestKind;
     holiday_name: string | null;
     leave: WorkingCalendarLeave | null;
+    windows?: WorkingCalendarWindow[];
 };
 
 export type OvertimeRule = {

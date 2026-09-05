@@ -21,6 +21,14 @@ export type AttendanceRecord = {
     id: number;
     company_id: number;
     employee_id: number;
+    shift_id: number | null;
+    shift?: {
+        id: number;
+        code: string;
+        name: string;
+        start_time: string;
+        end_time: string;
+    } | null;
     work_date: string;
     check_in_at: string | null;
     check_out_at: string | null;

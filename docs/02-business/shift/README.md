@@ -29,7 +29,8 @@ Define when employees are expected to work. Attendance, Leave, and Payroll overt
 ## Business Rules
 
 1. Shift definitions and assignments are company-scoped.
-2. An employee’s expected schedule for a date comes from assignment + calendar, not from ad-hoc UI guesses in Attendance.
+2. An employee’s expected schedule for a date comes from assignment + weekday mask + calendar, not from ad-hoc UI guesses in Attendance.
+3. Multiple assignments may cover the same dates when weekdays and/or shift time windows do not overlap (part-time days and morning + afternoon sessions).
 3. Rotating / night / flexible variants are types or strategies under one shift module — not separate apps.
 4. Overtime rules here define schedule-side policy; payroll rates/amount calculation stay in Payroll.
 5. Changing assignments that affect past locked attendance periods should be restricted or require controlled recalculation flows.

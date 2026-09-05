@@ -120,7 +120,10 @@ class AttendanceSummaryService
             'worked_minutes' => (int) $rows->sum('worked_minutes'),
             'late_minutes' => (int) $rows->sum('late_minutes'),
             'overtime_minutes' => (int) $rows->sum('overtime_minutes'),
-            'days_present' => $rows->filter(fn (AttendanceRecord $r) => $r->check_in_at !== null)->count(),
+            'days_present' => $rows
+                ->filter(fn (AttendanceRecord $r) => $r->check_in_at !== null)
+                ->unique(fn (AttendanceRecord $r) => $r->work_date->toDateString())
+                ->count(),
         ];
     }
 }

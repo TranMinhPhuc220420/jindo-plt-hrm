@@ -263,6 +263,7 @@ export function AttendanceRecordsTable({
                         ) : null}
                         <th className="px-3 py-2">{t('index.col_date')}</th>
                         <th className="px-3 py-2">{t('index.col_employee')}</th>
+                        <th className="px-3 py-2">{t('index.col_shift')}</th>
                         <th className="px-3 py-2">{t('index.col_in')}</th>
                         <th className="px-3 py-2">{t('index.col_out')}</th>
                         <th className="px-3 py-2">{t('index.col_worked')}</th>
@@ -329,6 +330,10 @@ export function AttendanceRecordsTable({
                                             #{row.employee_id}
                                         </span>
                                     )}
+                                </td>
+                                <td className="px-3 py-2">
+                                    {row.shift?.name ??
+                                        t('empty_value', { ns: 'common' })}
                                 </td>
                                 <td className="px-3 py-2">
                                     <div className="tabular-nums">

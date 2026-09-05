@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AttendanceEvidencePhotoButton } from '@/components/attendance/attendance-evidence-photo-button';
 import { AttendanceStatusBadge } from '@/components/attendance/attendance-status-badge';
-import { formatDuration } from '@/components/attendance/format-minutes';
 import { PermissionGate } from '@/components/shared/permission-gate';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -18,6 +17,8 @@ import { cn } from '@/lib/utils';
 type Props = {
     employeeId: number | null;
     today: AttendanceRecord | null;
+    sessions?: AttendanceRecord[];
+    expectedSessionCount?: number | null;
     busy: boolean;
     pendingCheckIn?: boolean;
     pendingCheckOut?: boolean;
@@ -54,6 +55,8 @@ function evidenceFor(
 export function TodayStatusCard({
     employeeId,
     today,
+    sessions,
+    expectedSessionCount = null,
     busy,
     pendingCheckIn = false,
     pendingCheckOut = false,
@@ -72,20 +75,34 @@ export function TodayStatusCard({
         return () => window.clearInterval(id);
     }, []);
 
+    const sessionList = sessions ?? (today ? [today] : []);
+    const openSession = sessionList.find(
+        (row) => row.check_in_at && !row.check_out_at,
+    );
+    const expected = expectedSessionCount ?? Math.max(sessionList.length, 1);
+    const completedCount = sessionList.filter((row) => row.check_out_at).length;
+    const canCheckIn =
+        Boolean(employeeId) &&
+        hasShiftToday !== false &&
+        !openSession &&
+        completedCount < expected;
+    const canCheckOut = Boolean(openSession);
+
     let stateKey:
         'state_no_employee' | 'state_not_in' | 'state_working' | 'state_done' =
         'state_not_in';
 
     if (!employeeId) {
         stateKey = 'state_no_employee';
-    } else if (today?.check_in_at && today.check_out_at) {
-        stateKey = 'state_done';
-    } else if (today?.check_in_at) {
+    } else if (openSession) {
         stateKey = 'state_working';
+    } else if (expected > 0 && completedCount >= expected) {
+        stateKey = 'state_done';
     }
 
-    const checkInEvidence = evidenceFor(today?.evidences, 'check_in');
-    const checkOutEvidence = evidenceFor(today?.evidences, 'check_out');
+    const active = openSession ?? today;
+    const checkInEvidence = evidenceFor(active?.evidences, 'check_in');
+    const checkOutEvidence = evidenceFor(active?.evidences, 'check_out');
 
     return (
         <div className="mb-6 rounded-xl border bg-muted/20 p-4 sm:p-6">
@@ -109,43 +126,47 @@ export function TodayStatusCard({
                         </p>
                     ) : null}
 
-                    {today ? (
-                        <div className="flex flex-wrap items-center gap-2 pt-1 text-sm">
-                            <span className="text-muted-foreground tabular-nums">
-                                {punchTimeLabel(today.check_in_at)}
-                                {' → '}
-                                {today.check_out_at
-                                    ? punchTimeLabel(today.check_out_at)
-                                    : t('empty_value', { ns: 'common' })}
-                            </span>
-                            <AttendanceStatusBadge status={today.status} />
-                            {today.late_minutes > 0 ? (
-                                <span className="text-muted-foreground">
-                                    {t('index.col_late')}:{' '}
-                                    {formatDuration(today.late_minutes, t)}
-                                </span>
-                            ) : null}
-                            {today.overtime_minutes > 0 ? (
-                                <span className="text-muted-foreground">
-                                    {t('index.col_ot')}:{' '}
-                                    {formatDuration(today.overtime_minutes, t)}
-                                </span>
-                            ) : null}
+                    {sessionList.length > 0 ? (
+                        <div className="space-y-2 pt-1 text-sm">
+                            {sessionList.map((row) => (
+                                <div
+                                    key={row.id}
+                                    className="flex flex-wrap items-center gap-2"
+                                >
+                                    {row.shift?.name ? (
+                                        <span className="font-medium">
+                                            {row.shift.name}
+                                        </span>
+                                    ) : null}
+                                    <span className="text-muted-foreground tabular-nums">
+                                        {punchTimeLabel(row.check_in_at)}
+                                        {' → '}
+                                        {row.check_out_at
+                                            ? punchTimeLabel(row.check_out_at)
+                                            : t('empty_value', {
+                                                  ns: 'common',
+                                              })}
+                                    </span>
+                                    <AttendanceStatusBadge
+                                        status={row.status}
+                                    />
+                                </div>
+                            ))}
                         </div>
                     ) : null}
 
-                    {today && (checkInEvidence || checkOutEvidence) ? (
+                    {active && (checkInEvidence || checkOutEvidence) ? (
                         <div className="space-y-2 pt-2 text-sm">
                             {checkInEvidence ? (
                                 <EvidenceLine
-                                    recordId={today.id}
+                                    recordId={active.id}
                                     label={t('evidence.check_in_label')}
                                     evidence={checkInEvidence}
                                 />
                             ) : null}
                             {checkOutEvidence ? (
                                 <EvidenceLine
-                                    recordId={today.id}
+                                    recordId={active.id}
                                     label={t('evidence.check_out_label')}
                                     evidence={checkOutEvidence}
                                 />
@@ -174,10 +195,7 @@ export function TodayStatusCard({
                                         isMobile && 'min-h-11 w-full',
                                     )}
                                     disabled={
-                                        busy ||
-                                        !!today?.check_in_at ||
-                                        pendingCheckIn ||
-                                        hasShiftToday === false
+                                        busy || !canCheckIn || pendingCheckIn
                                     }
                                     onClick={onCheckIn}
                                 >
@@ -191,10 +209,7 @@ export function TodayStatusCard({
                                         isMobile && 'min-h-11 w-full',
                                     )}
                                     disabled={
-                                        busy ||
-                                        !today?.check_in_at ||
-                                        !!today?.check_out_at ||
-                                        pendingCheckOut
+                                        busy || !canCheckOut || pendingCheckOut
                                     }
                                     onClick={onCheckOut}
                                 >

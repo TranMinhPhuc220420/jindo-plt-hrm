@@ -169,6 +169,7 @@ test('cannot delete shift with active assignment', function () {
             'employee_id' => $employee->id,
             'shift_id' => $shiftId,
             'start_date' => now()->toDateString(),
+            'end_date' => now()->addMonth()->toDateString(),
         ])
         ->assertCreated();
 
@@ -533,4 +534,174 @@ test('cannot assign a shift to an inactive employee', function () {
         ])
         ->assertUnprocessable()
         ->assertJsonPath('error_code', 'SHIFT_EMPLOYEE_INACTIVE');
+});
+
+test('assignments with disjoint weekdays may overlap dates', function () {
+    $company = Company::factory()->create();
+    $employee = Employee::factory()->create(['company_id' => $company->id]);
+    $hr = shiftUser([
+        'can_view_shifts',
+        'can_manage_shift_definitions',
+        'can_assign_shifts',
+    ]);
+
+    $shiftId = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shifts', [
+            'name' => 'Morning',
+            'code' => 'MOR-WD',
+            'start_time' => '08:00',
+            'end_time' => '17:00',
+        ])
+        ->assertCreated()
+        ->json('data.id');
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shift-assignments', [
+            'employee_id' => $employee->id,
+            'shift_id' => $shiftId,
+            'start_date' => '2026-08-01',
+            'end_date' => '2026-08-31',
+            'weekdays' => [1, 3, 5],
+        ])
+        ->assertCreated();
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shift-assignments', [
+            'employee_id' => $employee->id,
+            'shift_id' => $shiftId,
+            'start_date' => '2026-08-01',
+            'end_date' => '2026-08-31',
+            'weekdays' => [2, 4],
+        ])
+        ->assertCreated();
+});
+
+test('same weekdays and overlapping times return 409', function () {
+    $company = Company::factory()->create();
+    $employee = Employee::factory()->create(['company_id' => $company->id]);
+    $hr = shiftUser([
+        'can_view_shifts',
+        'can_manage_shift_definitions',
+        'can_assign_shifts',
+    ]);
+
+    $first = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shifts', [
+            'name' => 'Morning',
+            'code' => 'MOR-OV1',
+            'start_time' => '08:00',
+            'end_time' => '17:00',
+        ])
+        ->assertCreated()
+        ->json('data.id');
+
+    $second = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shifts', [
+            'name' => 'Overlap',
+            'code' => 'MOR-OV2',
+            'start_time' => '09:00',
+            'end_time' => '12:00',
+        ])
+        ->assertCreated()
+        ->json('data.id');
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shift-assignments', [
+            'employee_id' => $employee->id,
+            'shift_id' => $first,
+            'start_date' => '2026-08-01',
+            'end_date' => '2026-08-31',
+            'weekdays' => [1, 2, 3, 4, 5],
+        ])
+        ->assertCreated();
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shift-assignments', [
+            'employee_id' => $employee->id,
+            'shift_id' => $second,
+            'start_date' => '2026-08-01',
+            'end_date' => '2026-08-31',
+            'weekdays' => [1, 2, 3, 4, 5],
+        ])
+        ->assertStatus(409)
+        ->assertJsonPath('error_code', 'SHIFT_ASSIGNMENT_OVERLAP');
+});
+
+test('same weekdays with non-overlapping times may share dates', function () {
+    $company = Company::factory()->create();
+    WeekendRule::query()->create([
+        'company_id' => $company->id,
+        'weekend_days' => [],
+    ]);
+    $employee = Employee::factory()->create(['company_id' => $company->id]);
+    $hr = shiftUser([
+        'can_view_shifts',
+        'can_manage_shift_definitions',
+        'can_assign_shifts',
+    ]);
+
+    $morning = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shifts', [
+            'name' => 'Morning PT',
+            'code' => 'PT-AM',
+            'start_time' => '08:00',
+            'end_time' => '12:00',
+        ])
+        ->assertCreated()
+        ->json('data.id');
+
+    $afternoon = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shifts', [
+            'name' => 'Afternoon PT',
+            'code' => 'PT-PM',
+            'start_time' => '13:00',
+            'end_time' => '17:00',
+        ])
+        ->assertCreated()
+        ->json('data.id');
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shift-assignments', [
+            'employee_id' => $employee->id,
+            'shift_id' => $morning,
+            'start_date' => '2026-08-03',
+            'end_date' => '2026-08-07',
+            'weekdays' => [1, 3, 5],
+        ])
+        ->assertCreated();
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shift-assignments', [
+            'employee_id' => $employee->id,
+            'shift_id' => $afternoon,
+            'start_date' => '2026-08-03',
+            'end_date' => '2026-08-07',
+            'weekdays' => [1, 3, 5],
+        ])
+        ->assertCreated();
+
+    $calendar = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->getJson('/api/working-calendar?employee_id='.$employee->id.'&date_from=2026-08-03&date_to=2026-08-04')
+        ->assertOk()
+        ->json('data');
+
+    $byDate = collect($calendar)->keyBy('date');
+
+    expect($byDate['2026-08-03']['windows'])->toHaveCount(2)
+        ->and($byDate['2026-08-03']['rest_kind'])->toBe('none')
+        ->and($byDate['2026-08-04']['rest_kind'])->toBe('off')
+        ->and($byDate['2026-08-04']['shift_id'])->toBeNull()
+        ->and($byDate['2026-08-04']['windows'])->toBe([]);
 });

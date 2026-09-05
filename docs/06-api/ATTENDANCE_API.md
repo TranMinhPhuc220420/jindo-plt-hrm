@@ -78,7 +78,10 @@ Infrastructure failures (`502` `BAD_GATEWAY`, `503` `SERVICE_UNAVAILABLE`, `500`
 Check-in requires:
 
 - Linked employee status `probation` or `active`. Blocked statuses (`suspended` / `resigned` / `archived`) fail authenticated routes with **403** `AUTH_ACCOUNT_INACTIVE` (or `EMPLOYEE_ACCOUNT_INACTIVE` if the punch service is reached without that middleware).
-- A `ShiftAssignment` covering `work_date` (else **422** `ATTENDANCE_NO_SHIFT`)
+- A shift **window** for `work_date` (assignment date range + weekday mask). Else **422** `ATTENDANCE_NO_SHIFT`.
+- Optional `shift_id` to pick a session when several windows exist that day; otherwise the server matches `worked_at` to a window.
+
+One attendance record per `(employee, work_date, shift_id)` — morning and afternoon are separate check-in/out pairs.
 
 Check-out does **not** require a current shift assignment — only an open check-in for that work date.
 

@@ -57,9 +57,10 @@
 
 | Parent | Child | Cardinality | Notes |
 |--------|-------|-------------|-------|
-| `employees` | `attendance_records` | 1:N | Often constrained per date/shift |
+| `employees` | `attendance_records` | 1:N | Unique per `(work_date, shift_id)` |
+| `shifts` | `attendance_records` | 1:N | Punch session belongs to a shift |
 | `attendance_records` | `attendance_corrections` | 1:N | |
-| `employees` | `shift_assignments` | 1:N | Date-ranged |
+| `employees` | `shift_assignments` | 1:N | Date range + optional weekday mask |
 | `shifts` | `shift_assignments` | 1:N | |
 | `leave_types` | `leave_balances` | 1:N | Per employee + period |
 | `employees` | `leave_requests` | 1:N | |

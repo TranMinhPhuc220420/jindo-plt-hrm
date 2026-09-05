@@ -34,8 +34,9 @@ class AttendanceMetricsCalculator
         ?CarbonImmutable $checkInAt,
         ?CarbonImmutable $checkOutAt,
         ?int $breakMinutesOverride = null,
+        ?int $shiftId = null,
     ): array {
-        $window = $this->resolveEffectiveWindow($employeeId, $workDate);
+        $window = $this->resolveEffectiveWindow($employeeId, $workDate, $shiftId);
         $breakMinutes = $breakMinutesOverride
             ?? $this->defaultBreakMinutes($window['shift_id'] ?? null);
 
@@ -84,9 +85,9 @@ class AttendanceMetricsCalculator
     /**
      * @return array{shift_id: int, start_time: string, end_time: string, is_night: bool}|null
      */
-    private function resolveEffectiveWindow(int $employeeId, string $workDate): ?array
+    private function resolveEffectiveWindow(int $employeeId, string $workDate, ?int $shiftId = null): ?array
     {
-        $window = $this->resolveWindow($employeeId, $workDate);
+        $window = $this->resolveWindow($employeeId, $workDate, $shiftId);
         if ($window === null) {
             return null;
         }
@@ -97,7 +98,9 @@ class AttendanceMetricsCalculator
             return $window;
         }
 
-        return $this->applyLeaveToWindow($window, $workDate, $leave);
+        $dayWindows = $this->calendar->windowsForDate($employeeId, $workDate);
+
+        return $this->applyLeaveToWindow($window, $workDate, $leave, $dayWindows);
     }
 
     /**
@@ -111,14 +114,30 @@ class AttendanceMetricsCalculator
      *     start_at: string|null,
      *     end_at: string|null
      * }  $leave
+     * @param  list<array{shift_id: int, start_time: string, end_time: string}>  $dayWindows
      * @return array{shift_id: int, start_time: string, end_time: string, is_night: bool}|null
      */
-    private function applyLeaveToWindow(array $window, string $workDate, array $leave): ?array
+    private function applyLeaveToWindow(array $window, string $workDate, array $leave, array $dayWindows = []): ?array
     {
         $coverage = $leave['coverage'];
 
         if ($coverage === 'full') {
             return null;
+        }
+
+        if (($coverage === 'am' || $coverage === 'pm') && count($dayWindows) >= 2) {
+            $firstId = (int) $dayWindows[0]['shift_id'];
+            $lastId = (int) $dayWindows[array_key_last($dayWindows)]['shift_id'];
+
+            if ($coverage === 'am' && (int) $window['shift_id'] === $firstId) {
+                return null;
+            }
+
+            if ($coverage === 'pm' && (int) $window['shift_id'] === $lastId) {
+                return null;
+            }
+
+            return $window;
         }
 
         $start = $this->atDate($workDate, $window['start_time']);
@@ -193,22 +212,31 @@ class AttendanceMetricsCalculator
     /**
      * @return array{shift_id: int, start_time: string, end_time: string, is_night: bool}|null
      */
-    private function resolveWindow(int $employeeId, string $workDate): ?array
+    private function resolveWindow(int $employeeId, string $workDate, ?int $shiftId = null): ?array
     {
-        $days = $this->calendar->resolve($employeeId, $workDate, $workDate);
-        $day = $days[0] ?? null;
+        $windows = $this->calendar->windowsForDate($employeeId, $workDate);
 
-        if ($day === null) {
+        if ($windows === []) {
             return null;
         }
 
-        $shift = Shift::query()->find($day['shift_id']);
+        $picked = $windows[0];
+        if ($shiftId !== null) {
+            foreach ($windows as $candidate) {
+                if ((int) $candidate['shift_id'] === $shiftId) {
+                    $picked = $candidate;
+                    break;
+                }
+            }
+        }
+
+        $shift = Shift::query()->find($picked['shift_id']);
 
         return [
-            'shift_id' => $day['shift_id'],
-            'start_time' => $day['start_time'],
-            'end_time' => $day['end_time'],
-            'is_night' => (bool) ($shift?->is_night || $shift?->kind === 'night'),
+            'shift_id' => $picked['shift_id'],
+            'start_time' => $picked['start_time'],
+            'end_time' => $picked['end_time'],
+            'is_night' => $picked['is_night'] || (bool) ($shift?->is_night || $shift?->kind === 'night'),
         ];
     }
 

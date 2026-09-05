@@ -41,7 +41,8 @@ class LeaveDurationCalculator
             return $this->calculateHours($input);
         }
 
-        $nonWorking = $this->nonWorkingDates($start->toDateString(), $end->toDateString());
+        $employeeId = $input['employee_id'] ?? null;
+        $nonWorking = $this->nonWorkingDates($start->toDateString(), $end->toDateString(), $employeeId);
         $quantity = 0.0;
 
         foreach (CarbonPeriod::create($start, $end) as $day) {
@@ -57,7 +58,7 @@ class LeaveDurationCalculator
     /**
      * @return array<string, true>
      */
-    public function nonWorkingDates(string $dateFrom, string $dateTo): array
+    public function nonWorkingDates(string $dateFrom, string $dateTo, ?int $employeeId = null): array
     {
         $companyId = $this->companyContext->id();
         $from = CarbonImmutable::parse($dateFrom)->startOfDay();
@@ -88,12 +89,24 @@ class LeaveDurationCalculator
             }
         }
 
+        if ($employeeId !== null) {
+            foreach (CarbonPeriod::create($from, $to) as $day) {
+                $date = CarbonImmutable::instance($day)->toDateString();
+                if (isset($result[$date])) {
+                    continue;
+                }
+                if ($this->calendar->isScheduledOff($employeeId, $date)) {
+                    $result[$date] = true;
+                }
+            }
+        }
+
         return $result;
     }
 
-    public function isNonWorkingDate(string $date): bool
+    public function isNonWorkingDate(string $date, ?int $employeeId = null): bool
     {
-        return isset($this->nonWorkingDates($date, $date)[$date]);
+        return isset($this->nonWorkingDates($date, $date, $employeeId)[$date]);
     }
 
     /**
@@ -126,17 +139,31 @@ class LeaveDurationCalculator
             );
 
             if ($days !== []) {
-                $day = $days[0];
-                $start = CarbonImmutable::parse($day['date'].' '.$day['start_time']);
-                $end = CarbonImmutable::parse($day['date'].' '.$day['end_time']);
-                if ($end->lte($start)) {
-                    $end = $end->addDay();
+                $minutes = 0;
+                foreach ($days[0]['windows'] as $window) {
+                    $start = CarbonImmutable::parse($days[0]['date'].' '.$window['start_time']);
+                    $end = CarbonImmutable::parse($days[0]['date'].' '.$window['end_time']);
+                    if ($end->lte($start)) {
+                        $end = $end->addDay();
+                    }
+                    $minutes += max(0, $start->diffInMinutes($end));
                 }
-                $hoursPerDay = max(0.25, round($start->diffInMinutes($end) / 60, 2));
+
+                if ($minutes === 0) {
+                    $day = $days[0];
+                    $start = CarbonImmutable::parse($day['date'].' '.$day['start_time']);
+                    $end = CarbonImmutable::parse($day['date'].' '.$day['end_time']);
+                    if ($end->lte($start)) {
+                        $end = $end->addDay();
+                    }
+                    $minutes = max(0, $start->diffInMinutes($end));
+                }
+
+                $hoursPerDay = max(0.25, round($minutes / 60, 2));
             }
         }
 
-        $nonWorking = $this->nonWorkingDates($input['start_date'], $input['end_date']);
+        $nonWorking = $this->nonWorkingDates($input['start_date'], $input['end_date'], $employeeId);
         $workingDays = 0;
 
         foreach (CarbonPeriod::create($input['start_date'], $input['end_date']) as $day) {

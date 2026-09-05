@@ -7,11 +7,16 @@ import type { AttendanceRecord } from '@/lib/api/modules/attendance';
 import type { WorkingCalendarDay } from '@/lib/api/modules/shifts';
 import { dateFnsLocale, formatPunchTime } from '@/lib/datetime';
 import { cn } from '@/lib/utils';
-import { leaveCoverageLabel } from './schedule-day-helpers';
+import {
+    leaveCoverageLabel,
+    primaryAttendance,
+    shiftNamesLabel,
+    shiftWindowsLabel,
+} from './schedule-day-helpers';
 
 type Props = {
     days: WorkingCalendarDay[];
-    attendanceByDate: Map<string, AttendanceRecord>;
+    attendanceByDate: Map<string, AttendanceRecord[]>;
     onSelectDate?: (date: string) => void;
 };
 
@@ -36,7 +41,9 @@ export function ScheduleTable({ days, attendanceByDate, onSelectDate }: Props) {
                     const dateLabel = date
                         ? format(date, 'EEE, d MMM yyyy', { locale })
                         : day.date;
-                    const attendance = attendanceByDate.get(day.date);
+                    const attendance = primaryAttendance(
+                        attendanceByDate.get(day.date),
+                    );
                     const isLate = Boolean(
                         attendance && attendance.late_minutes > 0,
                     );
@@ -75,15 +82,12 @@ export function ScheduleTable({ days, attendanceByDate, onSelectDate }: Props) {
 
                                 <div className="space-y-0.5">
                                     <p className="text-sm font-medium">
-                                        {day.shift_name ??
+                                        {shiftNamesLabel(day) ??
                                             t('empty_value', { ns: 'common' })}
                                     </p>
                                     <p className="text-xs text-muted-foreground tabular-nums">
-                                        {day.start_time && day.end_time
-                                            ? `${day.start_time} – ${day.end_time}`
-                                            : t('empty_value', {
-                                                  ns: 'common',
-                                              })}
+                                        {shiftWindowsLabel(day) ??
+                                            t('empty_value', { ns: 'common' })}
                                     </p>
                                 </div>
 
@@ -97,6 +101,11 @@ export function ScheduleTable({ days, attendanceByDate, onSelectDate }: Props) {
                                     {day.rest_kind === 'weekend' ? (
                                         <Badge variant="outline">
                                             {t('my_schedule.weekend')}
+                                        </Badge>
+                                    ) : null}
+                                    {day.rest_kind === 'off' ? (
+                                        <Badge variant="outline">
+                                            {t('my_schedule.scheduled_off')}
                                         </Badge>
                                     ) : null}
                                     {day.leave ? (
@@ -189,7 +198,9 @@ export function ScheduleTable({ days, attendanceByDate, onSelectDate }: Props) {
                         const dateLabel = date
                             ? format(date, 'EEE, d MMM yyyy', { locale })
                             : day.date;
-                        const attendance = attendanceByDate.get(day.date);
+                        const attendance = primaryAttendance(
+                            attendanceByDate.get(day.date),
+                        );
                         const isLate = Boolean(
                             attendance && attendance.late_minutes > 0,
                         );
@@ -224,13 +235,12 @@ export function ScheduleTable({ days, attendanceByDate, onSelectDate }: Props) {
                                     </div>
                                 </td>
                                 <td className="px-3 py-2 font-medium">
-                                    {day.shift_name ??
+                                    {shiftNamesLabel(day) ??
                                         t('empty_value', { ns: 'common' })}
                                 </td>
                                 <td className="px-3 py-2 text-muted-foreground tabular-nums">
-                                    {day.start_time && day.end_time
-                                        ? `${day.start_time} – ${day.end_time}`
-                                        : t('empty_value', { ns: 'common' })}
+                                    {shiftWindowsLabel(day) ??
+                                        t('empty_value', { ns: 'common' })}
                                 </td>
                                 <td className="px-3 py-2">
                                     <div className="flex flex-wrap gap-1.5">
@@ -243,6 +253,11 @@ export function ScheduleTable({ days, attendanceByDate, onSelectDate }: Props) {
                                         {day.rest_kind === 'weekend' ? (
                                             <Badge variant="outline">
                                                 {t('my_schedule.weekend')}
+                                            </Badge>
+                                        ) : null}
+                                        {day.rest_kind === 'off' ? (
+                                            <Badge variant="outline">
+                                                {t('my_schedule.scheduled_off')}
                                             </Badge>
                                         ) : null}
                                         {day.leave ? (
