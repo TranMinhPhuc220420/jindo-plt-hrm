@@ -40,10 +40,10 @@
 |-------|--------|
 | **Current phase** | ∞ Future |
 | **Current step** | `∞.flexible-day-slot-assignment` |
-| **Overall status** | In progress |
+| **Overall status** | Done |
 | **Last updated** | 2026-09-07 |
 | **Last updated by** | agent |
-| **Next action** | Implement flexible week PUT + employee-first planner UI |
+| **Next action** | Future backlog / discuss `v1.0.0` readiness |
 | **Blockers** | None |
 
 ---
@@ -1447,23 +1447,24 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Field | Value |
 |-------|--------|
-| Status | `In progress` |
+| Status | `Done` |
 | Started | 2026-09-07 |
-| Completed | |
+| Completed | 2026-09-07 |
 | Docs | [FUTURE_FLEXIBLE_DAY_ASSIGNMENT.md](./FUTURE_FLEXIBLE_DAY_ASSIGNMENT.md), [SHIFT_API.md](../06-api/SHIFT_API.md) |
 
-- [ ] Spec: employee → date → time window; reuse assignments (`source=adhoc`)
-- [ ] Schema: `shift_assignments.source`, `shifts.is_generated`
-- [ ] `PUT /api/flexible-schedules` replace-set + window reuse / FLEX templates
-- [ ] Working calendar window `source`; hide generated shifts from catalog
-- [ ] Admin UI `/shifts/assign` week planner + i18n
-- [ ] Feature tests + types:check
+- [x] Spec: employee → date → time window; reuse assignments (`source=adhoc`)
+- [x] Schema: `shift_assignments.source`, `shifts.is_generated`
+- [x] `PUT /api/flexible-schedules` replace-set + window reuse / FLEX templates
+- [x] Working calendar window `source`; hide generated shifts from catalog
+- [x] Admin UI `/shifts/assign` week planner + i18n
+- [x] Feature tests + types:check
 
 **Notes:**
 
 ```
 - Recurring template assignments on /shifts/{id} stay as-is
 - Saving a week replaces only adhoc rows in the date range
+- ShiftApiTest 23 passed; tsc --noEmit green
 ```
 
 ### ∞.multi-device-web-push — Keep Web Push on every browser
@@ -2653,6 +2654,7 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-09-07 | `∞.flexible-day-slot-assignment` | Done: employee-first date + time-window planner; tests + types green | agent |
 | 2026-09-07 | `∞.flexible-day-slot-assignment` | Started: employee-first date + time-window shift assignment | agent |
 | 2026-09-05 | `∞.multi-device-web-push` | Done: per-browser Web Push; logout keeps subscriptions | agent |
 | 2026-09-05 | `∞.multi-device-web-push` | Started: keep Web Push per browser across logout | agent |

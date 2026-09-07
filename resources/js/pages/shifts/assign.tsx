@@ -8,7 +8,7 @@ import {
     subWeeks,
 } from 'date-fns';
 import { ChevronLeftIcon, ChevronRightIcon, PlusIcon, Trash2Icon } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AdminPageShell from '@/components/shared/admin-page-shell';
@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { useLoadEffect } from '@/hooks/use-load-effect';
 import { ApiError } from '@/lib/api/errors';
 import * as shiftApi from '@/lib/api/modules/shifts';
 import type { WorkingCalendarWindow } from '@/lib/api/modules/shifts';
@@ -64,10 +65,21 @@ function emptyWeek(anchor: Date): DayPlan[] {
     }));
 }
 
+function employeeIdFromQuery(): number | null {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    const raw = new URLSearchParams(window.location.search).get('employee_id');
+    const id = raw ? Number(raw) : Number.NaN;
+
+    return Number.isFinite(id) && id > 0 ? id : null;
+}
+
 export default function ShiftAssignPage() {
     const { t, i18n } = useTranslation(['shifts', 'common']);
     const { can } = useAuth();
-    const [employeeId, setEmployeeId] = useState<number | null>(null);
+    const [employeeId, setEmployeeId] = useState<number | null>(employeeIdFromQuery);
     const [weekAnchor, setWeekAnchor] = useState(() => new Date());
     const [days, setDays] = useState<DayPlan[]>(() => emptyWeek(new Date()));
     const [loading, setLoading] = useState(false);
@@ -78,17 +90,6 @@ export default function ShiftAssignPage() {
     const toStr = formatDateString(to);
     const locale = dateFnsLocale(i18n.language);
     const canAssign = can('can_assign_shifts');
-
-    useEffect(() => {
-        const raw = new URLSearchParams(window.location.search).get(
-            'employee_id',
-        );
-        const id = raw ? Number(raw) : Number.NaN;
-
-        if (Number.isFinite(id) && id > 0) {
-            setEmployeeId(id);
-        }
-    }, []);
 
     const loadWeek = useCallback(async () => {
         if (employeeId === null) {
@@ -136,7 +137,7 @@ export default function ShiftAssignPage() {
         }
     }, [employeeId, fromStr, toStr, t, weekAnchor]);
 
-    useEffect(() => {
+    useLoadEffect(() => {
         void loadWeek();
     }, [loadWeek]);
 

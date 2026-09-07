@@ -146,14 +146,14 @@ Employees still see the result on **My Schedule**; no employee-facing editor.
 
 ## Exit criteria
 
-- [ ] Admin can select employee → dates → time windows and persist a week
-- [ ] Two non-overlapping windows on the same date produce two calendar windows / punch records
-- [ ] Recurring template assignments survive a flexible save
-- [ ] Overlap with recurring or payload clocks → `409`
-- [ ] Generated `FLEX-*` templates do not clutter the shift catalog
-- [ ] Working calendar + My Schedule show the new windows
-- [ ] Feature tests + `types:check` green
-- [ ] en/vi copy for the planner
+- [x] Admin can select employee → dates → time windows and persist a week
+- [x] Two non-overlapping windows on the same date produce two calendar windows / punch records
+- [x] Recurring template assignments survive a flexible save
+- [x] Overlap with recurring or payload clocks → `409`
+- [x] Generated `FLEX-*` templates do not clutter the shift catalog
+- [x] Working calendar + My Schedule show the new windows
+- [x] Feature tests + `types:check` green
+- [x] en/vi copy for the planner
 
 ---
 
