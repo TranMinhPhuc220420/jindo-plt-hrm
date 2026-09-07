@@ -21,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::inertia('shifts', 'shifts/index')->name('shifts.index');
     Route::inertia('shifts/create', 'shifts/create')->name('shifts.create');
+    Route::inertia('shifts/assign', 'shifts/assign')->name('shifts.assign');
     Route::get('shifts/{id}', function (int $id) {
         return Inertia::render('shifts/show', ['id' => $id]);
     })->whereNumber('id')->name('shifts.show');

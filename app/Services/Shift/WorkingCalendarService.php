@@ -36,7 +36,7 @@ class WorkingCalendarService
      *     is_holiday: bool,
      *     rest_kind: 'none'|'weekend'|'holiday',
      *     holiday_name: string|null,
-     *     windows: list<array{shift_id: int, shift_name: string, start_time: string, end_time: string, assignment_id: int, is_night: bool}>
+     *     windows: list<array{shift_id: int, shift_name: string, start_time: string, end_time: string, assignment_id: int, is_night: bool, source: 'recurring'|'adhoc'}>
      * }>
      */
     public function resolve(int $employeeId, string $dateFrom, string $dateTo): array
@@ -76,7 +76,7 @@ class WorkingCalendarService
     }
 
     /**
-     * @return list<array{shift_id: int, shift_name: string, start_time: string, end_time: string, assignment_id: int, is_night: bool}>
+     * @return list<array{shift_id: int, shift_name: string, start_time: string, end_time: string, assignment_id: int, is_night: bool, source: 'recurring'|'adhoc'}>
      */
     public function windowsForDate(int $employeeId, string $date): array
     {
@@ -252,7 +252,7 @@ class WorkingCalendarService
 
     /**
      * @param  Collection<int, ShiftAssignment>  $assignments
-     * @return list<array{shift_id: int, shift_name: string, start_time: string, end_time: string, assignment_id: int, is_night: bool}>
+     * @return list<array{shift_id: int, shift_name: string, start_time: string, end_time: string, assignment_id: int, is_night: bool, source: 'recurring'|'adhoc'}>
      */
     private function windowsOnDate(Collection $assignments, string $date): array
     {
@@ -280,6 +280,9 @@ class WorkingCalendarService
                 'end_time' => ShiftSchedule::formatTime($shift->end_time),
                 'assignment_id' => $row->id,
                 'is_night' => (bool) ($shift->is_night || $shift->kind === 'night'),
+                'source' => $row->source === ShiftAssignment::SOURCE_ADHOC
+                    ? ShiftAssignment::SOURCE_ADHOC
+                    : ShiftAssignment::SOURCE_RECURRING,
             ];
         }
 

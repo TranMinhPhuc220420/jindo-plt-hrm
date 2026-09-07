@@ -1,7 +1,7 @@
 {
     "index": {
         "title": "Shifts",
-        "description": "Manage shift definitions. Edit in a dialog; assign employees on each shift’s page.",
+        "description": "Manage shift definitions. Assign repeating templates on each shift’s page, or plan flexible hours by employee and day.",
         "search_placeholder": "Name or code",
         "create": "Create shift",
         "loading": "Loading shifts…",
@@ -16,7 +16,8 @@
         "col_actions": "Actions",
         "break_minutes_value": "{{count}} min",
         "inactive": "Inactive",
-        "assign_action": "Assign"
+        "assign_action": "Assign",
+        "assign_by_day": "Assign by day"
     },
     "create": {
         "title": "Create shift",
@@ -119,5 +120,28 @@
         "agenda_title": "Upcoming",
         "day_detail_title": "Day details",
         "no_upcoming": "No remaining days in this month."
+    },
+    "assign": {
+        "title": "Assign by day",
+        "description": "Pick an employee, then set work windows for each day this week. Recurring template shifts stay read-only.",
+        "back": "Back to shifts",
+        "employee": "Employee",
+        "pick_employee": "Select an employee to plan their week.",
+        "week_label": "{{from}} – {{to}}",
+        "prev_week": "Previous week",
+        "this_week": "This week",
+        "next_week": "Next week",
+        "copy_previous": "Copy last week",
+        "recurring": "From template",
+        "slot_n": "Window {{n}}",
+        "add_slot": "Add hours",
+        "day_off": "Off",
+        "save": "Save week",
+        "saving": "Saving…",
+        "toast_saved": "Week schedule saved",
+        "toast_save_failed": "Could not save the week schedule",
+        "toast_load_failed": "Could not load this week’s schedule",
+        "toast_copied": "Copied last week’s flexible hours",
+        "toast_copy_failed": "Could not copy last week"
     }
 }

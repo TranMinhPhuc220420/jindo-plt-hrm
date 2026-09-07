@@ -28,6 +28,7 @@ class ShiftResource extends JsonResource
             'is_night' => $this->is_night,
             'is_flexible' => $this->is_flexible,
             'is_active' => $this->is_active,
+            'is_generated' => (bool) $this->is_generated,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];

@@ -90,6 +90,7 @@ Use UPPER_SNAKE_CASE, stable across releases:
 | `PAYROLL_ALREADY_FINALIZED` | Immutable run |
 | `ASSET_NOT_AVAILABLE` | Cannot assign |
 | `COMPANY_SCOPE_MISMATCH` | Cross-company reference |
+| `SHIFT_GENERATED_IMMUTABLE` | Generated FLEX-* window cannot be edited |
 
 Add codes when clients must distinguish handling; do not invent codes for every trivial validation message.
 

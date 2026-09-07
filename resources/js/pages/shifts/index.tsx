@@ -162,11 +162,23 @@ export default function ShiftsIndexPage() {
             description={t('index.description')}
             permission="can_view_shifts"
             actions={
-                <PermissionGate permission="can_manage_shift_definitions">
-                    <Button type="button" onClick={() => setCreateOpen(true)}>
-                        {t('index.create')}
-                    </Button>
-                </PermissionGate>
+                <div className="flex flex-wrap justify-end gap-2">
+                    <PermissionGate permission="can_assign_shifts">
+                        <Button variant="outline" asChild>
+                            <Link href="/shifts/assign">
+                                {t('index.assign_by_day')}
+                            </Link>
+                        </Button>
+                    </PermissionGate>
+                    <PermissionGate permission="can_manage_shift_definitions">
+                        <Button
+                            type="button"
+                            onClick={() => setCreateOpen(true)}
+                        >
+                            {t('index.create')}
+                        </Button>
+                    </PermissionGate>
+                </div>
             }
         >
             <Dialog open={createOpen} onOpenChange={handleCreateOpenChange}>

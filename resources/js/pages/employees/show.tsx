@@ -501,7 +501,7 @@ export default function EmployeeShowPage({ id }: Props) {
                                     {t('show.schedule_none')}
                                 </p>
                             )}
-                            <div>
+                            <div className="flex flex-wrap gap-2">
                                 <Button variant="outline" size="sm" asChild>
                                     <Link
                                         href={
@@ -513,6 +513,15 @@ export default function EmployeeShowPage({ id }: Props) {
                                         {t('show.schedule_manage')}
                                     </Link>
                                 </Button>
+                                <PermissionGate permission="can_assign_shifts">
+                                    <Button variant="outline" size="sm" asChild>
+                                        <Link
+                                            href={`/shifts/assign?employee_id=${employee.id}`}
+                                        >
+                                            {t('show.schedule_assign_days')}
+                                        </Link>
+                                    </Button>
+                                </PermissionGate>
                             </div>
                         </div>
                     </PermissionGate>

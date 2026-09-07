@@ -54,6 +54,7 @@ use App\Http\Controllers\Api\Report\DashboardController;
 use App\Http\Controllers\Api\Report\ReportController;
 use App\Http\Controllers\Api\Report\ReportExportController;
 use App\Http\Controllers\Api\Settings\SettingsController;
+use App\Http\Controllers\Api\Shift\FlexibleScheduleController;
 use App\Http\Controllers\Api\Shift\OvertimeRuleController;
 use App\Http\Controllers\Api\Shift\ShiftAssignmentController;
 use App\Http\Controllers\Api\Shift\ShiftController;
@@ -240,6 +241,8 @@ Route::middleware(['auth:sanctum', 'employee.eligible'])->group(function (): voi
         ->name('api.shift-assignments.update');
     Route::delete('/shift-assignments/{shiftAssignment}', [ShiftAssignmentController::class, 'destroy'])
         ->name('api.shift-assignments.destroy');
+    Route::put('/flexible-schedules', [FlexibleScheduleController::class, 'replace'])
+        ->name('api.flexible-schedules.replace');
 
     Route::get('/working-calendar', WorkingCalendarController::class)
         ->name('api.working-calendar');

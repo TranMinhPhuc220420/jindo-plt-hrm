@@ -705,3 +705,274 @@ test('same weekdays with non-overlapping times may share dates', function () {
         ->and($byDate['2026-08-04']['shift_id'])->toBeNull()
         ->and($byDate['2026-08-04']['windows'])->toBe([]);
 });
+
+test('cannot replace flexible schedule without can_assign_shifts', function () {
+    $company = Company::factory()->create();
+    $employee = Employee::factory()->create(['company_id' => $company->id]);
+    $user = shiftUser(['can_view_shifts']);
+
+    $this->actingAs($user)
+        ->withHeaders(spaJsonHeaders())
+        ->putJson('/api/flexible-schedules', [
+            'employee_id' => $employee->id,
+            'date_from' => '2026-09-07',
+            'date_to' => '2026-09-13',
+            'slots' => [
+                ['date' => '2026-09-07', 'start_time' => '08:00', 'end_time' => '12:00'],
+            ],
+        ])
+        ->assertForbidden();
+});
+
+test('hr can assign flexible day slots and working calendar exposes adhoc source', function () {
+    $company = Company::factory()->create();
+    $employee = Employee::factory()->create(['company_id' => $company->id]);
+    $hr = shiftUser([
+        'can_view_shifts',
+        'can_manage_shift_definitions',
+        'can_assign_shifts',
+    ]);
+
+    $morningId = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shifts', [
+            'name' => 'Morning',
+            'code' => 'FLEXMOR',
+            'start_time' => '08:00',
+            'end_time' => '17:00',
+        ])
+        ->assertCreated()
+        ->json('data.id');
+
+    $payload = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->putJson('/api/flexible-schedules', [
+            'employee_id' => $employee->id,
+            'date_from' => '2026-09-07',
+            'date_to' => '2026-09-13',
+            'slots' => [
+                ['date' => '2026-09-07', 'start_time' => '08:00', 'end_time' => '17:00'],
+                ['date' => '2026-09-08', 'start_time' => '13:00', 'end_time' => '17:00'],
+                ['date' => '2026-09-10', 'start_time' => '08:00', 'end_time' => '12:00'],
+                ['date' => '2026-09-10', 'start_time' => '14:00', 'end_time' => '16:00'],
+            ],
+        ])
+        ->assertOk()
+        ->json('data');
+
+    expect($payload)->toHaveCount(4)
+        ->and($payload[0]['source'])->toBe('adhoc')
+        ->and($payload[0]['shift_id'])->toBe($morningId)
+        ->and($payload[0]['start_date'])->toBe('2026-09-07')
+        ->and($payload[0]['end_date'])->toBe('2026-09-07');
+
+    $catalog = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->getJson('/api/shifts?per_page=100')
+        ->assertOk()
+        ->json('data');
+
+    $codes = collect($catalog)->pluck('code');
+    expect($codes)->toContain('FLEXMOR')
+        ->and($codes->filter(fn (string $code): bool => str_starts_with($code, 'FLEX-'))->values()->all())
+        ->toBe([]);
+
+    $generated = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->getJson('/api/shifts?include_generated=1&per_page=100')
+        ->assertOk()
+        ->json('data');
+
+    expect(collect($generated)->pluck('code'))->toContain('FLEX-1300-1700');
+
+    $calendar = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->getJson('/api/working-calendar?employee_id='.$employee->id.'&date_from=2026-09-07&date_to=2026-09-10')
+        ->assertOk()
+        ->json('data');
+
+    $byDate = collect($calendar)->keyBy('date');
+
+    expect($byDate['2026-09-07']['windows'])->toHaveCount(1)
+        ->and($byDate['2026-09-07']['windows'][0]['source'])->toBe('adhoc')
+        ->and($byDate['2026-09-07']['windows'][0]['shift_id'])->toBe($morningId)
+        ->and($byDate['2026-09-10']['windows'])->toHaveCount(2)
+        ->and($byDate['2026-09-10']['windows'][0]['start_time'])->toBe('08:00')
+        ->and($byDate['2026-09-10']['windows'][1]['start_time'])->toBe('14:00');
+
+    expect(AuditLog::query()->where('action', 'shift.flexible_schedule_replaced')->count())->toBe(1);
+});
+
+test('flexible save replaces adhoc slots and keeps recurring assignments', function () {
+    $company = Company::factory()->create();
+    $employee = Employee::factory()->create(['company_id' => $company->id]);
+    $hr = shiftUser([
+        'can_view_shifts',
+        'can_manage_shift_definitions',
+        'can_assign_shifts',
+    ]);
+
+    $morningId = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shifts', [
+            'name' => 'Morning',
+            'code' => 'RECMOR',
+            'start_time' => '08:00',
+            'end_time' => '12:00',
+        ])
+        ->assertCreated()
+        ->json('data.id');
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shift-assignments', [
+            'employee_id' => $employee->id,
+            'shift_id' => $morningId,
+            'start_date' => '2026-09-07',
+            'end_date' => '2026-09-11',
+            'weekdays' => [1, 2, 3, 4, 5],
+        ])
+        ->assertCreated();
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->putJson('/api/flexible-schedules', [
+            'employee_id' => $employee->id,
+            'date_from' => '2026-09-07',
+            'date_to' => '2026-09-13',
+            'slots' => [
+                ['date' => '2026-09-08', 'start_time' => '13:00', 'end_time' => '17:00'],
+            ],
+        ])
+        ->assertOk();
+
+    $calendar = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->getJson('/api/working-calendar?employee_id='.$employee->id.'&date_from=2026-09-07&date_to=2026-09-08')
+        ->assertOk()
+        ->json('data');
+
+    $byDate = collect($calendar)->keyBy('date');
+
+    expect($byDate['2026-09-07']['windows'])->toHaveCount(1)
+        ->and($byDate['2026-09-07']['windows'][0]['source'])->toBe('recurring')
+        ->and($byDate['2026-09-08']['windows'])->toHaveCount(2);
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->putJson('/api/flexible-schedules', [
+            'employee_id' => $employee->id,
+            'date_from' => '2026-09-07',
+            'date_to' => '2026-09-13',
+            'slots' => [],
+        ])
+        ->assertOk()
+        ->assertJsonCount(0, 'data');
+
+    $afterClear = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->getJson('/api/working-calendar?employee_id='.$employee->id.'&date_from=2026-09-07&date_to=2026-09-08')
+        ->assertOk()
+        ->json('data');
+
+    $cleared = collect($afterClear)->keyBy('date');
+    expect($cleared['2026-09-07']['windows'])->toHaveCount(1)
+        ->and($cleared['2026-09-07']['windows'][0]['source'])->toBe('recurring')
+        ->and($cleared['2026-09-08']['windows'])->toHaveCount(1)
+        ->and($cleared['2026-09-08']['windows'][0]['source'])->toBe('recurring');
+});
+
+test('flexible slots overlapping a recurring window are rejected', function () {
+    $company = Company::factory()->create();
+    $employee = Employee::factory()->create(['company_id' => $company->id]);
+    $hr = shiftUser([
+        'can_view_shifts',
+        'can_manage_shift_definitions',
+        'can_assign_shifts',
+    ]);
+
+    $morningId = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shifts', [
+            'name' => 'Morning',
+            'code' => 'OVLMOR',
+            'start_time' => '08:00',
+            'end_time' => '17:00',
+        ])
+        ->assertCreated()
+        ->json('data.id');
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->postJson('/api/shift-assignments', [
+            'employee_id' => $employee->id,
+            'shift_id' => $morningId,
+            'start_date' => '2026-09-07',
+            'end_date' => '2026-09-11',
+        ])
+        ->assertCreated();
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->putJson('/api/flexible-schedules', [
+            'employee_id' => $employee->id,
+            'date_from' => '2026-09-07',
+            'date_to' => '2026-09-13',
+            'slots' => [
+                ['date' => '2026-09-07', 'start_time' => '09:00', 'end_time' => '11:00'],
+            ],
+        ])
+        ->assertStatus(409)
+        ->assertJsonPath('error_code', 'SHIFT_ASSIGNMENT_OVERLAP');
+});
+
+test('flexible payload rejects overlapping clocks on the same day', function () {
+    $company = Company::factory()->create();
+    $employee = Employee::factory()->create(['company_id' => $company->id]);
+    $hr = shiftUser(['can_assign_shifts']);
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->putJson('/api/flexible-schedules', [
+            'employee_id' => $employee->id,
+            'date_from' => '2026-09-07',
+            'date_to' => '2026-09-13',
+            'slots' => [
+                ['date' => '2026-09-07', 'start_time' => '08:00', 'end_time' => '12:00'],
+                ['date' => '2026-09-07', 'start_time' => '11:00', 'end_time' => '15:00'],
+            ],
+        ])
+        ->assertStatus(409)
+        ->assertJsonPath('error_code', 'SHIFT_ASSIGNMENT_OVERLAP');
+});
+
+test('generated flexible shift windows cannot be edited', function () {
+    $company = Company::factory()->create();
+    $employee = Employee::factory()->create(['company_id' => $company->id]);
+    $hr = shiftUser([
+        'can_view_shifts',
+        'can_manage_shift_definitions',
+        'can_assign_shifts',
+    ]);
+
+    $created = $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->putJson('/api/flexible-schedules', [
+            'employee_id' => $employee->id,
+            'date_from' => '2026-09-07',
+            'date_to' => '2026-09-13',
+            'slots' => [
+                ['date' => '2026-09-07', 'start_time' => '18:00', 'end_time' => '22:00'],
+            ],
+        ])
+        ->assertOk()
+        ->json('data.0');
+
+    $this->actingAs($hr)
+        ->withHeaders(spaJsonHeaders())
+        ->patchJson('/api/shifts/'.$created['shift_id'], [
+            'name' => 'Evening',
+        ])
+        ->assertStatus(422)
+        ->assertJsonPath('error_code', 'SHIFT_GENERATED_IMMUTABLE');
+});

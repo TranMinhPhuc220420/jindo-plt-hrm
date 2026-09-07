@@ -24,7 +24,7 @@ jobs:
         with:
           php-version: "8.4"
           tools: composer:v2
-          extensions: mbstring, pdo_sqlite, sqlite3
+          extensions: mbstring, pdo_sqlite, sqlite3, gd
           coverage: none
 
       - name: Setup Node
@@ -66,7 +66,7 @@ jobs:
         with:
           php-version: "8.4"
           tools: composer:v2
-          extensions: mbstring, pdo_mysql
+          extensions: mbstring, pdo_mysql, gd
           coverage: none
 
       - name: Setup Node

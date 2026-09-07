@@ -13,6 +13,15 @@ class ShiftAssignment extends Model
     /** @use HasFactory<ShiftAssignmentFactory> */
     use HasFactory, SoftDeletes;
 
+    public const SOURCE_RECURRING = 'recurring';
+
+    public const SOURCE_ADHOC = 'adhoc';
+
+    public const SOURCES = [
+        self::SOURCE_RECURRING,
+        self::SOURCE_ADHOC,
+    ];
+
     protected $fillable = [
         'company_id',
         'employee_id',
@@ -20,6 +29,7 @@ class ShiftAssignment extends Model
         'start_date',
         'end_date',
         'weekdays',
+        'source',
     ];
 
     /**

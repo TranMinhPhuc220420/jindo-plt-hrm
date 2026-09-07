@@ -93,8 +93,8 @@ Prefer `employee_*` prefixes for satellite tables owned by the Employee module.
 | `leave_requests` | Requests |
 | `holidays` | Company holidays |
 | `weekend_rules` | Weekend configuration |
-| `shifts` | Shift definitions |
-| `shift_assignments` | Assignments |
+| `shifts` | Shift definitions (`is_generated` for FLEX-* windows created by the day planner) |
+| `shift_assignments` | Assignments (`source`: `recurring` \| `adhoc`) |
 | `overtime_rules` | Overtime schedule rules |
 
 ### Payroll

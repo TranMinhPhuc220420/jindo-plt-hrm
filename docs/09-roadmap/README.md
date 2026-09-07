@@ -22,6 +22,7 @@ Business boundaries: [BUSINESS_SCOPE.md](../00-overview/BUSINESS_SCOPE.md)
 | [PHASE_07_RECRUITMENT.md](./PHASE_07_RECRUITMENT.md) | Recruitment, onboarding, docs, assets |
 | [PHASE_08_PERFORMANCE.md](./PHASE_08_PERFORMANCE.md) | Performance, reports, notifications, audit |
 | [FUTURE_FEATURES.md](./FUTURE_FEATURES.md) | Post-v1 / advanced (PROJECT_LOGIC Phase 6+) |
+| [FUTURE_FLEXIBLE_DAY_ASSIGNMENT.md](./FUTURE_FLEXIBLE_DAY_ASSIGNMENT.md) | Employee-first date + time-window roster |
 
 ---
 
