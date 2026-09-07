@@ -7,7 +7,12 @@ import {
     startOfWeek,
     subWeeks,
 } from 'date-fns';
-import { ChevronLeftIcon, ChevronRightIcon, PlusIcon, Trash2Icon } from 'lucide-react';
+import {
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    PlusIcon,
+    Trash2Icon,
+} from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -79,7 +84,9 @@ function employeeIdFromQuery(): number | null {
 export default function ShiftAssignPage() {
     const { t, i18n } = useTranslation(['shifts', 'common']);
     const { can } = useAuth();
-    const [employeeId, setEmployeeId] = useState<number | null>(employeeIdFromQuery);
+    const [employeeId, setEmployeeId] = useState<number | null>(
+        employeeIdFromQuery,
+    );
     const [weekAnchor, setWeekAnchor] = useState(() => new Date());
     const [days, setDays] = useState<DayPlan[]>(() => emptyWeek(new Date()));
     const [loading, setLoading] = useState(false);
@@ -273,7 +280,9 @@ export default function ShiftAssignPage() {
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setWeekAnchor((d) => subWeeks(d, 1))}
+                                onClick={() =>
+                                    setWeekAnchor((d) => subWeeks(d, 1))
+                                }
                             >
                                 <ChevronLeftIcon className="size-4" />
                                 {t('assign.prev_week')}
@@ -290,7 +299,9 @@ export default function ShiftAssignPage() {
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setWeekAnchor((d) => addWeeks(d, 1))}
+                                onClick={() =>
+                                    setWeekAnchor((d) => addWeeks(d, 1))
+                                }
                             >
                                 {t('assign.next_week')}
                                 <ChevronRightIcon className="size-4" />
@@ -320,13 +331,19 @@ export default function ShiftAssignPage() {
                             const parsed = new Date(`${plan.date}T00:00:00`);
 
                             return (
-                                <Card key={plan.date} className="min-w-0 gap-0 py-0">
+                                <Card
+                                    key={plan.date}
+                                    className="min-w-0 gap-0 py-0"
+                                >
                                     <CardHeader className="border-b px-4 py-3">
-                                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                                             {format(parsed, 'EEE', { locale })}
                                         </p>
                                         <CardTitle className="text-sm">
-                                            {displayDate(plan.date, i18n.language)}
+                                            {displayDate(
+                                                plan.date,
+                                                i18n.language,
+                                            )}
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent className="grid gap-3 px-4 py-3">
@@ -335,16 +352,18 @@ export default function ShiftAssignPage() {
                                                 <p className="text-xs text-muted-foreground">
                                                     {t('assign.recurring')}
                                                 </p>
-                                                {plan.recurring.map((window) => (
-                                                    <Badge
-                                                        key={`${window.assignment_id}-${window.start_time}`}
-                                                        variant="secondary"
-                                                        className="justify-start font-normal"
-                                                    >
-                                                        {window.start_time}–
-                                                        {window.end_time}
-                                                    </Badge>
-                                                ))}
+                                                {plan.recurring.map(
+                                                    (window) => (
+                                                        <Badge
+                                                            key={`${window.assignment_id}-${window.start_time}`}
+                                                            variant="secondary"
+                                                            className="justify-start font-normal"
+                                                        >
+                                                            {window.start_time}–
+                                                            {window.end_time}
+                                                        </Badge>
+                                                    ),
+                                                )}
                                             </div>
                                         ) : null}
 
@@ -371,7 +390,9 @@ export default function ShiftAssignPage() {
                                                                 (current) => ({
                                                                     ...current,
                                                                     slots: current.slots.filter(
-                                                                        (item) =>
+                                                                        (
+                                                                            item,
+                                                                        ) =>
                                                                             item.key !==
                                                                             slot.key,
                                                                     ),
@@ -385,7 +406,9 @@ export default function ShiftAssignPage() {
                                                 <TimePicker
                                                     value={slot.start}
                                                     minuteStep={15}
-                                                    disabled={!canAssign || loading}
+                                                    disabled={
+                                                        !canAssign || loading
+                                                    }
                                                     onChange={(start) =>
                                                         updateDay(
                                                             plan.date,
@@ -408,7 +431,9 @@ export default function ShiftAssignPage() {
                                                 <TimePicker
                                                     value={slot.end}
                                                     minuteStep={15}
-                                                    disabled={!canAssign || loading}
+                                                    disabled={
+                                                        !canAssign || loading
+                                                    }
                                                     onChange={(end) =>
                                                         updateDay(
                                                             plan.date,
@@ -475,9 +500,7 @@ export default function ShiftAssignPage() {
                     <div className="flex flex-wrap justify-end gap-2">
                         <Button
                             type="button"
-                            disabled={
-                                employeeId === null || saving || loading
-                            }
+                            disabled={employeeId === null || saving || loading}
                             onClick={() => void handleSave()}
                         >
                             {saving ? t('assign.saving') : t('assign.save')}

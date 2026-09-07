@@ -2654,6 +2654,7 @@ Recommended time-domain order: **05 → 03 → 04** (dependencies matter more th
 
 | Date | Step | Change | By |
 |------|------|--------|-----|
+| 2026-09-07 | `∞.flexible-day-slot-assignment` | Follow-up: pre-commit needed PHP GD; added `gd` to CI PHP extensions | agent |
 | 2026-09-07 | `∞.flexible-day-slot-assignment` | Done: employee-first date + time-window planner; tests + types green | agent |
 | 2026-09-07 | `∞.flexible-day-slot-assignment` | Started: employee-first date + time-window shift assignment | agent |
 | 2026-09-05 | `∞.multi-device-web-push` | Done: per-browser Web Push; logout keeps subscriptions | agent |
