@@ -116,7 +116,8 @@
             "deleted": "Shift deleted",
             "assignment_created": "Shift assignment created",
             "assignment_updated": "Shift assignment updated",
-            "assignment_deleted": "Shift assignment deleted"
+            "assignment_deleted": "Shift assignment deleted",
+            "flexible_schedule_replaced": "Flexible schedule updated"
         },
         "overtime_rules": {
             "updated": "Overtime rules updated"

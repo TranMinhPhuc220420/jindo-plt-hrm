@@ -1,7 +1,7 @@
 {
     "index": {
         "title": "Ca làm việc",
-        "description": "Quản lý định nghĩa ca. Sửa nhanh bằng dialog; phân ca ở trang riêng của từng ca.",
+        "description": "Quản lý định nghĩa ca. Phân ca lặp theo mẫu trên trang từng ca, hoặc chọn nhân viên–ngày–khung giờ linh hoạt.",
         "search_placeholder": "Tên hoặc mã",
         "create": "Tạo ca",
         "loading": "Đang tải ca…",
@@ -16,7 +16,8 @@
         "col_actions": "Thao tác",
         "break_minutes_value": "{{count}} phút",
         "inactive": "Ngưng",
-        "assign_action": "Phân ca"
+        "assign_action": "Phân ca",
+        "assign_by_day": "Phân ca theo ngày"
     },
     "create": {
         "title": "Tạo ca làm việc",
@@ -119,5 +120,28 @@
         "agenda_title": "Sắp tới",
         "day_detail_title": "Chi tiết ngày",
         "no_upcoming": "Không còn ngày nào trong tháng này."
+    },
+    "assign": {
+        "title": "Phân ca theo ngày",
+        "description": "Chọn nhân viên, rồi chọn khung giờ từng ngày trong tuần. Ca mẫu lặp vẫn chỉ xem, không sửa tại đây.",
+        "back": "Về danh sách ca",
+        "employee": "Nhân viên",
+        "pick_employee": "Chọn nhân viên để xếp lịch tuần.",
+        "week_label": "{{from}} – {{to}}",
+        "prev_week": "Tuần trước",
+        "this_week": "Tuần này",
+        "next_week": "Tuần sau",
+        "copy_previous": "Chép tuần trước",
+        "recurring": "Theo ca mẫu",
+        "slot_n": "Khung {{n}}",
+        "add_slot": "Thêm giờ",
+        "day_off": "Nghỉ",
+        "save": "Lưu tuần",
+        "saving": "Đang lưu…",
+        "toast_saved": "Đã lưu lịch tuần",
+        "toast_save_failed": "Không lưu được lịch tuần",
+        "toast_load_failed": "Không tải được lịch tuần này",
+        "toast_copied": "Đã chép giờ linh hoạt tuần trước",
+        "toast_copy_failed": "Không chép được tuần trước"
     }
 }

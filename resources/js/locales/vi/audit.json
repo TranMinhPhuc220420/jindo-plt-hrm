@@ -116,7 +116,8 @@
             "deleted": "Xóa ca làm",
             "assignment_created": "Tạo phân ca",
             "assignment_updated": "Cập nhật phân ca",
-            "assignment_deleted": "Xóa phân ca"
+            "assignment_deleted": "Xóa phân ca",
+            "flexible_schedule_replaced": "Cập nhật lịch ca linh hoạt"
         },
         "overtime_rules": {
             "updated": "Cập nhật quy tắc làm thêm giờ"

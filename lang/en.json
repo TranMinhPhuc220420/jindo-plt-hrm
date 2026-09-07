@@ -1,4 +1,5 @@
 {
+  "A day cannot have more than 4 work windows.": "A day cannot have more than 4 work windows.",
   "A holiday already exists for this date.": "A holiday already exists for this date.",
   "A payroll run already exists for this period.": "A payroll run already exists for this period.",
   "A pending correction already exists for this record.": "A pending correction already exists for this record.",
@@ -17,7 +18,12 @@
   "Employee does not belong to the current company.": "Employee does not belong to the current company.",
   "End time must be after start time unless the shift is night.": "End time must be after start time unless the shift is night.",
   "Finalized payroll runs are immutable.": "Finalized payroll runs are immutable.",
+  "Flexible schedule date range cannot exceed 14 days.": "Flexible schedule date range cannot exceed 14 days.",
+  "Flexible schedule slot dates must fall within the requested range.": "Flexible schedule slot dates must fall within the requested range.",
+  "Flexible schedule slots must include date, start_time, and end_time.": "Flexible schedule slots must include date, start_time, and end_time.",
+  "Flexible schedule slots on the same day overlap.": "Flexible schedule slots on the same day overlap.",
   "Forbidden.": "Forbidden.",
+  "Generated shift windows cannot be edited.": "Generated shift windows cannot be edited.",
   "Holiday not found.": "Holiday not found.",
   "Idempotency key was already used with a different request.": "Idempotency key was already used with a different request.",
   "Idempotency-Key header is required for attendance punches.": "Idempotency-Key header is required for attendance punches.",

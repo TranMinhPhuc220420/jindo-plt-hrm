@@ -52,6 +52,7 @@ export const AUDIT_ACTION_CODES: readonly string[] = [
     'shift.assignment_created',
     'shift.assignment_updated',
     'shift.assignment_deleted',
+    'shift.flexible_schedule_replaced',
     'overtime_rules.updated',
     'attendance.checked_in',
     'attendance.checked_out',

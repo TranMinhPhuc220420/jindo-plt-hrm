@@ -32,6 +32,7 @@ class Shift extends Model
         'is_night',
         'is_flexible',
         'is_active',
+        'is_generated',
     ];
 
     /**
@@ -44,6 +45,7 @@ class Shift extends Model
             'is_night' => 'boolean',
             'is_flexible' => 'boolean',
             'is_active' => 'boolean',
+            'is_generated' => 'boolean',
         ];
     }
 

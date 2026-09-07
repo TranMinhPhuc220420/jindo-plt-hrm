@@ -1,4 +1,5 @@
 {
+  "A day cannot have more than 4 work windows.": "Một ngày không được quá 4 khung giờ làm.",
   "A holiday already exists for this date.": "Đã có ngày lễ cho ngày này.",
   "A payroll run already exists for this period.": "Đã có kỳ lương cho khoảng thời gian này.",
   "A pending correction already exists for this record.": "Đã có yêu cầu hiệu chỉnh đang chờ cho bản ghi này.",
@@ -17,7 +18,12 @@
   "Employee does not belong to the current company.": "Nhân viên không thuộc công ty hiện tại.",
   "End time must be after start time unless the shift is night.": "Giờ kết thúc phải sau giờ bắt đầu trừ khi là ca đêm.",
   "Finalized payroll runs are immutable.": "Kỳ lương đã chốt không thể sửa.",
+  "Flexible schedule date range cannot exceed 14 days.": "Khoảng ngày phân ca linh hoạt không được quá 14 ngày.",
+  "Flexible schedule slot dates must fall within the requested range.": "Ngày khung giờ phải nằm trong khoảng đã chọn.",
+  "Flexible schedule slots must include date, start_time, and end_time.": "Mỗi khung giờ phải có ngày, giờ bắt đầu và giờ kết thúc.",
+  "Flexible schedule slots on the same day overlap.": "Các khung giờ trong cùng một ngày bị chồng lên nhau.",
   "Forbidden.": "Không có quyền.",
+  "Generated shift windows cannot be edited.": "Không thể sửa khung giờ ca được tạo tự động.",
   "Holiday not found.": "Không tìm thấy ngày lễ.",
   "Idempotency key was already used with a different request.": "Khóa Idempotency đã dùng với nội dung điểm danh khác.",
   "Idempotency-Key header is required for attendance punches.": "Header Idempotency-Key là bắt buộc khi điểm danh.",

@@ -15,6 +15,7 @@ export type Shift = {
     is_night: boolean;
     is_flexible: boolean;
     is_active: boolean;
+    is_generated?: boolean;
 };
 
 export type ShiftAssignment = {
@@ -25,6 +26,7 @@ export type ShiftAssignment = {
     start_date: string;
     end_date: string | null;
     weekdays: number[] | null;
+    source?: 'recurring' | 'adhoc';
     shift?: Shift | null;
     employee?: { id: number; code: string; full_name: string } | null;
 };
@@ -37,6 +39,7 @@ export type WorkingCalendarWindow = {
     start_time: string;
     end_time: string;
     assignment_id?: number;
+    source?: 'recurring' | 'adhoc';
 };
 
 export type WorkingCalendarLeave = {
@@ -181,6 +184,20 @@ export async function createShiftAssignment(payload: Record<string, unknown>) {
 
 export async function deleteShiftAssignment(id: number) {
     await apiDelete(`/api/shift-assignments/${id}`);
+}
+
+export async function replaceFlexibleSchedule(payload: {
+    employee_id: number;
+    date_from: string;
+    date_to: string;
+    slots: Array<{ date: string; start_time: string; end_time: string }>;
+}) {
+    const res = await apiPut<ShiftAssignment[]>(
+        '/api/flexible-schedules',
+        payload,
+    );
+
+    return res.data;
 }
 
 export async function getWorkingCalendar(params: {

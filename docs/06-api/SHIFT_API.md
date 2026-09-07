@@ -12,6 +12,7 @@
 ```
 /api/shifts
 /api/shift-assignments
+/api/flexible-schedules
 /api/overtime-rules
 /api/working-calendar
 ```
@@ -43,6 +44,7 @@
 | `POST` | `/api/shift-assignments` | Assign |
 | `PATCH` | `/api/shift-assignments/{id}` | Update assignment |
 | `DELETE` | `/api/shift-assignments/{id}` | Remove assignment |
+| `PUT` | `/api/flexible-schedules` | Replace ad-hoc day slots for an employee/range |
 | `GET` | `/api/working-calendar` | Resolved calendar for employee/range |
 | `GET` | `/api/overtime-rules` | List rules |
 | `PUT` | `/api/overtime-rules` | Upsert company rules |
@@ -88,8 +90,40 @@
 
 Overlap is **date-range ∩ weekday ∩ shift time window**. Same employee may hold morning + afternoon assignments on the same dates when the clocks do not overlap.
 
+`source` on assignments: `recurring` (default, template range + weekday mask) or `adhoc` (one-day slots from the flexible week planner).
+
 Overlap conflicts → `409` / `SHIFT_ASSIGNMENT_OVERLAP`.  
 Inactive employees (`suspended`, `resigned`, `archived`) cannot receive new assignments → `422` / `SHIFT_EMPLOYEE_INACTIVE`.
+
+---
+
+## Flexible day slots
+
+`PUT /api/flexible-schedules`
+
+Employee-first replace-set for one date range (max 14 days). Admin sends the dates and clocks; the server reuses a matching named shift or creates a generated `FLEX-HHmm-HHmm` template (`is_generated=true`, hidden from `GET /api/shifts` unless `include_generated=1`).
+
+```json
+{
+  "employee_id": 10,
+  "date_from": "2026-09-07",
+  "date_to": "2026-09-13",
+  "slots": [
+    { "date": "2026-09-07", "start_time": "08:00", "end_time": "12:00" },
+    { "date": "2026-09-08", "start_time": "13:00", "end_time": "17:00" },
+    { "date": "2026-09-10", "start_time": "08:00", "end_time": "12:00" },
+    { "date": "2026-09-10", "start_time": "14:00", "end_time": "16:00" }
+  ]
+}
+```
+
+- Replaces **only** `source=adhoc` assignments whose `start_date` lies in the range.
+- Recurring template assignments are not deleted.
+- Empty `slots` clears ad-hoc rows in the range.
+- Max 4 windows per date; same-day clocks must not overlap.
+- Generated templates cannot be edited (`SHIFT_GENERATED_IMMUTABLE`).
+
+UI: `/shifts/assign` (permission `can_assign_shifts`).
 
 ---
 
@@ -107,7 +141,7 @@ Each day includes:
 |-------|---------|
 | `is_holiday` | `true` when the day is a weekend rest day or public holiday (BC flag) |
 | `rest_kind` | `none` \| `weekend` \| `holiday` \| `off` (scheduled off weekday) |
-| `windows` | Zero or more `{ shift_id, shift_name, start_time, end_time }` for that date |
+| `windows` | Zero or more `{ shift_id, shift_name, start_time, end_time, assignment_id, source }` for that date. `source` is `recurring` or `adhoc`. |
 
 Flat `shift_id` / `start_time` / `end_time` still mirror the **first** window (earliest start) for compatibility. Rest-only and `off` rows have `windows: []` and null shift fields.
 | `holiday_name` | Public holiday name when `rest_kind=holiday`, otherwise `null` |
@@ -176,7 +210,8 @@ Consumed by Attendance/Leave validation via services (not only by clients).
 | `SHIFT_ASSIGNMENT_OVERLAP` | Conflicting assignment window |
 | `SHIFT_EMPLOYEE_INACTIVE` | Assigning a shift to a non-punchable employee |
 | `SHIFT_IN_USE` | Cannot delete definition still assigned |
-| `SHIFT_INVALID_TIME_RANGE` | Bad start/end |
+| `SHIFT_INVALID_TIME_RANGE` | Bad start/end or flexible range/slots |
+| `SHIFT_GENERATED_IMMUTABLE` | Cannot edit a generated FLEX-* window |
 
 ---
 

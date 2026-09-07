@@ -81,6 +81,7 @@
         "schedule_none": "Chưa phân ca.",
         "schedule_current": "Ca hiện tại: {{shift}} ({{from}}{{to}})",
         "schedule_open_end": " → không hạn",
-        "schedule_manage": "Xem / phân ca"
+        "schedule_manage": "Xem / phân ca",
+        "schedule_assign_days": "Phân ca theo ngày"
     }
 }

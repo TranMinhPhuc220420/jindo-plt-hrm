@@ -33,6 +33,7 @@ class ShiftAssignmentFactory extends Factory
             'start_date' => now()->toDateString(),
             'end_date' => now()->addMonth()->toDateString(),
             'weekdays' => null,
+            'source' => ShiftAssignment::SOURCE_RECURRING,
         ];
     }
 }

@@ -29,6 +29,7 @@ class ShiftFactory extends Factory
             'is_night' => false,
             'is_flexible' => false,
             'is_active' => true,
+            'is_generated' => false,
         ];
     }
 }

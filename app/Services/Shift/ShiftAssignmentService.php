@@ -12,12 +12,14 @@ use App\Services\Audit\AuditLogger;
 use App\Services\Organization\CompanyContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class ShiftAssignmentService
 {
     public function __construct(
         private readonly CompanyContext $companyContext,
         private readonly AuditLogger $audit,
+        private readonly FlexibleShiftWindowService $windows,
     ) {}
 
     /**
@@ -84,6 +86,7 @@ class ShiftAssignmentService
             'start_date' => $startDate,
             'end_date' => $endDate,
             'weekdays' => $weekdays,
+            'source' => ShiftAssignment::SOURCE_RECURRING,
         ]);
 
         $this->audit->write(
@@ -216,6 +219,93 @@ class ShiftAssignmentService
         }
     }
 
+    /**
+     * Replace ad-hoc one-day slots for an employee in a date range.
+     * Recurring assignments in the same range are left untouched.
+     *
+     * @param  list<array{date: string, start_time: string, end_time: string}>  $slots
+     * @return list<ShiftAssignment>
+     */
+    public function replaceAdhocRange(int $employeeId, string $dateFrom, string $dateTo, array $slots): array
+    {
+        $companyId = $this->companyContext->id();
+        $employee = $this->assertEmployeeInCompany($employeeId, $companyId);
+
+        if (! $employee->canPunch()) {
+            throw new DomainException(
+                message: 'Cannot assign a shift to an inactive employee.',
+                errorCode: 'SHIFT_EMPLOYEE_INACTIVE',
+                status: 422,
+            );
+        }
+
+        $from = CarbonImmutable::parse($dateFrom)->toDateString();
+        $to = CarbonImmutable::parse($dateTo)->toDateString();
+        $this->assertDateOrder($from, $to);
+        $this->assertFlexibleRangeLength($from, $to);
+        $normalized = $this->normalizeFlexibleSlots($slots, $from, $to);
+
+        return DB::transaction(function () use ($companyId, $employee, $from, $to, $normalized): array {
+            $existing = ShiftAssignment::query()
+                ->where('company_id', $companyId)
+                ->where('employee_id', $employee->id)
+                ->where('source', ShiftAssignment::SOURCE_ADHOC)
+                ->whereDate('start_date', '>=', $from)
+                ->whereDate('start_date', '<=', $to)
+                ->get();
+
+            foreach ($existing as $row) {
+                $row->delete();
+            }
+
+            $created = [];
+
+            foreach ($normalized as $slot) {
+                $shift = $this->windows->resolve($companyId, $slot['start_time'], $slot['end_time']);
+                $weekday = (int) CarbonImmutable::parse($slot['date'])->dayOfWeek;
+                $this->assertNoOverlap(
+                    $companyId,
+                    $employee->id,
+                    $slot['date'],
+                    $slot['date'],
+                    [$weekday],
+                    $shift,
+                );
+
+                $assignment = ShiftAssignment::query()->create([
+                    'company_id' => $companyId,
+                    'employee_id' => $employee->id,
+                    'shift_id' => $shift->id,
+                    'start_date' => $slot['date'],
+                    'end_date' => $slot['date'],
+                    'weekdays' => [$weekday],
+                    'source' => ShiftAssignment::SOURCE_ADHOC,
+                ]);
+
+                $created[] = $assignment->fresh(['shift', 'employee']);
+            }
+
+            $this->audit->write(
+                action: 'shift.flexible_schedule_replaced',
+                subject: $employee,
+                payload: [
+                    'employee_id' => $employee->id,
+                    'date_from' => $from,
+                    'date_to' => $to,
+                    'slot_count' => count($created),
+                    'removed_count' => $existing->count(),
+                ],
+            );
+
+            $notify = $created[0] ?? $existing->first();
+            if ($notify !== null) {
+                ShiftAssignmentChanged::dispatch($notify);
+            }
+
+            return $created;
+        });
+    }
+
     public function delete(ShiftAssignment $assignment): void
     {
         $this->assertCompanyScope($assignment->company_id);
@@ -288,6 +378,103 @@ class ShiftAssignmentService
                     status: 409,
                 );
             }
+        }
+    }
+
+    /**
+     * @param  list<mixed>  $slots
+     * @return list<array{date: string, start_time: string, end_time: string}>
+     */
+    private function normalizeFlexibleSlots(array $slots, string $from, string $to): array
+    {
+        $byDate = [];
+        $normalized = [];
+
+        foreach ($slots as $slot) {
+            if (! is_array($slot)) {
+                throw new DomainException(
+                    message: 'Flexible schedule slots must include date, start_time, and end_time.',
+                    errorCode: 'SHIFT_INVALID_TIME_RANGE',
+                    status: 422,
+                );
+            }
+
+            $date = CarbonImmutable::parse((string) ($slot['date'] ?? ''))->toDateString();
+            if ($date < $from || $date > $to) {
+                throw new DomainException(
+                    message: 'Flexible schedule slot dates must fall within the requested range.',
+                    errorCode: 'SHIFT_INVALID_TIME_RANGE',
+                    status: 422,
+                );
+            }
+
+            $start = ShiftSchedule::formatTime($slot['start_time'] ?? '');
+            $end = ShiftSchedule::formatTime($slot['end_time'] ?? '');
+
+            if (! preg_match('/^\d{2}:\d{2}$/', $start) || ! preg_match('/^\d{2}:\d{2}$/', $end)) {
+                throw new DomainException(
+                    message: 'Shift start and end time are required.',
+                    errorCode: 'SHIFT_INVALID_TIME_RANGE',
+                    status: 422,
+                );
+            }
+
+            if ($start === $end) {
+                throw new DomainException(
+                    message: 'Shift start and end time must differ.',
+                    errorCode: 'SHIFT_INVALID_TIME_RANGE',
+                    status: 422,
+                );
+            }
+
+            $byDate[$date] ??= [];
+            foreach ($byDate[$date] as $existing) {
+                if (ShiftSchedule::timesOverlap($start, $end, $existing['start_time'], $existing['end_time'])) {
+                    throw new DomainException(
+                        message: 'Flexible schedule slots on the same day overlap.',
+                        errorCode: 'SHIFT_ASSIGNMENT_OVERLAP',
+                        status: 409,
+                    );
+                }
+            }
+
+            $byDate[$date][] = ['start_time' => $start, 'end_time' => $end];
+
+            if (count($byDate[$date]) > 4) {
+                throw new DomainException(
+                    message: 'A day cannot have more than 4 work windows.',
+                    errorCode: 'SHIFT_INVALID_TIME_RANGE',
+                    status: 422,
+                );
+            }
+
+            $normalized[] = [
+                'date' => $date,
+                'start_time' => $start,
+                'end_time' => $end,
+            ];
+        }
+
+        usort($normalized, function (array $a, array $b): int {
+            $dateCmp = strcmp($a['date'], $b['date']);
+
+            return $dateCmp !== 0 ? $dateCmp : strcmp($a['start_time'], $b['start_time']);
+        });
+
+        return $normalized;
+    }
+
+    private function assertFlexibleRangeLength(string $from, string $to): void
+    {
+        $start = CarbonImmutable::parse($from);
+        $end = CarbonImmutable::parse($to);
+
+        if ($start->diffInDays($end) > 13) {
+            throw new DomainException(
+                message: 'Flexible schedule date range cannot exceed 14 days.',
+                errorCode: 'SHIFT_INVALID_TIME_RANGE',
+                status: 422,
+            );
         }
     }
 

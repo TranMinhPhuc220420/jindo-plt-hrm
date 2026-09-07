@@ -17,7 +17,7 @@ class ShiftService
     ) {}
 
     /**
-     * @param  array{search?: string, kind?: string, is_active?: bool|string}  $filters
+     * @param  array{search?: string, kind?: string, is_active?: bool|string, include_generated?: bool|string}  $filters
      * @return LengthAwarePaginator<int, Shift>
      */
     public function list(array $filters = [], int $perPage = 20): LengthAwarePaginator
@@ -25,6 +25,16 @@ class ShiftService
         $query = Shift::query()
             ->where('company_id', $this->companyContext->id())
             ->orderBy('name');
+
+        $includeGenerated = filter_var(
+            $filters['include_generated'] ?? false,
+            FILTER_VALIDATE_BOOLEAN,
+            FILTER_NULL_ON_FAILURE,
+        );
+
+        if ($includeGenerated !== true) {
+            $query->where('is_generated', false);
+        }
 
         if (! empty($filters['search'])) {
             $search = '%'.$filters['search'].'%';
@@ -69,6 +79,7 @@ class ShiftService
         $data['is_night'] = $data['is_night'] ?? ($data['kind'] === 'night');
         $data['is_flexible'] = $data['is_flexible'] ?? ($data['kind'] === 'flexible');
         $data['is_active'] = $data['is_active'] ?? true;
+        $data['is_generated'] = false;
         $data['start_time'] = $this->normalizeTime($data['start_time']);
         $data['end_time'] = $this->normalizeTime($data['end_time']);
 
@@ -101,6 +112,14 @@ class ShiftService
     public function update(Shift $shift, array $data): Shift
     {
         $this->assertCompanyScope($shift->company_id);
+
+        if ($shift->is_generated) {
+            throw new DomainException(
+                message: 'Generated shift windows cannot be edited.',
+                errorCode: 'SHIFT_GENERATED_IMMUTABLE',
+                status: 422,
+            );
+        }
 
         $merged = array_merge($shift->only([
             'start_time',

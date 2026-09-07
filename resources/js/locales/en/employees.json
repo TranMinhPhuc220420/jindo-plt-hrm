@@ -81,6 +81,7 @@
         "schedule_none": "No shift assigned.",
         "schedule_current": "Current shift: {{shift}} ({{from}}{{to}})",
         "schedule_open_end": " → open",
-        "schedule_manage": "View / assign shift"
+        "schedule_manage": "View / assign shift",
+        "schedule_assign_days": "Assign by day"
     }
 }

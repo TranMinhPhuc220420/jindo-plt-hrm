@@ -24,6 +24,7 @@ class ShiftAssignmentResource extends JsonResource
             'start_date' => $this->start_date?->toDateString(),
             'end_date' => $this->end_date?->toDateString(),
             'weekdays' => $this->weekdays,
+            'source' => $this->source ?? ShiftAssignment::SOURCE_RECURRING,
             'shift' => $this->whenLoaded('shift', fn () => $this->shift
                 ? (new ShiftResource($this->shift))->resolve()
                 : null),

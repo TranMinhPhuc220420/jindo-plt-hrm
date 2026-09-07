@@ -61,6 +61,7 @@ Mutations on these screens still require the matching `can_manage_*` / `can_assi
 | `/attendance` | Attendance | Time & Attendance | `can_view_attendance` |
 | `/leave` | Leave | (under Time or own item) | `can_view_leave` |
 | `/shifts` | Shifts | — | `can_view_shifts` |
+| `/shifts/assign` | Assign by day | — | `can_view_shifts` (`can_assign_shifts` to save) |
 | `/payroll` | Payroll | Payroll | `can_view_payroll_history` / related |
 | `/recruitment` | Recruitment | Recruitment | `can_view_candidates` |
 | `/onboarding` | Onboarding | — | `can_view_onboarding` |

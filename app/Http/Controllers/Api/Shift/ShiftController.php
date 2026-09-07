@@ -23,7 +23,7 @@ class ShiftController extends Controller
         $this->authorize('viewAny', Shift::class);
 
         $paginator = $this->shifts->list(
-            filters: $request->only(['search', 'kind', 'is_active']),
+            filters: $request->only(['search', 'kind', 'is_active', 'include_generated']),
             perPage: min((int) $request->integer('per_page', 20), 100),
         );
 
