@@ -70,6 +70,23 @@
 - [ ] Company-scope isolation considered
 - [ ] CI green (format, lint, types, tests)
 
+### Definition of Done (PR)
+
+Enforce the minimums in [TESTING.md](../04-backend/TESTING.md). Reject or request changes when missing:
+
+- [ ] **API / feature change** — happy path + 401 + 403 + 422 (critical fields) + company-scope isolation where the resource is company-owned
+- [ ] **Policy / permission change** — update or add a Pest policy matrix under `tests/Unit/Policies/` (own / peer / manager / other company / missing permission)
+- [ ] **Job / listener / notification change** — test `handle()` (or sync queue) with `Mail::fake` / `Storage::fake` / `Notification::fake` / `Queue::fake` as appropriate; do not only assert “job was pushed”
+- [ ] **Critical UI path** — Playwright smoke under `e2e/` covers the flow (login, employees, leave, attendance, payroll, logout) or an existing smoke is updated
+- [ ] **Production bug fix** — include a regression test that would have failed before the fix
+- [ ] **Quarterly triage** — each production incident maps to a missing-test ticket; close only when the regression test lands
+
+Helpers: `actingUser`, `actingUserInCompany`, `foreignCompanyUser`, `assertCannotAccessOtherCompany` in `tests/Pest.php`.
+
+### Test impact rule
+
+Changing `app/Policies/*` or calculation services (`Leave*`, `Payroll*`, `AttendanceMetrics*`, employee status transitions) without adding/updating tests is a review blocker unless explicitly waived.
+
 ---
 
 ## Docs
