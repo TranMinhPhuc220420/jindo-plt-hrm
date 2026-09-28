@@ -65,11 +65,13 @@ Pre-1.0 may move faster; still tag production deploys.
 
 - [ ] Backup DB (and files if needed)
 - [ ] Put maintenance window if destructive migration
-- [ ] Deploy app
+- [ ] Local prep: `make release` (or `make release VERSION=vX.Y.Z` to tag)
+- [ ] Deploy app (`deploy-bundle/deploy.zip` or CI FTPS artifact)
 - [ ] Run migrations forward only
 - [ ] Restart/reload queue workers
 - [ ] Smoke test production
-- [ ] Tag release (`vX.Y.Z`)
+- [ ] Tag release (`vX.Y.Z`) if not tagged locally yet
+- [ ] Push tag: `git push origin vX.Y.Z`
 
 ### 5. Post-release
 

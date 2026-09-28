@@ -93,6 +93,19 @@ test('unpaid leave deducts a prorated day rate based on 30 days per month', func
     );
 });
 
+test('fractional unpaid leave days prorate correctly', function () {
+    $result = (new MonthlyPayrollStrategy)->calculate(baseInput([
+        'base_amount' => 6_000_000,
+        'unpaid_leave_days' => 0.5,
+    ]));
+
+    // day rate = 200,000; half day = 100,000
+    expect($result['net'])->toBe(5_900_000.0)
+        ->and($result['components'])->toContain(
+            ['type' => 'deduction', 'label' => 'Unpaid leave', 'amount' => '-100000.00'],
+        );
+});
+
 test('unpaid leave is ignored when base salary is zero', function () {
     $result = (new MonthlyPayrollStrategy)->calculate(baseInput([
         'base_amount' => 0,

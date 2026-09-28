@@ -66,6 +66,15 @@ Align auth mode with [AUTHENTICATION.md](../01-architecture/AUTHENTICATION.md).
 10. Smoke test
 ```
 
+Local release prep (gates + `deploy-bundle/deploy.zip`, optional tag):
+
+```
+make release
+make release VERSION=v0.7.0
+```
+
+See also `make release-check` and `make release-artifact` in the Makefile.
+
 Exact commands depend on hosting (VPS, container, Forge, etc.) — keep a runbook per environment.
 
 ### Production database bootstrap

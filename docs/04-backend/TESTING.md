@@ -15,6 +15,11 @@
 | Factories | Deterministic fake models |
 | `Event::fake` / `Queue::fake` | Side-effect isolation |
 | SQLite/MySQL test DB | Per CI/local convention |
+| Playwright | Browser smoke E2E (`e2e/`, `npm run test:e2e`) |
+| Vitest | Frontend unit tests for gates/utils (`npm run test:unit`) |
+| pcov + Pest coverage | CI coverage floor (see `docs/08-development/COVERAGE_BASELINE.md`) |
+
+Shared Pest helpers (`tests/Pest.php`): `actingUser`, `actingUserInCompany`, `foreignCompanyUser`, `assertCannotAccessOtherCompany`, `spaJsonHeaders`, `seedAuthCatalog`.
 
 ---
 
@@ -162,6 +167,16 @@ it('prevents attendance module from creating payslips') // architectural guard i
 - Tests run on fresh migrated DB
 - Pint/static analysis may run separately
 - Flaky tests are treated as failures to fix, not ignore
+- PR / `main`: `composer ci:check` (lint + Pest) **and** Playwright smoke; deploy needs both green
+- Coverage floor enforced on CI (see [COVERAGE_BASELINE.md](../08-development/COVERAGE_BASELINE.md))
+- Nightly / manual: Pest against MySQL for SQLite parity
+- Tag critical cases with `@group critical` when useful for focused local runs
+
+## Frontend / E2E
+
+- Prefer API + policy tests for domain rules; keep Playwright scenarios few and stable
+- Seed with `E2eSeeder` (`admin@example.test` / `password`)
+- Vitest covers `PermissionGate`, `canPermission`, and `ApiError.fieldErrors` — not full Inertia pages
 
 ---
 

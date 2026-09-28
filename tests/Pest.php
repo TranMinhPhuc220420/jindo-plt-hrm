@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Permission;
 use App\Models\Role;
@@ -8,6 +9,7 @@ use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 /*
@@ -24,6 +26,18 @@ use Tests\TestCase;
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature');
+
+pest()->extend(TestCase::class)
+    ->use(RefreshDatabase::class)
+    ->in('Unit/Policies');
+
+pest()->extend(TestCase::class)
+    ->use(RefreshDatabase::class)
+    ->in('Unit/Jobs');
+
+pest()->extend(TestCase::class)
+    ->use(RefreshDatabase::class)
+    ->in('Unit/Listeners');
 
 pest()->extend(TestCase::class)
     ->in('Unit/Support');
@@ -56,11 +70,6 @@ expect()->extend('toBeOne', function () {
 | global functions to help you to reduce the number of lines of code in your test files.
 |
 */
-
-function something()
-{
-    // ..
-}
 
 /**
  * Headers so Sanctum treats the request as a first-party SPA call in tests.
@@ -117,4 +126,56 @@ function actingUser(array $permissionKeys, ?Employee $employee = null, string $p
     }
 
     return $user->fresh('roles.permissions');
+}
+
+/**
+ * Creates a user with the given permissions and links an employee in $company.
+ *
+ * The first active company by id becomes CompanyContext's default — create the
+ * "home" company before any foreign company when testing isolation.
+ *
+ * @param  array<int, string>  $permissionKeys
+ * @return array{0: User, 1: Employee}
+ */
+function actingUserInCompany(Company $company, array $permissionKeys = [], string $prefix = 'co'): array
+{
+    $user = actingUser($permissionKeys, prefix: $prefix);
+    $employee = Employee::factory()->create([
+        'company_id' => $company->id,
+        'user_id' => $user->id,
+        'code' => 'E-'.strtoupper($prefix).'-'.uniqid(),
+        'status' => 'active',
+    ]);
+
+    return [$user->fresh('roles.permissions', 'employee'), $employee];
+}
+
+/**
+ * Creates a second company plus a user/employee pair that must not see the
+ * active (first) company's data.
+ *
+ * @param  array<int, string>  $permissionKeys
+ * @return array{0: Company, 1: User, 2: Employee}
+ */
+function foreignCompanyUser(array $permissionKeys = [], string $prefix = 'fx'): array
+{
+    $foreignCompany = Company::factory()->create();
+    [$user, $employee] = actingUserInCompany($foreignCompany, $permissionKeys, $prefix);
+
+    return [$foreignCompany, $user, $employee];
+}
+
+/**
+ * Asserts a JSON API response is a company-scope denial (403 or 404).
+ */
+function assertCannotAccessOtherCompany(TestResponse $response): TestResponse
+{
+    expect($response->status())->toBeIn([403, 404]);
+
+    $errorCode = $response->json('error_code');
+    if (is_string($errorCode) && $errorCode !== '') {
+        expect($errorCode)->toBeIn(['COMPANY_SCOPE_MISMATCH', 'NOT_FOUND', 'FORBIDDEN']);
+    }
+
+    return $response;
 }

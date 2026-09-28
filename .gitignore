@@ -27,3 +27,11 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+/database/e2e.sqlite
+/.env.e2e
+/.env.e2e.active
+/deploy-bundle
+/test-results
+/playwright-report
+/blob-report
+/coverage

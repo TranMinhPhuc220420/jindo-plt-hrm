@@ -23,17 +23,9 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RoleSeeder::class,
             CompanySeeder::class,
-            EmployeeSeeder::class,
-            ShiftSeeder::class,
-            AttendanceSeeder::class,
-            LeaveSeeder::class,
-            PayrollSeeder::class,
-            DocumentSeeder::class,
-            AssetSeeder::class,
-            RecruitmentSeeder::class,
-            OnboardingSeeder::class,
         ]);
 
+        // Create admin before EmployeeSeeder so the manager employee can link user_id.
         $admin = User::query()->updateOrCreate(
             ['email' => 'admin@example.test'],
             [
@@ -46,8 +38,16 @@ class DatabaseSeeder extends Seeder
         $adminRole = Role::query()->where('key', 'admin')->firstOrFail();
         $admin->roles()->syncWithoutDetaching([$adminRole->id]);
 
-        // After admin user exists so inbox samples can attach.
         $this->call([
+            EmployeeSeeder::class,
+            ShiftSeeder::class,
+            AttendanceSeeder::class,
+            LeaveSeeder::class,
+            PayrollSeeder::class,
+            DocumentSeeder::class,
+            AssetSeeder::class,
+            RecruitmentSeeder::class,
+            OnboardingSeeder::class,
             NotificationSeeder::class,
             PerformanceSeeder::class,
         ]);
